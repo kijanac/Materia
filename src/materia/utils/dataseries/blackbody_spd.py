@@ -24,7 +24,8 @@ class BlackbodySPD(RelativeSPDSpectrum):
         )
 
         y = materia.Qty(
-            value=1 / (np.power(x, 5) * (np.exp(c2 / (x * T)) - 1)), unit=materia.unitless
+            value=1 / (np.power(x, 5) * (np.exp(c2 / (x * T)) - 1)),
+            unit=materia.unitless,
         )  # wrong overall prefactor, but that's okay since it will be normalized in super().__init__
 
         super().__init__(x=x, y=y, normalize_to=normalize_to)

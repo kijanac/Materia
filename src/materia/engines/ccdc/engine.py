@@ -17,13 +17,13 @@ class CCDCEngine:
     ) -> None:
 
         self.executable = executable
-        self.work_dir = materia.utils.expand_path(work_dir)
+        self.work_dir = materia.expand(work_dir)
 
         self.log = os.path.join(work_dir, log)
 
         self.cleanup = cleanup
 
-        self.ccdc_root = materia.utils.expand_path(ccdc_root)
+        self.ccdc_root = materia.expand(ccdc_root)
         # FIXME: generalize past 2019 version of CCDC code
         self.executable = os.path.join(
             self.ccdc_root, "Python_API_2019", "miniconda", "bin", "python"
@@ -31,7 +31,7 @@ class CCDCEngine:
 
     def execute(self, input_path: str) -> None:
         try:
-            os.makedirs(materia.expand_path(self.work_dir))
+            os.makedirs(materia.expand(self.work_dir))
         except FileExistsError:
             pass
 

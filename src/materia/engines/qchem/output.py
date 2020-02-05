@@ -75,7 +75,7 @@ T = TypeVar("T")
 
 class QChemOutput:
     def __init__(self, filepath: str) -> None:
-        self.filepath = materia.utils.expand_path(filepath)
+        self.filepath = materia.expand(filepath)
 
     def get(self, *quantity_names: str) -> Union[T, Tuple[T]]:
         method_dict = dict(inspect.getmembers(self, predicate=inspect.isroutine))

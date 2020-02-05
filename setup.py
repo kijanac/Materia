@@ -32,7 +32,7 @@ class Clean(clean):
         super().run()
         self.remove_paths(
             pathlib.Path("build"),
-            pathlib.Path("conda/build").resolve(),
+            pathlib.Path("conda-build").resolve(),
             pathlib.Path("docs"),
             pathlib.Path(".pytest_cache"),
             pathlib.Path(".coverage"),
@@ -61,7 +61,7 @@ class Codecov(setuptools.Command):
 class CondaBuild(setuptools.Command):
     user_options = [
         ("build-dir=", None, "Build directory which will contain built conda package."),
-        ("channels=", None, "FIXME"),
+        ("channels=", None, "Conda channels from which to install dependencies"),
         ("recipe=", None, "Directory containing conda recipe."),
     ]
 
@@ -151,7 +151,9 @@ class DeployConda(setuptools.Command):
 
 
 class DeployPyPI(setuptools.Command):
-    user_options = [("pypi-token=", None, "Token for PyPI package upload"),]
+    user_options = [
+        ("pypi-token=", None, "Token for PyPI package upload"),
+    ]
 
     def initialize_options(self):
         self.pypi_token = None
@@ -182,7 +184,7 @@ class Docs(setuptools.Command):
         ("builder=", None, "FIXME"),
         ("extensions=", None, "FIXME"),
         ("params=", None, "FIXME"),
-        ("template-dir=",None,"FIXME"),
+        ("template-dir=", None, "FIXME"),
     ]
 
     def initialize_options(self):
@@ -260,10 +262,14 @@ class Docs(setuptools.Command):
 
 
 class Env(setuptools.Command):
-    user_options = [("channels=", None, "FIXME")]
+    user_options = [
+        ("channels=", None, "Conda channels from which to install dependencies"),
+        ("env-name=", None, "Name of conda environment to be created"),
+    ]
 
     def initialize_options(self):
         self.channels = None
+        self.env_name = None
 
     def finalize_options(self):
         pass
@@ -285,7 +291,7 @@ class Env(setuptools.Command):
             if c.strip() != ""
         ).split()
 
-        subprocess.run(["conda", "install", "-y"] + deps + channels)
+        subprocess.run(["conda", "create", "-n", self.env_name, "-y"] + deps + channels)
 
 
 class InstallLocal(setuptools.Command):
@@ -293,9 +299,9 @@ class InstallLocal(setuptools.Command):
         (
             "build-dir=",
             None,
-            "Build directory containing built conda package. Ignored if editable=True.",
+            "Build directory containing built conda package. Ignored if --editable is present.",
         ),
-        ("channels=", None, "FIXME"),
+        ("channels=", None, "Conda channels from which to install dependencies"),
         ("editable", None, "If true, install editable package using conda develop."),
     ]
 

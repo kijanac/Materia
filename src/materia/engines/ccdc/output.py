@@ -19,7 +19,7 @@ class CCDCOutput:
         Args:
             filepath: Path to file from which output will be read. Can be an absolute or a relative path.
         """
-        self.filepath = materia.expand_path(filepath)
+        self.filepath = materia.expand(filepath)
 
         raise NotImplementedError
 

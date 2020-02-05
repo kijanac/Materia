@@ -11,7 +11,7 @@ T = TypeVar("T")
 class PackmolOutput:
     def __init__(self, filepath: str) -> None:
         # raise NotImplementedError
-        self.filepath = materia.utils.expand_path(filepath)
+        self.filepath = materia.expand(filepath)
 
     def get(self, *quantity_names: str) -> Union[T, Tuple[T]]:
         method_dict = dict(inspect.getmembers(self, predicate=inspect.isroutine))

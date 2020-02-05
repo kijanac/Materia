@@ -70,7 +70,9 @@ def _find_rotations_planar(structure, symprec):
         structure.centered_atomic_positions.value.T, r=2
     ):
         Rs = (
-            materia.symmetry.ProperRotation(order=d, axis=materia.utils.normalize(p1 + p2))
+            materia.symmetry.ProperRotation(
+                order=d, axis=materia.utils.normalize(p1 + p2)
+            )
             for d in divisors
         )
         rs.extend(

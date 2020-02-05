@@ -561,9 +561,7 @@ def xyz2molUSE(xyz_filepath):
     # FIXME: rework this whole file for aesthetics
     charged_fragments = True
     quick = True
-    atomicNumList, charge, xyz_coordinates = read_xyz_file(
-        materia.utils.expand_path(xyz_filepath)
-    )
+    atomicNumList, charge, xyz_coordinates = read_xyz_file(materia.expand(xyz_filepath))
     return xyz2mol(atomicNumList, charge, xyz_coordinates, charged_fragments, quick)
 
 

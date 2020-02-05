@@ -17,7 +17,7 @@ class Molecule:
         Args:
             filepath: Path to file in which the molecule will be pickled. Can be an absolute or a relative path.
         """
-        with open(materia.expand_path(filepath), "wb") as f:
+        with open(materia.expand(filepath), "wb") as f:
             pickle.dump(obj=self, file=f)
 
     @staticmethod
@@ -32,7 +32,7 @@ class Molecule:
             Molecule retrieved from pickle file.
 
         """
-        with open(materia.expand_path(filepath), "rb") as f:
+        with open(materia.expand(filepath), "rb") as f:
             mol = pickle.load(file=f)
 
         return mol

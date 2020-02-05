@@ -13,7 +13,7 @@ class MultiwfnInput:
     """
 
     def __init__(self, filepath: str, *commands: str) -> None:
-        self.commands = tuple((materia.expand_path(filepath), *commands))
+        self.commands = tuple((materia.expand(filepath), *commands))
 
     def write(self, filepath: str) -> None:
         """
@@ -22,7 +22,7 @@ class MultiwfnInput:
         Args:
             filepath: Path to file to which the input will be written. Can be an absolute or a relative path.
         """
-        with open(materia.expand_path(filepath), "w") as f:
+        with open(materia.expand(filepath), "w") as f:
             f.write(str(self))
 
     def __str__(self) -> str:

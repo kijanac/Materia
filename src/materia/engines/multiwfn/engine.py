@@ -19,7 +19,7 @@ class MultiwfnEngine:
     ) -> None:
 
         self.executable = executable
-        self.work_dir = materia.utils.expand_path(work_dir)
+        self.work_dir = materia.expand(work_dir)
 
         self.log = os.path.join(work_dir, log)
 

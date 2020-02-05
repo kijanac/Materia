@@ -11,7 +11,7 @@ T = TypeVar("T")
 
 class MultiwfnOutput:
     def __init__(self, filepath: str) -> None:
-        self.filepath = materia.expand_path(filepath)
+        self.filepath = materia.expand(filepath)
 
     def get(self, *quantity_names: str) -> Union[T, Iterable[T]]:
         method_dict = dict(inspect.getmembers(self, predicate=inspect.isroutine))

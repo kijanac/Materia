@@ -39,12 +39,8 @@ class MultiwfnVolume(Task):
         name: str = None,
     ):
         super().__init__(handlers=handlers, name=name)
-        self.input_path = materia.utils.expand_path(
-            os.path.join(work_directory, input_name)
-        )
-        self.output_path = materia.utils.expand_path(
-            os.path.join(work_directory, output_name)
-        )
+        self.input_path = materia.expand(os.path.join(work_directory, input_name))
+        self.output_path = materia.expand(os.path.join(work_directory, output_name))
 
         self.executable = executable
 
@@ -52,7 +48,7 @@ class MultiwfnVolume(Task):
         self.parallel = parallel
 
         try:
-            os.makedirs(materia.utils.expand_path(work_directory))
+            os.makedirs(materia.expand(work_directory))
         except FileExistsError:
             pass
 
@@ -64,7 +60,7 @@ class MultiwfnVolume(Task):
         box_size_factor: float = 1.7,
     ):
         materia.MultiwfnInput(
-            materia.utils.expand_path(molden_filepath),
+            materia.expand(molden_filepath),
             100,
             3,
             f"{integration_mesh_exp},{density_isosurface},{box_size_factor}",
@@ -111,14 +107,12 @@ class WriteMultiwfnInput(Task):
         name: str = None,
     ):
         super().__init__(handlers=handlers, name=name)
-        self.input_path = materia.utils.expand_path(
-            os.path.join(work_directory, input_name)
-        )
-        self.in_filepath = materia.utils.expand_path(in_filepath)
+        self.input_path = materia.expand(os.path.join(work_directory, input_name))
+        self.in_filepath = materia.expand(in_filepath)
         self.commands = commands
 
         try:
-            os.makedirs(materia.utils.expand_path(work_directory))
+            os.makedirs(materia.expand(work_directory))
         except FileExistsError:
             pass
 

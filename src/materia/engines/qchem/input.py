@@ -80,14 +80,16 @@ class QChemFragments:
 class QChemInput:
     def __init__(
         self,
-        molecule: Union[materia.QChemStructure, materia.QChemFragments, materia.Structure],
+        molecule: Union[
+            materia.QChemStructure, materia.QChemFragments, materia.Structure
+        ],
         settings: materia.Settings,
     ) -> None:
         self.molecule = molecule
         self.settings = settings
 
     def write(self, filepath: str) -> None:
-        with open(materia.utils.expand_path(filepath), "w") as f:
+        with open(materia.expand(filepath), "w") as f:
             f.write(str(self))
 
     def __str__(self) -> str:

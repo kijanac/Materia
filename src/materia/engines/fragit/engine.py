@@ -14,7 +14,7 @@ class FragItEngine:
     def execute(
         self, structure_filepath: str, log_filepath: str, work_dir: Optional[str] = "."
     ) -> Tuple[str, Iterable[materia.Structure]]:
-        with open(materia.expand_path(log_filepath), "w") as log:
+        with open(materia.expand(log_filepath), "w") as log:
             subprocess.call(
                 [self.executable, structure_filepath],
                 stdout=log,
@@ -22,7 +22,7 @@ class FragItEngine:
                 cwd=work_dir,
             )
 
-        with open(materia.expand_path(log_filepath), "r") as f:
+        with open(materia.expand(log_filepath), "r") as f:
             output = "".join(f.readlines())
 
         return output

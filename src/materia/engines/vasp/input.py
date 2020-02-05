@@ -14,13 +14,13 @@ class VASPInput:
         self.settings = settings
 
     def write(self, directory: str) -> None:
-        with open(materia.expand_path(os.path.join(directory), "INCAR"), "w") as f:
+        with open(materia.expand(os.path.join(directory), "INCAR"), "w") as f:
             f.write(_incar_str(self.settings["INCAR"]))
-        with open(materia.expand_path(os.path.join(directory), "POSCAR"), "w") as f:
+        with open(materia.expand(os.path.join(directory), "POSCAR"), "w") as f:
             f.write(_poscar_str(self.settings["POSCAR"]))
-        with open(materia.expand_path(os.path.join(directory), "KPOINTS"), "w") as f:
+        with open(materia.expand(os.path.join(directory), "KPOINTS"), "w") as f:
             f.write(_kpoints_str(self.settings["KPOINTS"]))
-        with open(materia.expand_path(os.path.join(directory), "POTCAR"), "w") as f:
+        with open(materia.expand(os.path.join(directory), "POTCAR"), "w") as f:
             f.write(_potcar_str(self.settings["POTCAR"]))
 
     def __str__(self) -> str:

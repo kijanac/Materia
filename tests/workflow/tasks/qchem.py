@@ -58,7 +58,7 @@ def test_qchem_rttddft():
     # FIXME: make this test work on Windows using pathlib
 
     mock_open = mock.mock_open()
-    mock_expand_path = mock.MagicMock(side_effect=lambda s: s)
+    mock_expand = mock.MagicMock(side_effect=lambda s: s)
     mock_os_makedirs = mock.MagicMock(side_effect=lambda s: s)
 
     with mock.patch("builtins.open", mock_open):
@@ -67,7 +67,7 @@ def test_qchem_rttddft():
                 settings=settings, work_directory="/mock/path/to/dir"
             ).run()
 
-        # mock_expand_path.assert_called_once_with("/mock/path")
+        # mock_expand.assert_called_once_with("/mock/path")
     mock_os_makedirs.assert_called_once_with("/mock/path/to/dir")
     mock_open.assert_called_once_with("/mock/path/to/dir/TDSCF.prm", "w")
     mock_open().write.assert_called_once_with(out_str)
@@ -128,7 +128,7 @@ def test_write_qchem_tdscf():
     # FIXME: make this test work on Windows using pathlib
 
     mock_open = mock.mock_open()
-    mock_expand_path = mock.MagicMock(side_effect=lambda s: s)
+    mock_expand = mock.MagicMock(side_effect=lambda s: s)
     mock_os_makedirs = mock.MagicMock(side_effect=lambda s: s)
 
     with mock.patch("builtins.open", mock_open):
@@ -137,7 +137,7 @@ def test_write_qchem_tdscf():
                 settings=settings, work_directory="/mock/path/to/dir"
             ).run()
 
-        # mock_expand_path.assert_called_once_with("/mock/path")
+        # mock_expand.assert_called_once_with("/mock/path")
     mock_os_makedirs.assert_called_once_with("/mock/path/to/dir")
     mock_open.assert_called_once_with("/mock/path/to/dir/TDSCF.prm", "w")
     mock_open().write.assert_called_once_with(out_str)

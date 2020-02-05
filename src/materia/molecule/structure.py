@@ -1,13 +1,16 @@
 from __future__ import annotations
+import collections
+import contextlib
 import itertools
 import numpy as np
 import materia
 from materia.utils import memoize
+import openbabel as ob
 import pubchempy as pcp
 import rdkit, rdkit.Chem, rdkit.Chem.AllChem
 import scipy.linalg
 import tempfile
-from typing import Optional, Tuple
+from typing import Dict, IO, Optional, Tuple
 
 __all__ = ["Structure"]
 
@@ -18,10 +21,45 @@ class Structure:
 
     @staticmethod
     def read(filepath: str) -> Structure:
+        """
+        Read structure from a file.
+
+        Args:
+            filepath: Path to file from which the structure will be read. Can be an absolute or a relative path.
+
+        Returns:
+            materia.Structure: Structure object based on file contents.
+
+        Raises:
+            ValueError: If structure file extension is not recognized.
+        """
         if filepath.endswith(".xyz"):
             return _read_xyz(filepath=filepath)
         else:
             raise ValueError("Cannot read file with given extension.")
+
+    def __add__(self, other: materia.Structure) -> materia.Structure:
+        return materia.Structure((*self.atoms, *other.atoms))
+
+    def perceive_bonds(self) -> Dict[int, int]:
+        obmol = ob.OBMol()
+
+        for a in self.atoms:
+            obatom = ob.OBAtom()
+            obatom.SetAtomicNum(a.Z)
+            obatom.SetVector(*a.position.squeeze())
+            obmol.AddAtom(obatom)
+
+        obmol.ConnectTheDots()
+        obmol.PerceiveBondOrders()
+
+        bonds = collections.defaultdict(list)
+        for bond in ob.OBMolBondIter(obmol):
+            a, b = bond.GetBeginAtomIdx() - 1, bond.GetEndAtomIdx() - 1
+            bonds[a].append(b)
+            bonds[b].append(a)
+
+        return dict(bonds)
 
     @staticmethod
     def retrieve(
@@ -92,24 +130,51 @@ class Structure:
         else:
             raise ValueError(f"Structure generation for {identifier} failed.")
 
-    def write(self, filepath: str, overwrite: Optional[bool] = False) -> None:
-        """Write structure to a file.
-
-        Parameters
-        ----------
-        filepath : str
-            Path to file to which structure will be written. Can be an absolute or a relative path.
+    def write(self, file: Union[str, IO], overwrite: Optional[bool] = False) -> None:
         """
-        if filepath.endswith(".xyz"):
-            _write_xyz(structure=self, filepath=filepath, overwrite=overwrite)
-        # elif filepath.endswith('.rdk'):
-        #    _write_rdkit(structure=self,filepath=filepath)
-        else:
-            raise ValueError("Cannot write to file with given extension.")
+        Write structure to a file.
 
-    def to_rdkit(self):  # -> rdkit.Chem.rdchem.Mol:
-        with tempfile.NamedTemporaryFile(suffix=".xyz") as fp:
-            self.write(filepath=fp.name, overwrite=True)
+        Args:
+            file: Path to file to which the structure will be written. Can be an absolute or a relative path.
+            
+            overwrite: If False, an error is raised if `filepath` already exists and the structure is not written. Ignored if `file` is a file-like object. Defaults to False.
+        """
+        open_code = "w" if overwrite else "x"
+        with open(materia.expand(file), open_code) if isinstance(
+            file, str
+        ) else contextlib.nullcontext(file) as f:
+            if f.name.endswith(".xyz"):
+                s = self.to_xyz()
+            else:
+                raise ValueError("Cannot write to file with given extension.")
+
+            try:
+                f.write(s)
+            except TypeError:
+                f.write(s.encode())
+
+            f.flush()
+
+    @contextlib.contextmanager
+    def tempfile(self, suffix: str, dir: Optional[str] = None):
+        with tempfile.NamedTemporaryFile(
+            dir=materia.expand(dir) if dir is not None else None, suffix=suffix
+        ) as fp:
+            try:
+                self.write(file=fp)
+                yield fp
+            finally:
+                pass
+
+    def to_xyz(self) -> str:
+        return f"{self.num_atoms}\n\n" + "\n".join(
+            f"{atom} {x} {y} {z}"
+            for atom, (x, y, z) in zip(self.atomic_symbols, self.atomic_positions.T)
+        )
+
+    def to_rdkit(self) -> rdkit.Chem.rdchem.Mol:
+        # FIXME: segfaults due to xyz2molUSE
+        with self.tempfile(suffix=".xyz") as fp:
             rdkit_mol = materia.utils.xyz2molUSE(fp.name)
         return rdkit_mol
 
@@ -359,7 +424,7 @@ class Structure:
 
 
 def _read_xyz(filepath: str, coordinate_unit: str = "angstrom") -> Structure:
-    with open(materia.utils.expand_path(filepath), "r") as f:
+    with open(materia.expand(filepath), "r") as f:
         atom_data = np.atleast_2d(
             np.loadtxt(
                 fname=f,
@@ -383,21 +448,6 @@ def _read_xyz(filepath: str, coordinate_unit: str = "angstrom") -> Structure:
     )
 
     return Structure(atoms=atoms)
-
-
-def _write_xyz(structure: Structure, filepath: str, overwrite: bool) -> None:
-    open_code = "w" if overwrite else "x"
-    with open(materia.utils.expand_path(filepath), open_code) as f:
-        f.write(f"{structure.num_atoms}\n")
-        f.write("\n")
-        f.write(
-            "\n".join(
-                f"{atom} {x} {y} {z}"
-                for atom, (x, y, z) in zip(
-                    structure.atomic_symbols, structure.atomic_positions.value.T
-                )
-            )
-        )
 
 
 # def _write_sdf(structure, filepath):
@@ -476,9 +526,15 @@ def _structure_from_identifier(
     symbols = (a.GetSymbol() for a in conformer.GetOwningMol().GetAtoms())
 
     # FIXME: assumes the RDKIT distance unit is angstrom - is this correct??
+    # NOTE: using conformer.GetPositions sometimes causes a seg fault (RDKit) - use GetAtomPosition instead
     atoms = (
-        materia.Atom(element=symbol, position=materia.Qty(value=p, unit=materia.angstrom))
-        for symbol, p in zip(symbols, conformer.GetPositions())
+        materia.Atom(
+            element=symbol,
+            position=materia.Qty(
+                value=conformer.GetAtomPosition(i), unit=materia.angstrom
+            ),
+        )
+        for i, symbol in enumerate(symbols)
     )
 
     return materia.Structure(atoms=atoms)

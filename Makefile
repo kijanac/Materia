@@ -1,8 +1,8 @@
 .SHELLFLAGS := -euc
 
 CONDA_BASE ?= $(shell conda info --base)
-CONDA_BUILD ?= conda.build
-CONDA_ENV ?= dev#$(patsubst src/%,%,$(wildcard src/*)_dev)
+CONDA_BUILD ?= conda-build
+CONDA_ENV ?= dev
 $(VERBOSE).SILENT:
 
 CONDA_BASE := ${CONDA_BASE}
@@ -39,10 +39,8 @@ CONDA_PYTHON ?= ${CONDA_BASE}/bin/python
 clean:
 	$(CONDA_PYTHON) setup.py clean --env=$(CONDA_ENV)
 
-ENV_PYTHON_VERSION ?= 3
 $(CONDA_BASE)/envs/$(CONDA_ENV): setup.cfg
-	@conda create -n $(CONDA_ENV) python=$(ENV_PYTHON_VERSION) -y
-	@$(CONDA_ACTIVATE) $(CONDA_ENV); python setup.py env
+	@$(CONDA_PYTHON) setup.py env --env-name=$(CONDA_ENV)
 
 .PHONY: setup
 setup: | $(CONDA_BASE)/envs/$(CONDA_ENV)
@@ -84,9 +82,9 @@ endif
 
 .PHONY: deploy
 deploy:
+	@$(MAKE) codecov
 	@$(MAKE) pypi
 	@$(MAKE) conda
-	@$(MAKE) codecov
 
 SPHINX_TEMPLATE_DIR ?= sphinx/templates
 docs: $(call rwildcard,.,*.py)

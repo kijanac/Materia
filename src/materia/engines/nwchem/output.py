@@ -8,7 +8,7 @@ __all__ = ["NWChemOutput"]
 
 class NWChemOutput:
     def __init__(self, filename: str) -> None:
-        self.filename = materia.expand_path(filename)
+        self.filename = materia.expand(filename)
         self.output_dict = collections.OrderedDict()
 
         self.chunk_dict = {

@@ -32,7 +32,7 @@ class FragItFragmentStructure(Task):
         super().__init__(handlers=handlers, name=name)
         self.engine = engine
         self.log_name = log_name
-        self.work_dir = materia.expand_path(work_dir)
+        self.work_dir = materia.expand(work_dir)
         self.keep_logs = keep_logs
 
     def run(
@@ -46,20 +46,22 @@ class FragItFragmentStructure(Task):
             except FileExistsError:
                 pass
 
-            filepath = structure
-            while isinstance(structure, materia.Structure):
-                filepath = materia.expand_path(
-                    os.path.join(wd, f"{uuid.uuid4().hex}.xyz")
-                )
-                try:
-                    structure.write(filepath)
-                    break
-                except FileExistsError:
-                    continue
+            if isinstance(structure, str):
+                filepath = materia.expand(structure)
+            else:
+                while isinstance(structure, materia.Structure):
+                    filepath = materia.expand(
+                        os.path.join(wd, f"{uuid.uuid4().hex}.xyz")
+                    )
+                    try:
+                        structure.write(filepath)
+                        break
+                    except FileExistsError:
+                        continue
 
             self.engine.execute(
                 structure_filepath=filepath,
-                log_filepath=materia.expand_path(os.path.join(wd, self.log_name)),
+                log_filepath=materia.expand(os.path.join(wd, self.log_name)),
                 work_dir=wd,
             )
 

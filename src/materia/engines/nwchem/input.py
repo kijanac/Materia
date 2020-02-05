@@ -57,7 +57,7 @@ class NWChemInput:
         )
 
     def write(self, filepath: str) -> None:
-        with open(materia.utils.expand_path(filepath), "w") as f:
+        with open(materia.expand(filepath), "w") as f:
             f.write(str(self))
 
 

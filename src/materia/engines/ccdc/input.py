@@ -28,5 +28,5 @@ class CCDCInput:
         Args:
             filepath: Path to file to which the input will be written. Can be an absolute or a relative path.
         """
-        with open(materia.expand_path(filepath), "w") as f:
+        with open(materia.expand(filepath), "w") as f:
             f.write(str(self))

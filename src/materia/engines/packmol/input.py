@@ -39,7 +39,7 @@ class PackmolInput:
         )
 
     def write(self, filepath: str) -> None:
-        with open(materia.expand_path(filepath), "w") as f:
+        with open(materia.expand(filepath), "w") as f:
             f.write(str(self))
 
 
@@ -62,7 +62,7 @@ class PackmolInput:
 #         while True:
 #             filepath = os.path.join(tmpdir, f"{uuid.uuid4().hex}.{self.filetype}")
 #             try:
-#                 structure.write(materia.utils.expand_path(filepath))  # , overwrite=False
+#                 structure.write(materia.expand(filepath))  # , overwrite=False
 #                 break
 #             except FileExistsError:
 #                 continue
@@ -98,7 +98,7 @@ class PackmolInput:
 #                         tmpdir, f"{uuid.uuid4().hex}.{self.filetype}"
 #                     )
 #                     try:
-#                         s.write(materia.utils.expand_path(filepath))  # , overwrite=False
+#                         s.write(materia.expand(filepath))  # , overwrite=False
 #                     except FileExistsError:
 #                         continue
 
@@ -108,7 +108,7 @@ class PackmolInput:
 #             )
 
 #     def write(self, filepath: str) -> None:
-#         with open(materia.expand_path(filepath), "w") as f:
+#         with open(materia.expand(filepath), "w") as f:
 #             f.write(str(self))
 
 
@@ -121,7 +121,7 @@ class PackmolInput:
 #     ) -> None:
 #         if isinstance(structure, str):
 #             self.structure = None
-#             self.filepath = materia.utils.expand_path(structure)
+#             self.filepath = materia.expand(structure)
 #         else:
 #             self.structure = structure
 #             self.filepath = None
@@ -137,8 +137,8 @@ class PackmolInput:
 
 #     def write(self, filepath: str) -> None:
 #         if self.structure is not None:
-#             self.structure.write(materia.utils.expand_path(filepath))
-#             self.filepath = materia.utils.expand_path(filepath)
+#             self.structure.write(materia.expand(filepath))
+#             self.filepath = materia.expand(filepath)
 
 
 # class PackmolInput:
@@ -256,7 +256,7 @@ class PackmolInput:
 #         self.short_tol_scale = short_tol_scale
 #
 #     def write(self, filepath: str) -> None:
-#         with open(materia.expand_path(filepath), "w") as f:
+#         with open(materia.expand(filepath), "w") as f:
 #             f.write(str(self))
 #
 #     def __str__(self) -> str:
@@ -334,7 +334,7 @@ class PackmolInput:
 #         short_radius_scale=None,
 #         nloop=None,
 #     ):
-#         self.molecule_structure_file = materia.utils.expand_path(molecule_structure_file)
+#         self.molecule_structure_file = materia.expand(molecule_structure_file)
 #         self.number = number
 #         self.constraints = constraints
 #         self.atoms_blocks = atoms_blocks
@@ -627,7 +627,7 @@ class PackmolInput:
 # #         self.short_tol_scale = short_tol_scale
 # #
 # #     def write(self, filepath):
-# #         with open(materia.utils.expand_path(filepath),'w') as f:
+# #         with open(materia.expand(filepath),'w') as f:
 # #             f.write(str(self))
 # #
 # #     def __str__(self) -> str:
@@ -667,7 +667,7 @@ class PackmolInput:
 # # class PackmolStructureBlock:
 # #     def __init__(self, molecule_structure_file, number, constraints=(), atoms_blocks=(), radius=None, residue_number=None, restart_to=None, restart_from=None,
 # #                  fscale=None, short_radius=None, short_radius_scale=None, nloop=None):
-# #         self.molecule_structure_file = materia.utils.expand_path(molecule_structure_file)
+# #         self.molecule_structure_file = materia.expand(molecule_structure_file)
 # #         self.number = number
 # #         self.constraints = constraints
 # #         self.atoms_blocks = atoms_blocks

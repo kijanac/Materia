@@ -17,9 +17,15 @@ def test_validate_axes():
     nullity_three = np.zeros((3, 3))
 
     assert materia.symmetry.symmetric_axes_generator._validate_axes(axes=identity)
-    assert materia.symmetry.symmetric_axes_generator._validate_axes(axes=scaled_identity)
-    assert not materia.symmetry.symmetric_axes_generator._validate_axes(axes=nullity_one)
-    assert not materia.symmetry.symmetric_axes_generator._validate_axes(axes=nullity_two)
+    assert materia.symmetry.symmetric_axes_generator._validate_axes(
+        axes=scaled_identity
+    )
+    assert not materia.symmetry.symmetric_axes_generator._validate_axes(
+        axes=nullity_one
+    )
+    assert not materia.symmetry.symmetric_axes_generator._validate_axes(
+        axes=nullity_two
+    )
     assert not materia.symmetry.symmetric_axes_generator._validate_axes(
         axes=nullity_three
     )

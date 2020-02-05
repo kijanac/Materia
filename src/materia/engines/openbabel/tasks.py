@@ -1,7 +1,7 @@
 from __future__ import annotations
+import contextlib
 import os
 import materia
-import rdkit
 import re
 import tempfile
 from typing import Iterable, Optional, Union
@@ -9,150 +9,158 @@ from typing import Iterable, Optional, Union
 from ...workflow.tasks.task import Task
 
 __all__ = [
+    "OpenbabelConvertToFile",
     "OpenbabelConvertToMol",
     "OpenbabelConvertToPDB",
     "OpenbabelConvertToSMILES",
     "OpenbabelConvertToSDF",
-    "OpenbabelGetBonds",
 ]
 
 
-class OpenbabelConvertToMol(Task):
+class OpenbabelConvertToFile(Task):
     def __init__(
         self,
         engine: materia.OpenbabelEngine,
+        filetype: str,
         output_name: Optional[str] = None,
+        log_name: Optional[str] = "obabel.log",
+        work_dir: Optional[str] = ".",
+        keep_logs: bool = True,
         handlers: Optional[Iterable[materia.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
         super().__init__(handlers=handlers, name=name)
         self.engine = engine
+        self.filetype = filetype
         self.output_name = output_name
+        self.log_name = log_name
+        self.work_dir = work_dir
+        self.keep_logs = keep_logs
 
-    def run(self, structure: Union[str, materia.Structure]) -> None:
-        arguments = (
-            ["-omol", self.output_name] if self.output_name is not None else ["-omol"]
-        )
-        with contextlib.nullcontext(structure) if isinstance(
-            structure, str
-        ) else tempfile.NamedTemporaryFile(suffix=".xyz") as fp:
-            return self.engine.execute(
-                structure_file=fp.name,
-                output_file=self.output_name + ".mol",
-                arguments=arguments,
-            )
+    def run(self, structure: Union[str, materia.Structure]) -> str:
+        with materia.work_dir(self.work_dir) as wd:
+            arguments = [f"-o{self.filetype}"]
+
+            if self.output_name is not None:
+                output_path = (
+                    f"{materia.expand(self.output_name,dir=wd)}.{self.filetype}"
+                )
+                arguments.append(f"-O{output_path}")
+
+            with contextlib.nullcontext(structure) if isinstance(
+                structure, str
+            ) else structure.tempfile(suffix=".xyz") as fp:
+                input_filepath = materia.expand(
+                    path=fp.name if hasattr(fp, "name") else fp, dir=wd
+                )
+                self.engine.execute(
+                    input_filepath=input_filepath,
+                    log_filepath=materia.expand(path=self.log_name, dir=wd),
+                    arguments=arguments,
+                )
+
+            if self.output_name is not None:
+                with open(output_path, "r") as f:
+                    return "".join(f.readlines())
 
 
-class OpenbabelConvertToPDB(Task):
+class OpenbabelConvertToMol(OpenbabelConvertToFile):
     def __init__(
         self,
         engine: materia.OpenbabelEngine,
-        output_name: Optional[str] = None,
+        output_name: str,
+        log_name: Optional[str] = "obabel.log",
+        work_dir: Optional[str] = ".",
+        keep_logs: bool = True,
         handlers: Optional[Iterable[materia.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
-        super().__init__(handlers=handlers, name=name)
-        self.engine = engine
-        self.output_name = output_name
-
-    def run(self, structure: Union[str, materia.Structure]) -> None:
-        arguments = (
-            ["-opdb", self.output_name] if self.output_name is not None else ["-opdb"]
+        super().__init__(
+            engine=engine,
+            filetype="mol",
+            output_name=output_name,
+            log_name=log_name,
+            work_dir=work_dir,
+            keep_logs=keep_logs,
+            handlers=handlers,
+            name=name,
         )
-        with contextlib.nullcontext(structure) if isinstance(
-            structure, str
-        ) else tempfile.NamedTemporaryFile(suffix=".xyz") as fp:
-            return self.engine.execute(
-                structure_file=fp.name,
-                output_file=self.output_name + ".pdb"
-                if self.output_name is not None
-                else None,
-                arguments=arguments,
-            )
 
 
-class OpenbabelConvertToSDF(Task):
+class OpenbabelConvertToPDB(OpenbabelConvertToFile):
     def __init__(
         self,
         engine: materia.OpenbabelEngine,
-        output_name: Optional[str] = None,
+        output_name: str,
+        log_name: Optional[str] = "obabel.log",
+        work_dir: Optional[str] = ".",
+        keep_logs: bool = True,
         handlers: Optional[Iterable[materia.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
-        super().__init__(handlers=handlers, name=name)
-        self.engine = engine
-        self.output_name = output_name
-
-    def run(self, structure: Union[str, materia.Structure]) -> None:
-        arguments = (
-            ["-osdf", self.output_name] if self.output_name is not None else ["-osdf"]
+        super().__init__(
+            engine=engine,
+            filetype="pdb",
+            output_name=output_name,
+            log_name=log_name,
+            work_dir=work_dir,
+            keep_logs=keep_logs,
+            handlers=handlers,
+            name=name,
         )
-        with contextlib.nullcontext(structure) if isinstance(
-            structure, str
-        ) else tempfile.NamedTemporaryFile(suffix=".xyz") as fp:
-            return self.engine.execute(
-                structure_file=fp.name,
-                output_file=self.output_name + ".sdf",
-                arguments=arguments,
-            )
 
 
-class OpenbabelConvertToSMILES(Task):
+class OpenbabelConvertToSDF(OpenbabelConvertToFile):
     def __init__(
         self,
         engine: materia.OpenbabelEngine,
-        output_name: Optional[str] = None,
+        output_name: str,
+        log_name: Optional[str] = "obabel.log",
+        work_dir: Optional[str] = ".",
+        keep_logs: bool = True,
         handlers: Optional[Iterable[materia.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
-        super().__init__(handlers=handlers, name=name)
-        self.engine = engine
-        self.output_name = output_name
-
-    def run(self, structure: Union[str, materia.Structure]) -> None:
-        arguments = (
-            ["-osmi", self.output_name] if self.output_name is not None else ["-osmi"]
+        super().__init__(
+            engine=engine,
+            filetype="sdf",
+            output_name=output_name,
+            log_name=log_name,
+            work_dir=work_dir,
+            keep_logs=keep_logs,
+            handlers=handlers,
+            name=name,
         )
-        with contextlib.nullcontext(structure) if isinstance(
-            structure, str
-        ) else tempfile.NamedTemporaryFile(suffix=".xyz") as fp:
-            output = self.engine.execute(
-                structure_file=fp.name,
-                output_file=self.output_name + ".smi",
-                arguments=arguments,
-            )
 
-        smiles, *_ = re.search(r"([^\s]*).*", output).groups()
+
+class OpenbabelConvertToSMILES(OpenbabelConvertToFile):
+    def __init__(
+        self,
+        engine: materia.OpenbabelEngine,
+        output_name: str,
+        log_name: Optional[str] = "obabel.log",
+        work_dir: Optional[str] = ".",
+        keep_logs: bool = True,
+        handlers: Optional[Iterable[materia.Handler]] = None,
+        name: Optional[str] = None,
+    ) -> None:
+        super().__init__(
+            engine=engine,
+            filetype="smi",
+            output_name=output_name,
+            log_name=log_name,
+            work_dir=work_dir,
+            keep_logs=keep_logs,
+            handlers=handlers,
+            name=name,
+        )
+
+    def run(self, structure: Union[str, materia.Structure]) -> str:
+        super().run(structure=structure)
+
+        with open(
+            f"{materia.expand(self.output_name,dir=self.work_dir)}.smi", "r"
+        ) as f:
+            smiles, *_ = re.search(r"([^\s]*).*", "".join(f.readlines())).groups()
+
         return smiles
-
-
-class OpenbabelGetBonds(Task):
-    def __init__(
-        self, executable: Optional[str] = "obabel", work_directory: Optional[str] = "."
-    ) -> None:
-        self.executable = executable
-        self.work_directory = materia.utils.expand_path(work_directory)
-
-    def run(self, structure: materia.Structure):
-        mol_block = OpenbabelStructureToMolBlock(
-            executable=self.executable, work_directory=self.work_directory
-        ).run(structure=structure)
-        rdkit_mol = rdkit.Chem.MolFromMolBlock(mol_block, removeHs=False)
-        conf = rdkit_mol.GetConformer()
-
-        d = {}
-        for a in rdkit_mol.GetAtoms():
-            pos = conf.GetAtomPosition(a.GetIdx())
-            d[a.GetIdx()] = next(
-                i
-                for i, a2 in enumerate(structure.atoms)
-                if tuple(a2.position) == (pos.x, pos.y, pos.z)
-            )
-
-        d2 = {}
-        for a in rdkit_mol.GetAtoms():
-            d2[d[a.GetIdx()]] = tuple(
-                d[b.GetOtherAtomIdx(a.GetIdx())] for b in a.GetBonds()
-            )
-
-        return d2

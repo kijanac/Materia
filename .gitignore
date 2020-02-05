@@ -6,3 +6,15 @@ __pycache__/
 
 # Pytest coverage file
 .coverage
+
+# Build folder
+build
+
+# Dist folder
+dist
+
+# Conda build folder
+conda/build
+
+# Egg folder
+*.egg-info

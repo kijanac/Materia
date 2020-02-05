@@ -149,7 +149,9 @@ def test_qty_int_nparray_1():
 
 
 def test_qty_int_nparray_10():
-    qty = materia.Qty(value=np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), unit=materia.meter)
+    qty = materia.Qty(
+        value=np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), unit=materia.meter
+    )
 
     assert len(qty) == 10
 

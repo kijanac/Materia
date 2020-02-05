@@ -25,7 +25,8 @@ def test_property_polarizability():
         value=5, unit=materia.au_dipole_moment / (materia.volt / materia.meter)
     )
     check_result_anisotropy = materia.Qty(
-        value=np.sqrt(186), unit=materia.au_dipole_moment / (materia.volt / materia.meter)
+        value=np.sqrt(186),
+        unit=materia.au_dipole_moment / (materia.volt / materia.meter),
     )
     check_result_eigenvalues = materia.Qty(
         value=(16.116843969807043, -1.1168439698070416, -9.759184829871139e-16),

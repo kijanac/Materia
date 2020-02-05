@@ -31,7 +31,9 @@ __all__ = [
 class QChemBaseTask(Task):
     def __init__(
         self,
-        structure: Union[materia.QChemStructure, materia.QChemFragments, materia.Structure],
+        structure: Union[
+            materia.QChemStructure, materia.QChemFragments, materia.Structure
+        ],
         engine: materia.QChemEngine,
         input_name: str,
         output_name: str,
@@ -45,7 +47,7 @@ class QChemBaseTask(Task):
         super().__init__(handlers=handlers, name=name)
         self.engine = engine
         self.log_name = log_name
-        self.work_dir = materia.expand_path(work_dir)
+        self.work_dir = materia.expand(work_dir)
         self.keep_logs = keep_logs
         self.input_name = input_name
         self.output_name = output_name
@@ -89,7 +91,9 @@ class ComputeKoopmanError(Task):
         gs_energy, homo, lumo = gs
         ip = cation_energy - gs_energy
         ea = gs_energy - anion_energy
-        return (homo.convert(materia.eV) + ip) ** 2 + (lumo.convert(materia.eV) + ea) ** 2
+        return (homo.convert(materia.eV) + ip) ** 2 + (
+            lumo.convert(materia.eV) + ea
+        ) ** 2
 
 
 class ExecuteQChem(Task):
@@ -106,9 +110,9 @@ class ExecuteQChem(Task):
         name: str = None,
     ) -> None:
         super().__init__(handlers=handlers, name=name)
-        self.input_path = materia.expand_path(os.path.join(work_directory, input_name))
-        self.output_path = materia.expand_path(os.path.join(work_directory, output_name))
-        self.scratch_directory = materia.expand_path(scratch_directory)
+        self.input_path = materia.expand(os.path.join(work_directory, input_name))
+        self.output_path = materia.expand(os.path.join(work_directory, output_name))
+        self.scratch_directory = materia.expand(scratch_directory)
 
         self.executable = executable
 
@@ -116,7 +120,7 @@ class ExecuteQChem(Task):
         self.parallel = parallel
 
         try:
-            os.makedirs(materia.expand_path(work_directory))
+            os.makedirs(materia.expand(work_directory))
         except FileExistsError:
             pass
 
@@ -136,7 +140,9 @@ class ExecuteQChem(Task):
 class QChemAIMD(QChemBaseTask):
     def __init__(
         self,
-        structure: Union[materia.QChemStructure, materia.QChemFragments, materia.Structure],
+        structure: Union[
+            materia.QChemStructure, materia.QChemFragments, materia.Structure
+        ],
         engine: materia.QChemEngine,
         input_name: str,
         output_name: str,
@@ -186,7 +192,9 @@ class QChemAIMD(QChemBaseTask):
 class QChemLRTDDFT(QChemBaseTask):
     def __init__(
         self,
-        structure: Union[materia.QChemStructure, materia.QChemFragments, materia.Structure],
+        structure: Union[
+            materia.QChemStructure, materia.QChemFragments, materia.Structure
+        ],
         engine: materia.QChemEngine,
         input_name: str,
         output_name: str,
@@ -236,7 +244,9 @@ class QChemLRTDDFT(QChemBaseTask):
 class QChemOptimize(QChemBaseTask):
     def __init__(
         self,
-        structure: Union[materia.QChemStructure, materia.QChemFragments, materia.Structure],
+        structure: Union[
+            materia.QChemStructure, materia.QChemFragments, materia.Structure
+        ],
         engine: materia.QChemEngine,
         input_name: str,
         output_name: str,
@@ -268,13 +278,17 @@ class QChemOptimize(QChemBaseTask):
         try:
             parsed = cclib.io.ccread(os.path.join(self.work_dir, self.output_name))
             # FIXME: is this the correct unit?
-            coords = materia.Qty(value=parsed.atomcoords, unit=materia.angstrom)[-1, :, :]
+            coords = materia.Qty(value=parsed.atomcoords, unit=materia.angstrom)[
+                -1, :, :
+            ]
             zs = parsed.atomnos
         except AttributeError:
             return None
         # FIXME: is this the correct unit?
         atoms = (
-            materia.Atom(element=Z, position=materia.Qty(value=p, unit=materia.angstrom))
+            materia.Atom(
+                element=Z, position=materia.Qty(value=p, unit=materia.angstrom)
+            )
             for Z, p in zip(zs, coords)
         )
         return materia.Structure(atoms=atoms)
@@ -283,7 +297,9 @@ class QChemOptimize(QChemBaseTask):
 class QChemPolarizability(QChemBaseTask):
     def __init__(
         self,
-        structure: Union[materia.QChemStructure, materia.QChemFragments, materia.Structure],
+        structure: Union[
+            materia.QChemStructure, materia.QChemFragments, materia.Structure
+        ],
         engine: materia.QChemEngine,
         input_name: str,
         output_name: str,
@@ -346,19 +362,15 @@ class QChemRTTDDFT(Task):
         name=None,
     ):
         super().__init__(handlers=handlers, name=name)
-        self.work_directory = materia.utils.expand_path(work_directory)
-        self.input_path = materia.utils.expand_path(
-            os.path.join(work_directory, input_name)
-        )
-        self.output_path = materia.utils.expand_path(
-            os.path.join(work_directory, output_name)
-        )
-        self.scratch_directory = materia.utils.expand_path(scratch_directory)
+        self.work_directory = materia.expand(work_directory)
+        self.input_path = materia.expand(os.path.join(work_directory, input_name))
+        self.output_path = materia.expand(os.path.join(work_directory, output_name))
+        self.scratch_directory = materia.expand(scratch_directory)
         self.executable = executable
         self.num_cores = num_cores
         self.parallel = parallel
         try:
-            os.makedirs(materia.utils.expand_path(work_directory))
+            os.makedirs(materia.expand(work_directory))
         except FileExistsError:
             pass
         self.settings = settings or materia.Settings()
@@ -375,12 +387,12 @@ class QChemRTTDDFT(Task):
         self.tdscf_settings = tdscf_settings or materia.Settings()
 
     def run(self):
-        tdscf_input_path = materia.utils.expand_path(
+        tdscf_input_path = materia.expand(
             os.path.join(self.work_directory, "TDSCF.prm")
         )
         keys = tuple(str(next(iter(k))) for k in self.tdscf_settings)
         max_length = max(len(k) for k in keys)
-        with open(materia.utils.expand_path(tdscf_input_path), "w") as f:
+        with open(materia.expand(tdscf_input_path), "w") as f:
             f.write(
                 "\n".join(
                     k + " " * (max_length - len(k) + 1) + str(self.tdscf_settings[k])
@@ -389,9 +401,7 @@ class QChemRTTDDFT(Task):
             )
         materia.QChemInput(settings=self.settings).write(filepath=self.input_path)
         try:
-            os.makedirs(
-                materia.utils.expand_path(os.path.join(self.work_directory, "logs"))
-            )
+            os.makedirs(materia.expand(os.path.join(self.work_directory, "logs")))
         except FileExistsError:
             pass
         os.environ["QCSCRATCH"] = self.scratch_directory
@@ -411,7 +421,9 @@ class QChemRTTDDFT(Task):
 class QChemSinglePoint(QChemBaseTask):
     def __init__(
         self,
-        structure: Union[materia.QChemStructure, materia.QChemFragments, materia.Structure],
+        structure: Union[
+            materia.QChemStructure, materia.QChemFragments, materia.Structure
+        ],
         input_name: str,
         output_name: str,
         scratch_directory: str,
@@ -455,7 +467,9 @@ class QChemSinglePoint(QChemBaseTask):
 class QChemSinglePointFrontier(QChemBaseTask):
     def __init__(
         self,
-        structure: Union[materia.QChemStructure, materia.QChemFragments, materia.Structure],
+        structure: Union[
+            materia.QChemStructure, materia.QChemFragments, materia.Structure
+        ],
         input_name: str,
         output_name: str,
         scratch_directory: str,
@@ -514,13 +528,11 @@ class WriteQChemInput(Task):
         name: str = None,
     ) -> None:
         super().__init__(handlers=handlers, name=name)
-        self.input_path = materia.utils.expand_path(
-            os.path.join(work_directory, input_name)
-        )
+        self.input_path = materia.expand(os.path.join(work_directory, input_name))
         self.settings = settings
         self.settings["molecule", "structure"] = structure
         try:
-            os.makedirs(materia.utils.expand_path(work_directory))
+            os.makedirs(materia.expand(work_directory))
         except FileExistsError:
             pass
 
@@ -666,23 +678,21 @@ class WriteQChemTDSCF(Task):
         name: str = None,
     ):
         super().__init__(handlers=handlers, name=name)
-        self.work_directory = materia.utils.expand_path(work_directory)
+        self.work_directory = materia.expand(work_directory)
         self.settings = settings
 
         try:
-            os.makedirs(materia.utils.expand_path(work_directory))
+            os.makedirs(materia.expand(work_directory))
         except FileExistsError:
             pass
 
     def run(self) -> None:
-        input_path = materia.utils.expand_path(
-            os.path.join(self.work_directory, "TDSCF.prm")
-        )
+        input_path = materia.expand(os.path.join(self.work_directory, "TDSCF.prm"))
 
         keys = tuple(str(next(iter(k))) for k in self.settings)
         max_length = max(len(k) for k in keys)
 
-        with open(materia.utils.expand_path(input_path), "w") as f:
+        with open(materia.expand(input_path), "w") as f:
             f.write(
                 "\n".join(
                     k + " " * (max_length - len(k) + 1) + str(self.settings[k])
@@ -717,14 +727,14 @@ class OptimizeRangeSeparationParameter(Task):
                 settings[k] = v
 
         self.settings["input"] = settings
-        self.settings["input_path"] = materia.utils.expand_path(
+        self.settings["input_path"] = materia.expand(
             os.path.join(work_directory, input_name)
         )
-        self.settings["output_path"] = materia.utils.expand_path(
+        self.settings["output_path"] = materia.expand(
             os.path.join(work_directory, output_path)
         )
         self.settings["executable"] = executable
-        self.settings["work_directory"] = materia.utils.expand_path(work_directory)
+        self.settings["work_directory"] = materia.expand(work_directory)
         self.settings["num_cores"] = num_cores
         self.settings["parallel"] = parallel
 

@@ -529,7 +529,8 @@ class RelativeSPDSpectrum(SPDSpectrum):
     def __init__(self, x, y, normalizing_x=560, normalize_to=1):
         [val,] = y[x.value == normalizing_x]
         super().__init__(
-            x=x, y=materia.Qty(value=normalize_to * y.value / val, unit=materia.unitless)
+            x=x,
+            y=materia.Qty(value=normalize_to * y.value / val, unit=materia.unitless),
         )  # norm_factor*y/y.unit)
 
         self.XYZ = self.tristimulus()

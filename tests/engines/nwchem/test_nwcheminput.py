@@ -290,7 +290,9 @@ def test_nwchem_rttddft_excite_subblock_empty():
 
 
 def test_nwchem_rttddft_excite_subblock_full():
-    excite = materia.NWChemRTTDDFTExciteSubblock(geometry_name="geom", field_name="kick")
+    excite = materia.NWChemRTTDDFTExciteSubblock(
+        geometry_name="geom", field_name="kick"
+    )
 
     check_result = '  excite "geom" with "kick"\n'
 

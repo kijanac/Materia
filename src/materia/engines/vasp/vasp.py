@@ -24,9 +24,9 @@ class ExecuteVASP(Task):
         super().__init__()
         self.settings["executable"] = executable
         self.settings["output_path"] = os.path.join(
-            work_directory, materia.utils.expand_path(output_name)
+            work_directory, materia.expand(output_name)
         )
-        self.settings["work_directory"] = materia.utils.expand_path(work_directory)
+        self.settings["work_directory"] = materia.expand(work_directory)
 
         self.settings["num_cores"] = num_cores
         self.settings["parallel"] = parallel

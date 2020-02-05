@@ -2297,8 +2297,8 @@
 # # class Append(materia.Task):
 # #     def __init__(self, append_string, input_name, output_name, output_dir):
 # #         self.settings['append_string'] = append_string
-# #         self.settings['input_path'] = materia.utils.expand_path(os.path.join(output_dir,input_name))
-# #         self.settings['output_path'] = materia.utils.expand_path(os.path.join(output_dir,output_name))
+# #         self.settings['input_path'] = materia.expand(os.path.join(output_dir,input_name))
+# #         self.settings['output_path'] = materia.expand(os.path.join(output_dir,output_name))
 # #
 # #     def run(self):
 # #         with open(self.settings['input_path'],'r') as f:
@@ -2309,9 +2309,9 @@
 # #
 # # class Combine:
 # #     def __init__(self, input_name_1, input_name_2, output_name):
-# #         self.settings['input_path_1'] = materia.utils.expand_path(os.path.join(output_dir,input_name_1))
-# #         self.settings['input_path_2'] = materia.utils.expand_path(os.path.join(output_dir,input_name_2))
-# #         self.settings['output_path'] = materia.utils.expand_path(os.path.join(output_dir,output_name))
+# #         self.settings['input_path_1'] = materia.expand(os.path.join(output_dir,input_name_1))
+# #         self.settings['input_path_2'] = materia.expand(os.path.join(output_dir,input_name_2))
+# #         self.settings['output_path'] = materia.expand(os.path.join(output_dir,output_name))
 # #
 # #     def run(self):
 # #         with open(os.path.join(self.output_dir,self.read_from_1),'r') as f:
@@ -2414,8 +2414,8 @@
 # # # class Append(materia.Task):
 # # #     def __init__(self, append_string, input_name, output_name, output_dir):
 # # #         self.settings['append_string'] = append_string
-# # #         self.settings['input_path'] = materia.utils.expand_path(os.path.join(output_dir,input_name))
-# # #         self.settings['output_path'] = materia.utils.expand_path(os.path.join(output_dir,output_name))
+# # #         self.settings['input_path'] = materia.expand(os.path.join(output_dir,input_name))
+# # #         self.settings['output_path'] = materia.expand(os.path.join(output_dir,output_name))
 # # #
 # # #     def run(self):
 # # #         with open(self.settings['input_path'],'r') as f:
@@ -2426,9 +2426,9 @@
 # # #
 # # # class Combine:
 # # #     def __init__(self, input_name_1, input_name_2, output_name):
-# # #         self.settings['input_path_1'] = materia.utils.expand_path(os.path.join(output_dir,input_name_1))
-# # #         self.settings['input_path_2'] = materia.utils.expand_path(os.path.join(output_dir,input_name_2))
-# # #         self.settings['output_path'] = materia.utils.expand_path(os.path.join(output_dir,output_name))
+# # #         self.settings['input_path_1'] = materia.expand(os.path.join(output_dir,input_name_1))
+# # #         self.settings['input_path_2'] = materia.expand(os.path.join(output_dir,input_name_2))
+# # #         self.settings['output_path'] = materia.expand(os.path.join(output_dir,output_name))
 # # #
 # # #     def run(self):
 # # #         with open(os.path.join(self.output_dir,self.read_from_1),'r') as f:

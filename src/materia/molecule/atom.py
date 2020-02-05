@@ -38,7 +38,9 @@ class Atom:
                 k for k in _atomic_numbers if _atomic_numbers[k] == self.Z
             )
 
-        self.mass = materia.Qty(value=_atomic_masses[self.atomic_symbol], unit=materia.amu)
+        self.mass = materia.Qty(
+            value=_atomic_masses[self.atomic_symbol], unit=materia.amu
+        )
 
 
 _atomic_numbers = {

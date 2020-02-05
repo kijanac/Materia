@@ -18,7 +18,7 @@ class GPAWOutput:
             filepath: Path to file from which output will be read. Can be an absolute or a relative path.
         """
         raise NotImplementedError  # FIXME: implement
-        self.filepath = materia.expand_path(filepath)
+        self.filepath = materia.expand(filepath)
 
     def get(self, *quantity_names: str) -> Union[Any, Iterable[Any]]:
         """

@@ -20,16 +20,16 @@ class ExecuteNWChem(Task):
         name=None,
     ):
         super().__init__(handlers=handlers)
-        self.settings["input_path"] = materia.utils.expand_path(
+        self.settings["input_path"] = materia.expand(
             os.path.join(work_directory, input_name)
         )
-        self.settings["output_path"] = materia.utils.expand_path(
+        self.settings["output_path"] = materia.expand(
             os.path.join(work_directory, output_name)
         )
-        self.settings["scratch_directory"] = materia.utils.expand_path(scratch_directory)
+        self.settings["scratch_directory"] = materia.expand(scratch_directory)
 
         self.settings["executable"] = executable
-        self.settings["work_directory"] = materia.utils.expand_path(work_directory)
+        self.settings["work_directory"] = materia.expand(work_directory)
 
         self.settings["num_cores"] = num_cores
         self.settings["parallel"] = parallel
