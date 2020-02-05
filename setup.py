@@ -353,7 +353,7 @@ class Tag(setuptools.Command):
     ]
 
     def initialize_options(self):
-        self.branch = remote
+        self.remote = None
 
     def finalize_options(self):
         pass
@@ -361,10 +361,7 @@ class Tag(setuptools.Command):
     def run(self):
         version = self.distribution.metadata.version
         tag = "v" + version
-        message = "'Version " + version + "'"
-        subprocess.run(
-            ["git", "tag", "-a", tag, "-m", message,]
-        )
+        subprocess.run(["git", "tag", "-a", tag, "-m", "'" + tag + "'"])
         subprocess.run(["git", "push", self.remote, tag])
 
 
