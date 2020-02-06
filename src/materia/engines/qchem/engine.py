@@ -29,7 +29,7 @@ class QChemEngine:
         self.num_threads = num_threads
         self.arguments = arguments
 
-    def execute(self, input_filepath: str, log_filepath: str,) -> str:
+    def execute(self, input_filepath: str, log_filepath: str) -> str:
         if self.scratch_dir is not None:
             os.environ["QCSCRATCH"] = materia.expand(self.scratch_dir)
         if self.qcenv is not None:
@@ -45,6 +45,8 @@ class QChemEngine:
                 ).group(1)
             )
             # os.environ.update(qcenv_environ)
+        else:
+            qcenv_environ = None
         cmd = [self.executable]
         if self.arguments is not None:
             cmd.extend(self.arguments)
@@ -53,6 +55,9 @@ class QChemEngine:
         if self.num_threads is not None:
             cmd.append(f"-nt {self.num_threads}")
         cmd.extend([materia.expand(input_filepath), materia.expand(log_filepath)])
-        return subprocess.check_output(
-            shlex.split(" ".join(cmd)), env=qcenv_environ
-        ).decode()
+
+        if qcenv_environ is not None:
+            return subprocess.check_output(
+                shlex.split(" ".join(cmd)), env=qcenv_environ
+            ).decode()
+        return subprocess.check_output(shlex.split(" ".join(cmd))).decode()
