@@ -2,9 +2,6 @@
 Materia Module
 ==============
 
-.. image:: https://travis-ci.org/kijanac/materia.svg?branch=master
-    :target: https://travis-ci.org/kijanac/materia
-
 .. image:: https://codecov.io/gh/kijanac/materia/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/kijanac/materia
 
