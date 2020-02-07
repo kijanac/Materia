@@ -1,10 +1,11 @@
 from __future__ import annotations
-import collections
+#import collections
 import contextlib
 import itertools
 import numpy as np
 import materia
 from materia.utils import memoize
+import networkx as nx
 import openbabel as ob
 import pubchempy as pcp
 import rdkit, rdkit.Chem, rdkit.Chem.AllChem
@@ -42,8 +43,11 @@ class Structure:
         return materia.Structure((*self.atoms, *other.atoms))
 
     def perceive_bonds(self) -> Dict[int, int]:
+        # FIXME: change this to bonds and add @property decorator
         obmol = ob.OBMol()
 
+        bonds = {k: [] for k in range(self.num_atoms)}
+        
         for a in self.atoms:
             obatom = ob.OBAtom()
             obatom.SetAtomicNum(a.Z)
@@ -53,13 +57,29 @@ class Structure:
         obmol.ConnectTheDots()
         obmol.PerceiveBondOrders()
 
-        bonds = collections.defaultdict(list)
+        #bonds = collections.defaultdict(list)
         for bond in ob.OBMolBondIter(obmol):
             a, b = bond.GetBeginAtomIdx() - 1, bond.GetEndAtomIdx() - 1
             bonds[a].append(b)
             bonds[b].append(a)
 
-        return dict(bonds)
+        return bonds#dict(bonds)
+
+    def to_graph(self) -> nx.Graph:
+        g = nx.Graph()
+
+        bonds = self.perceive_bonds()
+
+        g.add_edges_from([(i,j) for i,v in bonds.items() for j in v])
+
+        nx.set_node_attributes(
+            G=g, values={i: {"Z": Z} for i, Z in enumerate(self.atomic_numbers)}
+        )
+        # nx.set_edge_attributes(
+        #     G=g, values={e: {"dist": v} for e, v in zip(edges, com_distances)}
+        # )
+
+        return g
 
     @staticmethod
     def retrieve(
