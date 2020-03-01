@@ -1,5 +1,7 @@
 from __future__ import annotations
-#import collections
+from typing import Dict, IO, Optional, Tuple, Union
+
+# import collections
 import contextlib
 import itertools
 import numpy as np
@@ -11,7 +13,6 @@ import pubchempy as pcp
 import rdkit, rdkit.Chem, rdkit.Chem.AllChem
 import scipy.linalg
 import tempfile
-from typing import Dict, IO, Optional, Tuple
 
 __all__ = ["Structure"]
 
@@ -47,7 +48,7 @@ class Structure:
         obmol = ob.OBMol()
 
         bonds = {k: [] for k in range(self.num_atoms)}
-        
+
         for a in self.atoms:
             obatom = ob.OBAtom()
             obatom.SetAtomicNum(a.Z)
@@ -57,20 +58,20 @@ class Structure:
         obmol.ConnectTheDots()
         obmol.PerceiveBondOrders()
 
-        #bonds = collections.defaultdict(list)
+        # bonds = collections.defaultdict(list)
         for bond in ob.OBMolBondIter(obmol):
             a, b = bond.GetBeginAtomIdx() - 1, bond.GetEndAtomIdx() - 1
             bonds[a].append(b)
             bonds[b].append(a)
 
-        return bonds#dict(bonds)
+        return bonds  # dict(bonds)
 
     def to_graph(self) -> nx.Graph:
         g = nx.Graph()
 
         bonds = self.perceive_bonds()
 
-        g.add_edges_from([(i,j) for i,v in bonds.items() for j in v])
+        g.add_edges_from([(i, j) for i, v in bonds.items() for j in v])
 
         nx.set_node_attributes(
             G=g, values={i: {"Z": Z} for i, Z in enumerate(self.atomic_numbers)}
