@@ -1,11 +1,12 @@
 from __future__ import annotations
+from typing import Iterable, Optional
+
 import ast
 import os
 import materia
 import re
 import shlex
 import subprocess
-from typing import Iterable, Optional
 
 __all__ = ["QChemEngine"]
 
