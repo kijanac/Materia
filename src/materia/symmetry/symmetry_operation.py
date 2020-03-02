@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.linalg
 
-import materia.utils.geometry
+import materia
 
 
 class SymmetryOperation:
@@ -53,7 +53,7 @@ class SymmetryOperation:
         axis = np.sqrt(
             np.abs(np.diag(S) / (3 - np.sign(self.det) * self.tr))
         )  # scipy.linalg.null_space(R-det*np.eye(3)).squeeze()
-        u = materia.utils.geometry.Geometry()._perpendicular_vector(p=axis)
+        u = materia.Geometry()._perpendicular_vector(p=axis)
         axis *= np.sign(np.dot(axis, np.cross(u, self.matrix @ u)))
 
         return axis
