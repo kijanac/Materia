@@ -1,7 +1,7 @@
 from __future__ import annotations
 import functools
 import subprocess
-from typing import Callable, Iterable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 from .task import Task
 from ..handlers import Handler
@@ -26,14 +26,14 @@ class FunctionTask(Task):
 class InputTask(Task):
     def __init__(
         self,
-        value,
+        value: Any,
         handlers: Optional[Iterable[Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
         super().__init__(handlers=handlers, name=name)
         self.value = value
 
-    def run(self) -> None:
+    def run(self) -> Any:
         return self.value
 
 

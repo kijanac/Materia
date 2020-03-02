@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import Any, Dict, Optional
+
 import copy
 import multiprocessing as mp
 import networkx as nx
@@ -10,7 +13,7 @@ __all__ = ["Workflow"]
 
 
 class Workflow:
-    def __init__(self, *tasks):
+    def __init__(self, *tasks: materia.Task) -> None:
         self.tasks = copy.deepcopy(tasks)
         self.links = {}
         for i, t in enumerate(self.tasks):
@@ -19,26 +22,24 @@ class Workflow:
                 (k, self.tasks.index(p)) for k, p in named_reqs.items()
             ]
 
-    def run(self, num_consumers=1, thread=True):
+    def run(
+        self, num_consumers: Optional[int] = 1, thread: Optional[bool] = True
+    ) -> Dict[int, Any]:
         if thread:
             tasks = list(self.tasks)
             links = self.links
 
-            task_queue = (
-                queue.Queue()
-            )  # holds nodes corresponding to tasks waiting to be run by a process
-            results = (
-                {}
-            )  # record task outputs for handler checking and passing to successor tasks
-            done = {
-                node: False for node in range(len(tasks))
-            }  # lookup table to track which tasks have been completed
-            done_queue = (
-                queue.Queue()
-            )  # hold nodes corresponding to tasks waiting to be recognized as done by the producer
-            tracker = (
-                []
-            )  # holds nodes corresponding to tasks currently being held by a consumer
+            # NOTE: holds nodes corresponding to tasks waiting to be run by a process
+            task_queue = queue.Queue()
+            # NOTE: record task outputs for handler checking and passing to successor tasks
+            results = {}
+            # NOTE: lookup table to track which tasks have been completed
+            done = {node: False for node in range(len(tasks))}
+            # NOTE: hold nodes corresponding to tasks waiting to be recognized as done by the producer
+            done_queue = queue.Queue()
+            # NOTE: holds nodes corresponding to tasks currently being held by a consumer
+            tracker = []
+            quit_producer = False
 
             producer_kwargs = {
                 "tasks": tasks,
@@ -47,6 +48,7 @@ class Workflow:
                 "done": done,
                 "done_queue": done_queue,
                 "tracker": tracker,
+                "quit_producer": quit_producer,
             }
             producer = threading.Thread(target=_produce, kwargs=producer_kwargs)
 
@@ -56,13 +58,15 @@ class Workflow:
                 "task_queue": task_queue,
                 "results": results,
                 "done_queue": done_queue,
+                "quit_producer": quit_producer,
             }
             consumers = tuple(
                 threading.Thread(target=_consume, kwargs=consumer_kwargs, daemon=True)
                 for _ in range(num_consumers)
             )
         else:
-            mp.freeze_support()  # for freeze support on Windows - does nothing if not in frozen application or if not on Windows
+            # NOTE: for freeze support on Windows - does nothing if not in frozen application or if not on Windows
+            mp.freeze_support()
             m = mp.Manager()
             tasks = m.list(self.tasks)
             links = m.dict(self.links)
@@ -82,6 +86,7 @@ class Workflow:
             tracker = (
                 m.list()
             )  # holds nodes corresponding to tasks currently being held by a consumer
+            quit_producer = mp.Value("i", 0)
 
             producer_kwargs = {
                 "tasks": tasks,
@@ -90,6 +95,7 @@ class Workflow:
                 "done": done,
                 "done_queue": done_queue,
                 "tracker": tracker,
+                "quit_producer": quit_producer,
             }
             producer = mp.Process(target=_produce, kwargs=producer_kwargs)
 
@@ -100,6 +106,7 @@ class Workflow:
                 "task_queue": task_queue,
                 "results": results,
                 "done_queue": done_queue,
+                "quit_producer": quit_producer,
             }
             consumers = tuple(
                 mp.Process(target=_consume, kwargs=consumer_kwargs, daemon=True)
@@ -123,11 +130,11 @@ class Workflow:
         return dict(results)
 
 
-def _produce(tasks, links, task_queue, done, done_queue, tracker):
+def _produce(tasks, links, task_queue, done, done_queue, tracker, quit_producer):
     _queue_tasks(
         tasks=tasks, links=links, task_queue=task_queue, done=done, tracker=tracker
     )
-    while not all(done.values()):
+    while not (all(done.values()) or quit_producer):
         try:
             node, actions = done_queue.get(block=False)
         except queue.Empty:
@@ -135,7 +142,7 @@ def _produce(tasks, links, task_queue, done, done_queue, tracker):
 
         # run rest of loop only if a job was marked as done
 
-        # nothing bad can happen in between the try block and now,
+        # NOTE: nothing bad can happen in between the try block and now,
         # since only _queue_tasks cares about done_queue, done, or tracker,
         # and _queue_tasks cannot possibly be running here since there is
         # only one producer process
@@ -150,33 +157,38 @@ def _produce(tasks, links, task_queue, done, done_queue, tracker):
         )
 
 
-def _consume(tasks, links, task_queue, results, done_queue):
+def _consume(tasks, links, task_queue, results, done_queue, quit_producer):
     while True:
         try:
-            node = task_queue.get()
-        except queue.Empty:
-            continue
+            try:
+                node = task_queue.get()
+            except queue.Empty:
+                continue
 
-        # node = None signals consumer to stop
-        if node is None:
-            break
+            # NOTE: node = None signals consumer to stop
+            if node is None:
+                break
 
-        task = tasks[
-            node
-        ]  # this is safe because the node assigned to a task never changes while the workflow runs
-        result = task.run(
-            **{k: results[v] for k, v in links[node] if k is not None}
-        )  # this is safe because 1.) the dependencies of each task can only be changed by tasks which precede it, i.e. by the time a task is running, no actions can alter its dependencies, and 2.) only one consumer will write to results[node] at a time because only one consumer is running a particular task at a time
-        try:
-            [h.run(result=result, task=task) for h in task.handlers]
+            # NOTE: this is safe because the node assigned to a task never changes while the workflow runs
+            task = tasks[node]
+            # NOTE: this is safe because 1.) the dependencies of each task can only be changed by tasks which precede it, i.e. by the time a task is running, no actions can alter its dependencies, and 2.) only one consumer will write to results[node] at a time because only one consumer is running a particular task at a time
+            result = task.run(
+                **{k: results[v] for k, v in links[node] if k is not None}
+            )
+            try:
+                for h in task.handlers:
+                    h.run(result=result, task=task)
 
-            results[node] = result
-            actions = []
-        except ActionSignal as a:
-            results[node] = a.result
-            actions = a.actions
+                results[node] = result
+                actions = []
+            except ActionSignal as a:
+                results[node] = a.result
+                actions = a.actions
 
-        done_queue.put((node, actions))
+            done_queue.put((node, actions))
+        except Exception as e:
+            quit_producer = 1
+            raise e
 
 
 # _PRODUCE HELPER FUNCTIONS

@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import Dict, Optional
+
 import copy
 
 from .action import Action
@@ -6,12 +9,12 @@ __all__ = ["InsertTasks", "Modify", "Rerun"]
 
 
 class InsertTasks(Action):
-    def __init__(self, *tasks, requires_kw=None):
-        # IMPORTANT: the first task in tasks must be the head, and the last task in tasks must be the tail!
+    def __init__(self, *tasks, requires_kw=None) -> None:
+        # NOTE: the first task in tasks must be the head, and the last task in tasks must be the tail!
         self.tasks = copy.deepcopy(tasks)
         self.requires_kw = requires_kw
 
-    def run(self, node, tasks, links, done):
+    def run(self, node, tasks, links, done: Dict[int, bool]) -> None:
         head_task_node = len(tasks)
         # this value is safe to use in the scope of this method because only the producer runs actions, and there is only one producer at a time
         tail_task_node = head_task_node + len(self.tasks) - 1
@@ -25,14 +28,14 @@ class InsertTasks(Action):
 
 
 class Modify(Action):
-    def modify(self, task):
-        # IMPORTANT: this should return the modified task - this can be a copy or it can modify task in place and return it, either way
+    def modify(self, task: materia.Task) -> materia.Task:
+        # NOTE: this should return the modified task - this can be a copy or it can modify task in place and return it, either way
         raise NotImplementedError
 
-    def run(self, node, tasks, links, done):
+    def run(self, node, tasks, links, done: Dict[int, bool]) -> None:
         tasks[node] = self.modify(task=tasks[node])
 
 
 class Rerun(Action):
-    def run(self, node, tasks, links, done):
+    def run(self, node, tasks, links, done: Dict[int, bool]) -> None:
         done[node] = False
