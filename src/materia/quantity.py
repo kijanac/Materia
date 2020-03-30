@@ -6,7 +6,7 @@ import copy
 import numpy as np
 
 
-__all__ = ["Dimension", "Quantity"]#,"qty_wrap"]
+__all__ = ["Dimension", "Quantity"]  # ,"qty_wrap"]
 
 
 class Dimension(collections.abc.MutableMapping):
@@ -141,6 +141,7 @@ def _precast(func):
 
     return dec
 
+
 # def qty_wrap(*attrs):
 #     def dec_factory(func):
 #         def dec(self,*args,**kwargs):
@@ -214,7 +215,7 @@ class Quantity(collections.abc.Sequence):
     def __getattr__(self, name: str) -> Any:
         if name.startswith("__") and name.endswith("__"):
             raise AttributeError
-        #if not hasattr(self,name):
+        # if not hasattr(self,name):
         return getattr(self.value, name)
 
     __array_priority__ = 1000
