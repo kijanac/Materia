@@ -32,7 +32,7 @@ class Atom:
             self.atomic_symbol = element
             self.Z = _atomic_numbers[self.atomic_symbol]
         else:
-            self.Z = element
+            self.Z = int(element)
             self.atomic_symbol = next(
                 k for k in _atomic_numbers if _atomic_numbers[k] == self.Z
             )
