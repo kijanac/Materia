@@ -26,9 +26,8 @@ class Atom:
     """
 
     def __init__(self, element: Union[str, int], position: materia.Qty) -> None:
-        self.position = materia.Qty(
-            value=position.value.reshape(3, 1), unit=position.unit
-        )
+        self.position = position.value.reshape(3, 1) * position.unit
+
         if isinstance(element, str):
             self.atomic_symbol = element
             self.Z = _atomic_numbers[self.atomic_symbol]
@@ -38,9 +37,7 @@ class Atom:
                 k for k in _atomic_numbers if _atomic_numbers[k] == self.Z
             )
 
-        self.mass = materia.Qty(
-            value=_atomic_masses[self.atomic_symbol], unit=materia.amu
-        )
+        self.mass = _atomic_masses[self.atomic_symbol] * materia.amu
 
 
 _atomic_numbers = {

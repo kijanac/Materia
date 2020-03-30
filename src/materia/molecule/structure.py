@@ -5,7 +5,7 @@ from typing import Dict, IO, Optional, Tuple, Union
 import contextlib
 import itertools
 import numpy as np
-import materia
+import materia as mtr
 from materia.utils import memoize
 import networkx as nx
 import openbabel as ob
@@ -18,7 +18,7 @@ __all__ = ["Structure"]
 
 
 class Structure:
-    def __init__(self, atoms: materia.Atom) -> None:
+    def __init__(self, *atoms: mtr.Atom) -> None:
         self.atoms = tuple(atoms)
 
     @staticmethod
@@ -40,11 +40,11 @@ class Structure:
         else:
             raise ValueError("Cannot read file with given extension.")
 
-    def __add__(self, other: materia.Structure) -> materia.Structure:
-        return materia.Structure((*self.atoms, *other.atoms))
+    def __add__(self, other: mtr.Structure) -> mtr.Structure:
+        return mtr.Structure((*self.atoms, *other.atoms))
 
-    def perceive_bonds(self) -> Dict[int, int]:
-        # FIXME: change this to bonds and add @property decorator
+    @property
+    def bonds(self) -> Dict[int, int]:
         obmol = ob.OBMol()
 
         bonds = {k: [] for k in range(self.num_atoms)}
@@ -58,20 +58,17 @@ class Structure:
         obmol.ConnectTheDots()
         obmol.PerceiveBondOrders()
 
-        # bonds = collections.defaultdict(list)
         for bond in ob.OBMolBondIter(obmol):
             a, b = bond.GetBeginAtomIdx() - 1, bond.GetEndAtomIdx() - 1
             bonds[a].append(b)
             bonds[b].append(a)
 
-        return bonds  # dict(bonds)
+        return bonds
 
     def to_graph(self) -> nx.Graph:
         g = nx.Graph()
 
-        bonds = self.perceive_bonds()
-
-        g.add_edges_from([(i, j) for i, v in bonds.items() for j in v])
+        g.add_edges_from([(i, j) for i, v in self.bonds.items() for j in v])
 
         nx.set_node_attributes(
             G=g, values={i: {"Z": Z} for i, Z in enumerate(self.atomic_numbers)}
@@ -88,7 +85,7 @@ class Structure:
         smiles: Optional[str] = None,
         inchi: Optional[str] = None,
         inchikey: Optional[str] = None,
-    ) -> materia.Structure:
+    ) -> mtr.Structure:
         kwargs = (
             (name, "name"),
             (smiles, "smiles"),
@@ -128,7 +125,7 @@ class Structure:
         smiles: Optional[str] = None,
         inchi: Optional[str] = None,
         inchikey: Optional[str] = None,
-    ) -> materia.Structure:
+    ) -> mtr.Structure:
         kwargs = (
             (name, "name"),
             (smiles, "smiles"),
@@ -161,7 +158,7 @@ class Structure:
             overwrite: If False, an error is raised if `filepath` already exists and the structure is not written. Ignored if `file` is a file-like object. Defaults to False.
         """
         open_code = "w" if overwrite else "x"
-        with open(materia.expand(file), open_code) if isinstance(
+        with open(mtr.expand(file), open_code) if isinstance(
             file, str
         ) else contextlib.nullcontext(file) as f:
             if f.name.endswith(".xyz"):
@@ -179,7 +176,7 @@ class Structure:
     @contextlib.contextmanager
     def tempfile(self, suffix: str, dir: Optional[str] = None):
         with tempfile.NamedTemporaryFile(
-            dir=materia.expand(dir) if dir is not None else None, suffix=suffix
+            dir=mtr.expand(dir) if dir is not None else None, suffix=suffix
         ) as fp:
             try:
                 self.write(file=fp)
@@ -193,11 +190,8 @@ class Structure:
             for atom, (x, y, z) in zip(self.atomic_symbols, self.atomic_positions.T)
         )
 
-    def to_rdkit(self) -> rdkit.Chem.rdchem.Mol:
-        # FIXME: segfaults due to xyz2molUSE
-        with self.tempfile(suffix=".xyz") as fp:
-            rdkit_mol = materia.utils.xyz2molUSE(fp.name)
-        return rdkit_mol
+    def to_rdkit(self, charge: Optional[int] = 0) -> rdkit.Chem.rdchem.Mol:
+        return mtr.xyz2mol(self.atomic_numbers, charge, self.atomic_positions.T)
 
     @property
     def num_atoms(self) -> int:
@@ -210,15 +204,15 @@ class Structure:
 
     @property
     @memoize
-    def atomic_positions(self) -> materia.Qty:
-        value = np.hstack([atom.position for atom in self.atoms])
+    def atomic_positions(self) -> mtr.Qty:
+        value = np.hstack([atom.position.value for atom in self.atoms])
         unit_set = set(atom.position.unit for atom in self.atoms)
         try:
             (unit,) = tuple(unit_set)
         except ValueError:
             raise ValueError("Atomic positions do not have a common unit.")
 
-        return materia.Qty(value=value, unit=unit)
+        return value * unit
 
     @property
     @memoize
@@ -227,7 +221,7 @@ class Structure:
 
     @property
     @memoize
-    def atomic_masses(self) -> materia.Qty:
+    def atomic_masses(self) -> mtr.Qty:
         value = tuple(atom.mass.value for atom in self.atoms)
         unit_set = set(atom.mass.unit for atom in self.atoms)
         try:
@@ -235,38 +229,35 @@ class Structure:
         except ValueError:
             raise ValueError("Atomic masses do not have a common unit.")
 
-        return materia.Qty(value=value, unit=unit)
+        return value * unit
 
     @property
     @memoize
-    def mass(self) -> materia.Qty:
+    def mass(self) -> mtr.Qty:
         value = sum(self.atomic_masses.value)
         unit = self.atomic_masses.unit
 
-        return materia.Qty(value=value, unit=unit)
+        return value * unit
 
     @property
     @memoize
-    def center_of_mass(self) -> materia.Qty:
-        value = (
-            sum(
-                m * r
-                for m, r in zip(self.atomic_masses.value, self.atomic_positions.value.T)
-            ).reshape(3, 1)
+    def center_of_mass(self) -> mtr.Qty:
+        return (
+            (self.atomic_masses.value * self.atomic_positions.value)
+            .sum(1)
+            .reshape(3, 1)
+            * self.atomic_positions.unit
             / self.mass.value
         )
-        unit = self.atomic_positions.unit
-
-        return materia.Qty(value=value, unit=unit)
 
     @property
     @memoize
-    def centered_atomic_positions(self) -> materia.Qty:
+    def centered_atomic_positions(self) -> mtr.Qty:
         return self.atomic_positions - self.center_of_mass
 
     @property
     @memoize
-    def inertia_tensor(self) -> materia.Qty:
+    def inertia_tensor(self) -> mtr.Qty:
         atomic_masses = self.atomic_masses
         centered_atomic_positions = self.centered_atomic_positions
 
@@ -279,25 +270,23 @@ class Structure:
 
         I = np.zeros((3, 3))
         I[np.tril_indices(3, -1)] = -xy, -xz, -yz
-        I += I.T
-        I += np.diag([yy + zz, xx + zz, xx + yy])
+        I += I.T + np.diag([yy + zz, xx + zz, xx + yy])
 
         unit = atomic_masses.unit * centered_atomic_positions.unit ** 2
 
-        return materia.Qty(value=I, unit=unit)
+        return I * unit
 
     @property
     @memoize
-    def inertia_aligned_atomic_positions(self) -> materia.Qty:
+    def inertia_aligned_atomic_positions(self) -> mtr.Qty:
         # FIXME: examine and clean this one up
+        if self.num_atoms == 1:
+            # i.e. this is an atomic species
+            return np.eye(3)
+
         principal_moments, principal_directions = scipy.linalg.eigh(
             self.inertia_tensor.value
         )
-
-        if (
-            principal_moments == np.array([0, 0, 0])
-        ).all():  # i.e. this is an atomic species
-            return np.eye(3)
 
         sorted_moments, sorted_directions = zip(
             *sorted(zip(principal_moments, principal_directions.T), reverse=True)
@@ -340,10 +329,9 @@ class Structure:
         print(R @ R.T)
         print(Rp @ Rp.T)
 
-        return materia.Qty(
-            value=R @ self.centered_atomic_positions.value,
-            unit=self.centered_atomic_positions.unit,
-        )
+        return (
+            R @ self.centered_atomic_positions.value
+        ) * self.centered_atomic_positions.unit
 
     # @property
     # @memoize
@@ -363,16 +351,14 @@ class Structure:
 
     @property
     @memoize
-    def principal_moments(self) -> materia.Qty:
-        return materia.Qty(
-            scipy.linalg.eigvalsh(self.inertia_tensor), self.inertia_tensor.unit
-        )
+    def principal_moments(self) -> mtr.Qty:
+        scipy.linalg.eigvalsh(self.inertia_tensor) * self.inertia_tensor.unit
 
     @property
     @memoize
     def principal_axes(self) -> Tuple[float]:
         _, axes = scipy.linalg.eigh(self.inertia_tensor)
-        return tuple(materia.normalize(ax) for ax in axes.T)
+        return tuple(mtr.normalize(ax) for ax in axes.T)
 
     @property
     @memoize
@@ -384,27 +370,28 @@ class Structure:
 
     @property
     @memoize
-    def is_planar(self) -> materia.Qty:
+    def is_planar(self) -> mtr.Qty:
         (m1, m2, m3) = self.principal_moments.value / sum(self.principal_moments.value)
         return (m1 + m2 == m3) or (m1 + m2 == m3) or (m1 + m2 == m3)
 
     @property
     @memoize
-    def diameter(self) -> materia.Qty:
+    def diameter(self) -> mtr.Qty:
         hull = scipy.spatial.ConvexHull(self.atomic_positions.value)
         # only look at atoms on the convex hull
         kdt = scipy.spatial.KDTree(self.atomic_positions.value[hull.vertices, :])
-        return materia.Qty(
-            max(kdt.sparse_distance_matrix(kdt, np.inf).values()),
-            self.atomic_positions.unit,
-        )
+
         # return maximum pairwise distance among all atoms on the convex hull
+        return (
+            max(kdt.sparse_distance_matrix(kdt, np.inf).values())
+            * self.atomic_positions.unit
+        )
 
     # FIXME: fix this, annotation too
     @property
     @memoize
     def pointgroup(self):
-        sf = materia.symfinder.SymmetryFinder()
+        sf = mtr.symfinder.SymmetryFinder()
         return sf.molecular_pointgroup(
             atomic_positions=self.atomic_positions.value,
             atomic_numbers=self.atomic_numbers,
@@ -434,7 +421,7 @@ class Structure:
             spanning set which are related to one another by a symmetry rotation;
             and wprime.
         """
-        axgen = materia.symfinder.AxesGenerator()
+        axgen = mtr.symfinder.AxesGenerator()
 
         return axgen.generate_axes(
             pointgroup_symbol=self.pointgroup, inertia_tensor=self.inertia_tensor
@@ -445,7 +432,7 @@ class Structure:
 
 
 def _read_xyz(filepath: str, coordinate_unit: str = "angstrom") -> Structure:
-    with open(materia.expand(filepath), "r") as f:
+    with open(mtr.expand(filepath), "r") as f:
         atom_data = np.atleast_2d(
             np.loadtxt(
                 fname=f,
@@ -458,37 +445,34 @@ def _read_xyz(filepath: str, coordinate_unit: str = "angstrom") -> Structure:
 
     atomic_symbols = atom_data[:, 0]
     atomic_positions = (
-        materia.Qty(
-            value=np.asarray(p, dtype="float64"), unit=getattr(materia, coordinate_unit)
-        )
+        np.asarray(p, dtype="float64") * getattr(mtr, coordinate_unit)
         for p in atom_data[:, 1:]
     )
     atoms = (
-        materia.Atom(element=symbol, position=position)
+        mtr.Atom(element=symbol, position=position)
         for symbol, position in zip(atomic_symbols, atomic_positions)
     )
 
-    return Structure(atoms=atoms)
+    return Structure(*atoms)
 
 
 # def _write_sdf(structure, filepath):
 # import rdkit
 
 
-def _structure_from_pubchem_compound(compound: pcp.Compound) -> materia.Structure:
+def _structure_from_pubchem_compound(compound: pcp.Compound) -> mtr.Structure:
     # FIXME: assumes the pubchem distance unit is angstrom - is this correct??
     atom_generator = (
-        (a.element, materia.Qty(value=(a.x, a.y, a.z), unit=materia.angstrom))
-        for a in compound.atoms
+        (a.element, (a.x, a.y, a.z) * mtr.angstrom) for a in compound.atoms
     )
-    atoms = (materia.Atom(element=symb, position=pos) for symb, pos in atom_generator)
+    atoms = (mtr.Atom(element=symb, position=pos) for symb, pos in atom_generator)
 
-    return materia.Structure(atoms=atoms)
+    return mtr.Structure(*atoms)
 
 
 def _structure_from_identifier(
     smiles: Optional[str] = None, inchi: Optional[str] = None, num_conformers: int = 25
-) -> materia.Structure:
+) -> mtr.Structure:
     # for motivation on generating 25 (as opposed to, say, 10 or 100) conformers, see:
     # https://github.com/rdkit/UGM_2015/blob/master/Presentations/ETKDG.SereinaRiniker.pdf
 
@@ -543,22 +527,17 @@ def _structure_from_identifier(
 
     conformer = min(energies, key=energies.get)
 
-    # convert to materia.Structure
+    # convert to Structure
     symbols = (a.GetSymbol() for a in conformer.GetOwningMol().GetAtoms())
 
     # FIXME: assumes the RDKIT distance unit is angstrom - is this correct??
     # NOTE: using conformer.GetPositions sometimes causes a seg fault (RDKit) - use GetAtomPosition instead
     atoms = (
-        materia.Atom(
-            element=symbol,
-            position=materia.Qty(
-                value=conformer.GetAtomPosition(i), unit=materia.angstrom
-            ),
-        )
+        mtr.Atom(element=symbol, position=conformer.GetAtomPosition(i) * mtr.angstrom,)
         for i, symbol in enumerate(symbols)
     )
 
-    return materia.Structure(atoms=atoms)
+    return mtr.Structure(*atoms)
 
 
 # def sanitize(self):
