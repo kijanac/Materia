@@ -1,12 +1,41 @@
 from __future__ import annotations
-import functools
-import subprocess
 from typing import Any, Callable, Iterable, Optional
 
-from .task import Task
-from ..handlers import Handler
+import functools
+import materia as mtr
+import subprocess
 
-__all__ = ["FunctionTask", "InputTask", "ShellCommand"]
+__all__ = ["ExternalTask", "FunctionTask", "InputTask", "ShellCommand", "Task"]
+
+
+class Task:
+    def __init__(
+        self,
+        handlers: Optional[Iterable[mtr.Handler]] = None,
+        name: Optional[str] = None,
+    ) -> None:
+        self.handlers = handlers or []
+        self.name = name or ""
+        self.requirements = ([], {})
+
+    def requires(self, *args: Task, **kwargs: Task) -> None:
+        self.requirements = (args, kwargs)
+
+    def run(self, **kwargs: Any) -> Any:
+        raise NotImplementedError
+
+
+class ExternalTask(Task):
+    def __init__(
+        self,
+        engine: mtr.Engine,
+        io: mtr.IO,
+        handlers: Optional[Iterable[mtr.Handler]] = None,
+        name: Optional[str] = None,
+    ) -> None:
+        self.engine = engine
+        self.io = io
+        super().__init__(handlers=handlers, name=name)
 
 
 class FunctionTask(Task):
@@ -56,7 +85,7 @@ def task(
     handlers: Optional[Iterable[Handler]] = None,
     name: Optional[str] = None,
 ) -> FunctionTask:
-    # FIXME: this is incomptabile with materia.Workflow.run(thread=False) (i.e. with multiprocessing) because FunctionTask cannot be serialized!
+    # FIXME: this is incomptabile with mtr.Workflow.run(thread=False) (i.e. with multiprocessing) because FunctionTask cannot be serialized!
     if f is None:
         return functools.partial(task, handlers=handlers, name=name)
 

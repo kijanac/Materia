@@ -1,7 +1,7 @@
 import abc
 import functools
 
-import materia
+import materia as mtr
 
 __all__ = ["Handler"]
 
@@ -9,7 +9,7 @@ __all__ = ["Handler"]
 class Handler(abc.ABC):
     def run(self, result, task):
         if self.check(result=result, task=task):
-            raise materia.ActionSignal(
+            raise mtr.ActionSignal(
                 result=result, actions=self.handle(result=result, task=task)
             )
 
