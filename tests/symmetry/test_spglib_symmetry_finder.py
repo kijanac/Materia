@@ -1,11 +1,10 @@
 import numpy as np
 
-from materia import Atom, Molecule, Structure
+import materia as mtr
 from materia.symmetry import SpglibSymmetryFinder
-from materia import angstrom, Qty
 
 
-class StructureTestClass(Structure):
+class StructureTestClass(mtr.Structure):
     def __init__(self, *atoms):
         setattr(self, "atoms", atoms)
 
@@ -14,7 +13,7 @@ class StructureTestClass(Structure):
 
 
 def test_align_axes_with_molecule_he():
-    ssf = SpglibSymmetryFinder()
+    ssf = mtr.SpglibSymmetryFinder()
 
     test_result = ssf._align_rotations_with_molecule(
         inertia_tensor=np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
@@ -26,7 +25,7 @@ def test_align_axes_with_molecule_he():
 
 
 def test_align_axes_with_molecule_h2o_norot():
-    ssf = SpglibSymmetryFinder()
+    ssf = mtr.SpglibSymmetryFinder()
 
     test_result = ssf._align_rotations_with_molecule(
         inertia_tensor=np.array(
@@ -44,7 +43,7 @@ def test_align_axes_with_molecule_h2o_norot():
 
 
 def test_align_axes_with_molecule_h2o_rot():
-    ssf = SpglibSymmetryFinder()
+    ssf = mtr.SpglibSymmetryFinder()
 
     test_result = ssf._align_rotations_with_molecule(
         inertia_tensor=np.array(
@@ -62,12 +61,12 @@ def test_align_axes_with_molecule_h2o_rot():
 
 
 def test_molecular_pointgroup_h2o_norot():
-    ssf = SpglibSymmetryFinder()
+    ssf = mtr.SpglibSymmetryFinder()
 
-    o = Atom(element="O", position=Qty(value=(0.000, 0.000, 0.000), unit=angstrom))
-    h1 = Atom(element="H", position=Qty(value=(0.757, 0.586, 0.000), unit=angstrom))
-    h2 = Atom(element="H", position=Qty(value=(-0.757, 0.586, 0.000), unit=angstrom))
-    h2o = Molecule()
+    o = mtr.Atom(element="O", position=(0.000, 0.000, 0.000) * mtr.angstrom)
+    h1 = mtr.Atom(element="H", position=(0.757, 0.586, 0.000) * mtr.angstrom)
+    h2 = mtr.Atom(element="H", position=(-0.757, 0.586, 0.000) * mtr.angstrom)
+    h2o = mtr.Molecule()
     h2o.structure = StructureTestClass(o, h1, h2)
 
     test_result = ssf.molecular_pointgroup(molecule=h2o)
@@ -78,12 +77,12 @@ def test_molecular_pointgroup_h2o_norot():
 
 
 def test_symfinder_molecular_pointgroup_h2o_rot():
-    ssf = SpglibSymmetryFinder()
+    ssf = mtr.SpglibSymmetryFinder()
 
-    o = Atom(element="O", position=Qty(value=(0.000, 0.000, 0.000), unit=angstrom))
-    h1 = Atom(element="H", position=Qty(value=(0.757, 0.000, 0.586), unit=angstrom))
-    h2 = Atom(element="H", position=Qty(value=(-0.757, 0.000, 0.586), unit=angstrom))
-    h2o = Molecule()
+    o = mtr.Atom(element="O", position=(0.000, 0.000, 0.000) * mtr.angstrom)
+    h1 = mtr.Atom(element="H", position=(0.757, 0.000, 0.586) * mtr.angstrom)
+    h2 = mtr.Atom(element="H", position=(-0.757, 0.000, 0.586) * mtr.angstrom)
+    h2o = mtr.Molecule()
     h2o.structure = StructureTestClass(o, h1, h2)
 
     test_result = ssf.molecular_pointgroup(molecule=h2o)

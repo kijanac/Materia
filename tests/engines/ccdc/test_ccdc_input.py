@@ -1,4 +1,4 @@
-import materia
+import materia as mtr
 import unittest.mock as mock
 
 
@@ -10,7 +10,7 @@ def test_ccdc_input_write():
 
     with mock.patch("builtins.open", mock_open):
         with mock.patch("materia.expand", mock_expand):
-            materia.CCDCInput(ccdc_code).write("/mock/path")
+            mtr.CCDCInput(ccdc_code).write("/mock/path")
 
     mock_expand.assert_called_once_with("/mock/path")
     mock_open.assert_called_once_with("/mock/path", "w")

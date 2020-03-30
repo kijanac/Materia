@@ -1,12 +1,12 @@
 import collections
 import unittest.mock as mock
 import numpy as np
+import pytest
 
-import materia
-from materia import Structure
+import materia as mtr
 
 
-class StructureTestClass(materia.Structure):
+class StructureTestClass(mtr.Structure):
     def __init__(self, *atoms):
         self.atoms = atoms
 
@@ -16,62 +16,55 @@ class StructureTestClass(materia.Structure):
 
 def test_structure_he():
     he = StructureTestClass(
-        materia.Atom(
-            element="He",
-            position=materia.Qty(value=(0.000, 0.000, 0.000), unit=materia.angstrom),
-        )
+        mtr.Atom(element="He", position=(0.000, 0.000, 0.000) * mtr.angstrom,)
     )
 
-    check_result_center_of_mass = materia.Qty(
-        np.array([[0.0, 0.0, 0.0]]).T, unit=materia.angstrom
-    )
-    check_result_inertia_tensor = materia.Qty(
-        value=np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
-        unit=materia.amu * materia.angstrom ** 2,
+    check_result_center_of_mass = np.array([[0.0, 0.0, 0.0]]).T * mtr.angstrom
+
+    check_result_inertia_tensor = (
+        np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
+        * mtr.amu
+        * mtr.angstrom ** 2
     )
 
     assert he.center_of_mass == check_result_center_of_mass
     assert np.allclose(he.inertia_tensor.value, check_result_inertia_tensor.value)
-    assert he.inertia_tensor.unit == check_result_inertia_tensor.unit
 
 
 def test_structure_h2o():
-    h1 = materia.Atom(
-        element="H",
-        position=materia.Qty(value=(0.757, 0.586, 0.000), unit=materia.angstrom),
-    )
-    h2 = materia.Atom(
-        element="H",
-        position=materia.Qty(value=(-0.757, 0.586, 0.000), unit=materia.angstrom),
-    )
-    o = materia.Atom(
-        element="O",
-        position=materia.Qty(value=(0.000, 0.000, 0.000), unit=materia.angstrom),
-    )
+    h1 = mtr.Atom(element="H", position=(0.757, 0.586, 0.000) * mtr.angstrom,)
+    h2 = mtr.Atom(element="H", position=(-0.757, 0.586, 0.000) * mtr.angstrom,)
+    o = mtr.Atom(element="O", position=(0.000, 0.000, 0.000) * mtr.angstrom,)
     h2o = StructureTestClass(h1, h2, o)
 
-    check_result_center_of_mass = materia.Qty(
-        value=np.array([[0.0, 0.06557735220649459, 0.0]]).T, unit=materia.angstrom
-    )
-    check_result_inertia_tensor = materia.Qty(
-        value=np.array(
-            [
-                [0.6148148259597, 0.0, 0.0],
-                [0.0, 1.1552667840000002, 0.0],
-                [0.0, 0.0, 1.7700816099597003],
-            ]
-        ),
-        unit=materia.amu * materia.angstrom ** 2,
+    check_result_center_of_mass = (
+        np.array([[0.0, 0.06557735220649459, 0.0]]).T * mtr.angstrom
     )
 
-    assert h2o.center_of_mass == check_result_center_of_mass
+    check_result_inertia_tensor = (
+        np.array(
+            [[0.61481483, 0.0, 0.0], [0.0, 1.15526678, 0.0], [0.0, 0.0, 1.77008161],]
+        )
+        * mtr.amu
+        * mtr.angstrom ** 2
+    )
+    print(h2o.center_of_mass)
+    print(check_result_center_of_mass)
+    assert np.allclose(h2o.center_of_mass.value, check_result_center_of_mass.value)
+    assert pytest.approx(h2o.center_of_mass.prefactor) == pytest.approx(
+        check_result_center_of_mass.prefactor
+    )
+    assert h2o.center_of_mass.dimension == check_result_center_of_mass.dimension
     assert np.allclose(h2o.inertia_tensor.value, check_result_inertia_tensor.value)
-    assert h2o.inertia_tensor.unit == check_result_inertia_tensor.unit
+    assert pytest.approx(h2o.inertia_tensor.prefactor) == pytest.approx(
+        check_result_inertia_tensor.prefactor
+    )
+    assert h2o.inertia_tensor.dimension == check_result_inertia_tensor.dimension
 
 
 def test_structure_generate_no_kwargs():
     try:
-        materia.Structure.generate()
+        mtr.Structure.generate()
         assert False
     except ValueError:
         assert True
@@ -79,7 +72,7 @@ def test_structure_generate_no_kwargs():
 
 def test_structure_retrieve_no_kwargs():
     try:
-        materia.Structure.retrieve()
+        mtr.Structure.retrieve()
         assert False
     except ValueError:
         assert True
@@ -109,18 +102,18 @@ def test_structure_retrieve_smiles():
     with mock.patch("pubchempy.get_cids", mock_pcp_get_cids):
         with mock.patch("pubchempy.Compound.from_cid", mock_pcp_from_cid):
             with mock.patch("pubchempy.get_properties", mock_pcp_get_properties):
-                structure = materia.Structure.retrieve(smiles="C")
+                structure = mtr.Structure.retrieve(smiles="C")
 
     assert np.allclose(
         structure.atomic_positions.value,
         np.array([[0, 1, 0, 0, 0], [0, 0, 1, 0, 1], [0, 0, 0, 1, 1]]),
     )
-    assert structure.atomic_positions.unit == materia.angstrom
+    assert structure.atomic_positions.unit == mtr.angstrom
     assert structure.atomic_symbols == ("C", "H", "H", "H", "H")
 
 
 def test_structure_generate_smiles():
-    structure = materia.Structure.generate(smiles="C")
+    structure = mtr.Structure.generate(smiles="C")
 
     assert np.allclose(
         structure.atomic_positions.value,
@@ -132,5 +125,5 @@ def test_structure_generate_smiles():
             ]
         ),
     )
-    assert structure.atomic_positions.unit == materia.angstrom
+    assert structure.atomic_positions.unit == mtr.angstrom
     assert structure.atomic_symbols == ("C", "H", "H", "H", "H")

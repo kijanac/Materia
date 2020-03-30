@@ -1,16 +1,13 @@
+import materia as mtr
 import numpy as np
-
-from materia.utils import SPDSpectrum, ASTMG173
-
-import materia
 
 
 def test_spd_spectrum_extrapolate_linear():
-    x = materia.Qty(value=np.linspace(1, 10, 10), unit=materia.nanometer)
+    x = np.linspace(1, 10, 10) * mtr.nanometer
     y = 2 * x
-    line = SPDSpectrum(x=x, y=y)
+    line = mtr.SPDSpectrum(x=x, y=y)
 
-    x_extrap_to = materia.Qty(value=np.linspace(0, 15, 16), unit=materia.nanometer)
+    x_extrap_to = np.linspace(0, 15, 16) * mtr.nanometer
 
     line.extrapolate(x_extrap_to=x_extrap_to)
 
@@ -19,11 +16,11 @@ def test_spd_spectrum_extrapolate_linear():
 
 
 def test_spd_spectrum_interpolate_cubic_spline_linear():
-    x = materia.Qty(value=np.linspace(1, 10, 10), unit=materia.nanometer)
+    x = np.linspace(1, 10, 10) * mtr.nanometer
     y = 2 * x
-    line = SPDSpectrum(x=x, y=y)
+    line = mtr.SPDSpectrum(x=x, y=y)
 
-    x_interp_to = materia.Qty(value=np.linspace(1, 10, 19), unit=materia.nanometer)
+    x_interp_to = np.linspace(1, 10, 19) * mtr.nanometer
     line.interpolate(x_interp_to=x_interp_to, method="cubic_spline")
 
     assert line.x == x_interp_to
@@ -31,11 +28,11 @@ def test_spd_spectrum_interpolate_cubic_spline_linear():
 
 
 def test_spd_spectrum_interpolate_linear_spline_linear():
-    x = materia.Qty(value=np.linspace(1, 10, 10), unit=materia.nanometer)
+    x = np.linspace(1, 10, 10) * mtr.nanometer
     y = 2 * x
-    line = SPDSpectrum(x=x, y=y)
+    line = mtr.SPDSpectrum(x=x, y=y)
 
-    x_interp_to = materia.Qty(value=np.linspace(1, 10, 19), unit=materia.nanometer)
+    x_interp_to = np.linspace(1, 10, 19) * mtr.nanometer
     line.interpolate(x_interp_to=x_interp_to, method="linear_spline")
 
     assert line.x == x_interp_to
@@ -43,13 +40,13 @@ def test_spd_spectrum_interpolate_linear_spline_linear():
 
 
 # def test_spd_spectrum_interpolate_sprague_linear():
-#     materia.nanometer = units.Unit('materia.nanometer')
+#     mtr.nanometer = units.Unit('mtr.nanometer')
 #
-#     x = materia.Qty(value=np.linspace(1,10,10),unit=materia.nanometer)
+#     x = np.linspace(1,10,10)*mtr.nanometer
 #     y = 2*x
-#     line = SPDSpectrum(x=x,y=y)
+#     line = mtr.SPDSpectrum(x=x,y=y)
 #
-#     x_interp_to = materia.Qty(value=np.linspace(1,10,19),unit=materia.nanometer)
+#     x_interp_to = np.linspace(1,10,19)*mtr.nanometer
 #     line.interpolate(x_interp_to=x_interp_to,method='sprague')
 #
 #     assert line.x == x_interp_to
@@ -57,17 +54,17 @@ def test_spd_spectrum_interpolate_linear_spline_linear():
 
 
 def test_spd_spectrum_extrapolate_quadratic():
-    x = materia.Qty(value=np.linspace(1, 10, 10), unit=materia.nanometer)
+    x = np.linspace(1, 10, 10) * mtr.nanometer
     y = x ** 2
-    line = SPDSpectrum(x=x, y=y)
+    line = mtr.SPDSpectrum(x=x, y=y)
 
-    x_extrap_to = materia.Qty(value=np.linspace(0, 15, 16), unit=materia.nanometer)
+    x_extrap_to = np.linspace(0, 15, 16) * mtr.nanometer
 
     line.extrapolate(x_extrap_to=x_extrap_to)
 
     check_result_x = x_extrap_to
-    check_result_y = materia.Qty(
-        value=np.array(
+    check_result_y = (
+        np.array(
             [
                 -2.0,
                 1.0,
@@ -86,8 +83,8 @@ def test_spd_spectrum_extrapolate_quadratic():
                 176.0,
                 195.0,
             ]
-        ),
-        unit=materia.nanometer ** 2,
+        )
+        * mtr.nanometer ** 2
     )
 
     assert line.x == check_result_x
@@ -95,11 +92,11 @@ def test_spd_spectrum_extrapolate_quadratic():
 
 
 def test_spd_spectrum_interpolate_cubic_spline_quadratic():
-    x = materia.Qty(value=np.linspace(1, 10, 10), unit=materia.nanometer)
+    x = np.linspace(1, 10, 10) * mtr.nanometer
     y = x ** 2
-    line = SPDSpectrum(x=x, y=y)
+    line = mtr.SPDSpectrum(x=x, y=y)
 
-    x_interp_to = materia.Qty(value=np.linspace(1, 10, 19), unit=materia.nanometer)
+    x_interp_to = np.linspace(1, 10, 19) * mtr.nanometer
     line.interpolate(x_interp_to=x_interp_to, method="cubic_spline")
 
     assert line.x == x_interp_to
@@ -107,16 +104,16 @@ def test_spd_spectrum_interpolate_cubic_spline_quadratic():
 
 
 def test_spd_spectrum_interpolate_linear_spline_quadratic():
-    x = materia.Qty(value=np.linspace(1, 10, 10), unit=materia.nanometer)
+    x = np.linspace(1, 10, 10) * mtr.nanometer
     y = x ** 2
-    line = SPDSpectrum(x=x, y=y)
+    line = mtr.SPDSpectrum(x=x, y=y)
 
-    x_interp_to = materia.Qty(value=np.linspace(1, 10, 19), unit=materia.nanometer)
+    x_interp_to = np.linspace(1, 10, 19) * mtr.nanometer
     line.interpolate(x_interp_to=x_interp_to, method="linear_spline")
 
     check_result_x = x_interp_to
-    check_result_y = materia.Qty(
-        value=np.array(
+    check_result_y = (
+        np.array(
             [
                 1.0,
                 2.5,
@@ -138,8 +135,8 @@ def test_spd_spectrum_interpolate_linear_spline_quadratic():
                 90.5,
                 100.0,
             ]
-        ),
-        unit=materia.nanometer ** 2,
+        )
+        * mtr.nanometer ** 2
     )
 
     assert line.x == check_result_x
