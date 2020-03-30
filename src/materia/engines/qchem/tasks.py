@@ -7,7 +7,7 @@ import os
 import materia as mtr
 import subprocess
 
-from ...workflow.tasks.task import Task
+from ...workflow.tasks import Task, ExternalTask
 
 __all__ = [
     #    "ComputeKoopmanError",
@@ -29,20 +29,8 @@ __all__ = [
 ]
 
 
-class QChemBaseTask(Task):
-    def __init__(
-        self,
-        engine: mtr.QChemEngine,
-        io: mtr.IOParams,
-        handlers: Optional[Iterable[mtr.Handler]] = None,
-        name: Optional[str] = None,
-    ) -> None:
-        super().__init__(handlers=handlers, name=name)
-        self.engine = engine
-        # self.log_name = log_name
-        self.io = io
-
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+class QChemBaseTask(ExternalTask):
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         raise NotImplementedError
 
     def parse(self, output: str) -> Any:
@@ -61,13 +49,13 @@ class QChemBaseTask(Task):
             if isinstance(structure, mtr.Structure)
             or isinstance(structure, mtr.QChemStructure)
             else mtr.QChemFragments(structures=structure),
-            settings=self.set_defaults(s),
+            settings=self.defaults(s),
         )
 
         with self.io() as io:
             inp.write(io.inp)
 
-            self.engine.execute(io.inp, io.out)
+            self.engine.execute(self.io)
 
             return self.parse(io.out)
 
@@ -125,7 +113,7 @@ class QChemAIMD(QChemBaseTask):
         with open(output, "r") as f:
             return "".join(f.readlines())
 
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
@@ -156,7 +144,7 @@ class QChemLRTDDFT(QChemBaseTask):
         # FIXME: implement using cclib
         raise NotImplementedError
 
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
@@ -178,18 +166,17 @@ class QChemOptimize(QChemBaseTask):
         try:
             parsed = cclib.io.ccread(output)
             # FIXME: is this the correct unit?
-            coords = mtr.Qty(value=parsed.atomcoords, unit=mtr.angstrom)[-1, :, :]
+            coords = parsed.atomcoords[-1, :, :] * mtr.angstrom
             zs = parsed.atomnos
         except AttributeError:
             return None
         # FIXME: is this the correct unit?
         atoms = (
-            mtr.Atom(element=Z, position=mtr.Qty(value=p, unit=mtr.angstrom))
-            for Z, p in zip(zs, coords)
+            mtr.Atom(element=Z, position=p * mtr.angstrom) for Z, p in zip(zs, coords)
         )
-        return mtr.Structure(atoms=atoms)
+        return mtr.Structure(*atoms)
 
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
@@ -203,15 +190,15 @@ class QChemOptimize(QChemBaseTask):
 class QChemPolarizability(QChemBaseTask):
     def parse(self, output: str) -> Any:
         try:
-            polarizability = mtr.Qty(
-                value=cclib.io.ccread(output).polarizabilities, unit=mtr.au_volume,
+            polarizability = (
+                cclib.io.ccread(output).polarizabilities[-1] * mtr.au_volume
             )
         except AttributeError:
             polarizability = None
 
         return polarizability
 
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
@@ -302,13 +289,13 @@ class QChemPolarizability(QChemBaseTask):
 class QChemSinglePoint(QChemBaseTask):
     def parse(self, output: str) -> Any:
         try:
-            energy = mtr.Qty(cclib.io.ccread(output).scfenergies, mtr.eV)
+            energy = cclib.io.ccread(output).scfenergies * mtr.eV
         except AttributeError:
             energy = None
 
         return energy
 
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
@@ -323,7 +310,7 @@ class QChemSinglePointFrontier(QChemBaseTask):
     def parse(self, output: str) -> Any:
         try:
             out = cclib.io.ccread(output)
-            energy = mtr.Qty(out.scfenergies, mtr.eV)
+            energy = out.scfenergies * mtr.eV
             moenergies = out.moenergies
             homo_indices = out.homos
 
@@ -337,8 +324,8 @@ class QChemSinglePointFrontier(QChemBaseTask):
             # alpha_occ, beta_occ, alpha_unocc, beta_unocc = mtr.QChemOutput(output).get(
             #     "orbital_energies"
             # )
-            homo = mtr.Qty(max(homos), mtr.eV)
-            lumo = mtr.Qty(min(lumos), mtr.eV)
+            homo = max(homos) * mtr.eV
+            lumo = min(lumos) * mtr.eV
         except AttributeError:
             energy = None
             homo = None
@@ -346,7 +333,7 @@ class QChemSinglePointFrontier(QChemBaseTask):
 
         return energy, homo, lumo
 
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
@@ -360,14 +347,14 @@ class QChemSinglePointFrontier(QChemBaseTask):
 class WriteQChemInput(Task):
     def __init__(
         self,
-        io: mtr.IOParams,
+        io: mtr.IO,
         handlers: Optional[Iterable[mtr.Handler]] = None,
         name: str = None,
     ) -> None:
         super().__init__(handlers=handlers, name=name)
         self.io = io
 
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         return settings
 
     def run(
@@ -382,7 +369,7 @@ class WriteQChemInput(Task):
             if isinstance(structure, mtr.Structure)
             or isinstance(structure, mtr.QChemStructure)
             else mtr.QChemFragments(structures=structure),
-            settings=self.set_defaults(s),
+            settings=self.defaults(s),
         )
 
         with self.io() as io:
@@ -390,7 +377,7 @@ class WriteQChemInput(Task):
 
 
 class WriteQChemInputGeometryRelaxation(WriteQChemInput):
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
@@ -402,7 +389,7 @@ class WriteQChemInputGeometryRelaxation(WriteQChemInput):
 
 
 class WriteQChemInputLRTDDFT(WriteQChemInput):
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
@@ -420,7 +407,7 @@ class WriteQChemInputLRTDDFT(WriteQChemInput):
 
 
 class WriteQChemInputPolarizability(WriteQChemInput):
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
@@ -432,7 +419,7 @@ class WriteQChemInputPolarizability(WriteQChemInput):
 
 
 class WriteQChemInputSinglePoint(WriteQChemInput):
-    def set_defaults(self, settings: mtr.Settings) -> mtr.Settings:
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:

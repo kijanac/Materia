@@ -108,8 +108,8 @@ class QChemOutput:
             year,
         ) = pattern.search(lines).groups()
 
-        walltime = materia.Qty(value=float(walltime), unit=materia.second)
-        cputime = materia.Qty(value=float(cputime), unit=materia.second)
+        walltime = float(walltime) * materia.second
+        cputime = float(cputime) * materia.second
         date = tuple(
             int(year), month, int(date), int(hour), int(minutes), int(seconds), day
         )
@@ -130,9 +130,9 @@ class QChemOutput:
         else:
             raise ValueError("Cannot parse energy unit.")
 
-        homo = materia.Qty(value=float(homo), unit=unit)
-        lumo = materia.Qty(value=float(lumo), unit=unit)
-        gap = materia.Qty(value=float(gap), unit=unit)
+        homo = float(homo) * unit
+        lumo = float(lumo) * unit
+        gap = float(gap) * unit
 
         return {"homo": homo, "lumo": lumo, "gap": gap}
 
@@ -149,9 +149,8 @@ class QChemOutput:
         if unit_str.lower() == "a.u.":
             unit = materia.au_volume
 
-        polarizability_tensor = materia.Qty(
-            value=np.array(tuple(float(tc) for tc in tensor_components)).reshape(3, 3),
-            unit=unit,
+        polarizability_tensor = (
+            np.array(tuple(float(tc) for tc in tensor_components)).reshape(3, 3) * unit
         )
 
         return materia.Polarizability(polarizability_tensor=polarizability_tensor)
@@ -211,22 +210,20 @@ class QChemOutput:
 
         return {
             "iterations": iterations,
-            "T": materia.Qty(value=np.array(Ts), unit=materia.fs),
-            "dt": materia.Qty(value=np.array(dts), unit=materia.fs),
-            "hours_per_picosecond": materia.Qty(
-                value=np.array(hours_per_ps), unit=materia.hour / materia.picosecond
-            ),
-            "lapsed": materia.Qty(value=np.array(lapsed), unit=materia.minute),
-            "remaining": materia.Qty(value=np.array(remaining), unit=materia.minute),
+            "T": np.array(Ts) * materia.fs,
+            "dt": np.array(dts) * materia.fs,
+            "hours_per_picosecond": np.array(hours_per_ps) * materia.hr / materia.ps,
+            "lapsed": np.array(lapsed) * materia.minute,
+            "remaining": np.array(remaining) * materia.minute,
             "trace_deviations": trace_deviations,
             "hrm": hrms,
-            "energies": materia.Qty(value=np.array(energies), unit=materia.hartree),
+            "energies": np.array(energies) * materia.hartree,
             "entr": entrs,
             "field": field,
             "number_fock": number_fock,
-            "mu_x": materia.Qty(value=np.array(mu_xs), unit=materia.au_dipole_moment),
-            "mu_y": materia.Qty(value=np.array(mu_ys), unit=materia.au_dipole_moment),
-            "mu_z": materia.Qty(value=np.array(mu_zs), unit=materia.au_dipole_moment),
+            "mu_x": np.array(mu_xs) * materia.au_dipole_moment,
+            "mu_y": np.array(mu_ys) * materia.au_dipole_moment,
+            "mu_z": np.array(mu_zs) * materia.au_dipole_moment,
         }
 
     def electronic_excitations(
@@ -274,13 +271,11 @@ class QChemOutput:
 
         if excitation_energy_unit_str.lower() == "ev":
             excitation_energy_unit = materia.eV
-        excitation_energy = materia.Qty(
-            value=float(excitation_energy), unit=excitation_energy_unit
-        )
+        excitation_energy = float(excitation_energy) * excitation_energy_unit
 
         if total_energy_unit_str.lower() == "au":
             total_energy_unit = materia.au_energy
-        total_energy = materia.Qty(value=float(total_energy), unit=total_energy_unit)
+        total_energy = float(total_energy) * total_energy_unit
 
         if multiplicity.lower() == "singlet":
             mult = 1
@@ -332,13 +327,13 @@ class QChemOutput:
         ).groups()
 
         alpha_orbital_occupied_energies = tuple(
-            materia.Qty(value=float(x), unit=energy_unit)
+            float(x) * energy_unit
             for split in energy_symmetry_pattern.findall(alpha_orbitals_occupied)
             for x in energy_pattern.findall(split)
             if split != ""
         )
         alpha_orbital_virtual_energies = tuple(
-            materia.Qty(value=float(x), unit=energy_unit)
+            float(x) * energy_unit
             for split in energy_symmetry_pattern.findall(alpha_orbitals_virtual)
             for x in energy_pattern.findall(split)
             if split != ""
@@ -356,13 +351,13 @@ class QChemOutput:
         ).groups()
 
         beta_orbital_occupied_energies = tuple(
-            materia.Qty(value=float(x), unit=energy_unit)
+            float(x) * energy_unit
             for split in energy_symmetry_pattern.findall(beta_orbitals_occupied)
             for x in energy_pattern.findall(split)
             if split != ""
         )
         beta_orbital_virtual_energies = tuple(
-            materia.Qty(value=float(x), unit=energy_unit)
+            float(x) * energy_unit
             for split in energy_symmetry_pattern.findall(beta_orbitals_virtual)
             for x in energy_pattern.findall(split)
             if split != ""
@@ -381,14 +376,14 @@ class QChemOutput:
         # FIXME: this doesn't seem like a great way to handle multiple groups... better fix?
         *_, energy_str = re.search(s, lines).groups()
 
-        return materia.Qty(value=float(energy_str), unit=materia.hartree)
+        return float(energy_str) * materia.hartree
 
     def total_energy(self, lines: str) -> materia.Qty:
         s = r"\s*Total\s*energy\s*in\s*the\s*final\s*basis\s*set\s*=\s*(-?\d*\.\d*)\s*"
         # FIXME: this doesn't seem like a great way to handle multiple groups... better fix?
         *_, energy_str = re.search(s, lines).groups()
 
-        return materia.Qty(value=float(energy_str), unit=materia.hartree)
+        return float(energy_str) * materia.hartree
 
 
 # class Section:

@@ -1,44 +1,34 @@
 from __future__ import annotations
+from typing import Iterable, Optional, Tuple, Union
+
 import contextlib
 import numpy as np
-import os
 import materia
-import subprocess
-from typing import Iterable, Optional, Tuple, Union
-from ...workflow.tasks.task import Task
+
+from ...workflow.tasks import ExternalTask
 
 __all__ = ["PackmolSolvate"]
 
 
-class PackmolSolvate(Task):
+class PackmolSolvate(ExternalTask):
     def __init__(
         self,
         shells: int,
         tolerance: float,
         engine: materia.PackmolEngine,
+        io: materia.IO,
         number_density: Optional[materia.Qty] = None,
         mass_density: Optional[materia.Qty] = None,
-        input_name: str = "packmol.inp",
-        log_name: str = "packmol.log",
-        work_dir: str = ".",
-        keep_logs: bool = True,
         handlers: Optional[Iterable[materia.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
-        super().__init__(handlers=handlers, name=name)
+        super().__init__(engine=engine, io=io, handlers=handlers, name=name)
 
         self.shells = shells
         self.number_density = number_density
         self.mass_density = mass_density
 
         self.tolerance = tolerance
-
-        self.input_name = input_name
-        self.log_name = log_name
-        self.work_dir = work_dir
-        self.keep_logs = keep_logs
-
-        self.engine = engine
 
     def _packing_params(self, solvent: materia.Structure) -> Tuple[int, materia.Qty]:
         if self.number_density is None:
@@ -64,28 +54,27 @@ class PackmolSolvate(Task):
         solvent: Union[materia.Structure, str],
     ) -> materia.Structure:
         n, sphere_radius = self._packing_params(solvent=solvent)
-
-        with materia.work_dir(self.work_dir) as wd:
+        with self.io() as io:
             inp = materia.PackmolInput(
                 tolerance=self.tolerance,
                 filetype="xyz",
-                output_name=materia.expand(path="packed", dir=wd),
+                output_name=materia.expand(path="packed", dir=io.work_dir),
             )
 
             if isinstance(solute, str):
                 solute_cm = contextlib.nullcontext(solute)
             else:
-                solute_cm = solute.tempfile(suffix=".xyz", dir=wd)
+                solute_cm = solute.tempfile(suffix=".xyz", dir=io.work_dir)
 
             if isinstance(solvent, str):
                 solvent_cm = contextlib.nullcontext(solvent)
             else:
-                solvent_cm = solvent.tempfile(suffix=".xyz", dir=wd)
+                solvent_cm = solvent.tempfile(suffix=".xyz", dir=io.work_dir)
 
             with solute_cm as f, solvent_cm as g:
                 inp.add_structure(
                     structure_filepath=materia.expand(
-                        path=f.name if hasattr(f, "name") else f, dir=wd
+                        path=f.name if hasattr(f, "name") else f, dir=io.work_dir
                     ),
                     number=1,
                     instructions=["fixed 0. 0. 0. 0. 0. 0."],
@@ -93,7 +82,7 @@ class PackmolSolvate(Task):
 
                 inp.add_structure(
                     structure_filepath=materia.expand(
-                        path=g.name if hasattr(g, "name") else g, dir=wd
+                        path=g.name if hasattr(g, "name") else g, dir=io.work_dir
                     ),
                     number=n - 1,
                     instructions=[
@@ -101,13 +90,10 @@ class PackmolSolvate(Task):
                     ],
                 )
 
-                input_filepath = materia.expand(path=self.input_name, dir=wd)
+                inp.write(io.inp)
 
-                inp.write(input_filepath)
+                self.engine.execute(self.io)
 
-                self.engine.execute(
-                    input_filepath=input_filepath,
-                    log_filepath=materia.expand(path=self.log_name, dir=wd),
+                return materia.Structure.read(
+                    materia.expand(path="packed.xyz", dir=io.work_dir)
                 )
-
-                return materia.Structure.read(materia.expand(path="packed.xyz", dir=wd))
