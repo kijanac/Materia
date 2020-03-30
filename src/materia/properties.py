@@ -17,7 +17,7 @@ class Dipole:
     @property
     @memoize
     def norm(self) -> mtr.Quantity:
-        return np.linalg.norm(self.dipole_moment.value)*self.dipole_moment.unit
+        return np.linalg.norm(self.dipole_moment.value) * self.dipole_moment.unit
 
 
 class Excitation:
