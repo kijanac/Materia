@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Dict, IO, Optional, Tuple, Union
 
-# import collections
 import contextlib
 import itertools
 import numpy as np
@@ -73,9 +72,6 @@ class Structure:
         nx.set_node_attributes(
             G=g, values={i: {"Z": Z} for i, Z in enumerate(self.atomic_numbers)}
         )
-        # nx.set_edge_attributes(
-        #     G=g, values={e: {"dist": v} for e, v in zip(edges, com_distances)}
-        # )
 
         return g
 
@@ -333,22 +329,6 @@ class Structure:
             R @ self.centered_atomic_positions.value
         ) * self.centered_atomic_positions.unit
 
-    # @property
-    # @memoize
-    # def atomic_lines(self):
-    #     # FIXME: do we need to make sure that only linearly independent lines are returned?
-    #     lines = ((a1.position.value - a2.position.value).reshape(3,) for a1,a2 in itertools.combinations(self.atoms,r=2))
-    #
-    #     return set(tuple(line/np.linalg.norm(line)) for line in lines)
-    #
-    # @property
-    # @memoize
-    # def atomic_planes(self):
-    #     # FIXME: do we need to make sure that only linearly independent plane normals are returned?
-    #     plane_normals = (np.cross((a1.position.value-a2.position.value).reshape(3,),(a2.position.value-a3.position.value).reshape(3,)) for a1,a2,a3 in itertools.combinations(self.atoms,r=3))
-    #
-    #     return set(tuple(normal/np.linalg.norm(normal)) for normal in plane_normals)
-
     @property
     @memoize
     def principal_moments(self) -> mtr.Qty:
@@ -456,10 +436,6 @@ def _read_xyz(filepath: str, coordinate_unit: str = "angstrom") -> Structure:
     return Structure(*atoms)
 
 
-# def _write_sdf(structure, filepath):
-# import rdkit
-
-
 def _structure_from_pubchem_compound(compound: pcp.Compound) -> mtr.Structure:
     # FIXME: assumes the pubchem distance unit is angstrom - is this correct??
     atom_generator = (
@@ -538,118 +514,3 @@ def _structure_from_identifier(
     )
 
     return mtr.Structure(*atoms)
-
-
-# def sanitize(self):
-# 	"""
-# 	   This code belongs to James Davidson and is discussed here:
-#
-# 	   http://www.mail-archive.com/rdkit-discuss@lists.sourceforge.net/msg01185.html
-# 	   http://www.mail-archive.com/rdkit-discuss@lists.sourceforge.net/msg01162.html
-# 	   http://www.mail-archive.com/rdkit-discuss@lists.sourceforge.net/msg01900.html
-# 	"""
-# 	try:
-# 		self.mol.UpdatePropertyCache(False)
-# 		from_binary = rdkit.Chem.Mol(self.mol.ToBinary())
-# 		rdkit.Chem.SanitizeMol(from_binary)
-# 		self.mol = from_binary
-# 	except ValueError:
-# 		try:
-# 			self._AdjustAromaticNs()
-# 			rdkit.Chem.SanitizeMol(nm)
-# 			self.mol = nm
-# 		except ValueError:
-# 			raise ValueError('Cannot sanitize RDKit molecule.')
-#
-#
-#
-# def _AdjustAromaticNs(self, nitrogenPattern='[n&D2&H0;r5,r6]'):
-# 	"""
-#        default nitrogen pattern matches Ns in 5 rings and 6 rings in order to be able
-#        to fix: O=c1ccncc1
-# 	"""
-# 	rdkit.Chem.GetSymmSSSR(self.mol)
-# 	self.mol.UpdatePropertyCache(False)
-#
-#     # break non-ring bonds linking rings:
-# 	em = rdkit.Chem.EditableMol(self.mol)
-# 	linkers = self.mol.GetSubstructMatches(rdkit.Chem.MolFromSmarts('[r]!@[r]'))
-# 	plsFix = set()
-# 	for a,b in linkers:
-# 		em.RemoveBond(a,b)
-# 		plsFix.add(a)
-# 		plsFix.add(b)
-# 	nm = em.GetMol()
-# 	for at in plsFix:
-# 		at = nm.GetAtomWithIdx(at)
-# 		if at.GetIsAromatic() and at.GetAtomicNum() == 7:
-# 			at.SetNumExplicitHs(1)
-# 			at.SetNoImplicit(True)
-#
-#     # build molecules from the fragments:
-# 	frags = (self._FragIndicesToMol(oMol=nm,indices=x) for x in rdkit.Chem.GetMolFrags(nm))
-#
-#     # loop through the fragments in turn and try to aromatize them:
-# 	for i,frag in enumerate(frags):
-# 		frag_mol = rdkit.Chem.Mol(frag)
-# 		try:
-# 			rdkit.Chem.SanitizeMol(frag_mol)
-# 		except ValueError:
-# 			matches = tuple(x[0] for x in frag.GetSubstructMatches(rdkit.Chem.MolFromSmarts(nitrogenPattern)))
-# 			lres,indices = self._recursivelyModifyNs(mol=frag,matches=matches)
-# 			if not lres:
-# 				raise ValueError('Could not aromatize fragments.')
-# 			else:
-# 				revMap = {v: k for k,v in frag._idxMap.items()}
-# 				for idx in indices:
-# 					oatom = self.mol.GetAtomWithIdx(revMap[idx])
-# 					oatom.SetNoImplicit(True)
-# 					oatom.SetNumExplicitHs(1)
-#
-# def _FragIndicesToMol(self, oMol, indices):
-#     em = rdkit.Chem.EditableMol(rdkit.Chem.Mol())
-#
-#     newIndices = {}
-#     for i,idx in enumerate(indices):
-#         em.AddAtom(oMol.GetAtomWithIdx(idx))
-#         newIndices[idx] = i
-#
-#     for i,idx in enumerate(indices):
-#         at = oMol.GetAtomWithIdx(idx)
-#         for bond in at.GetBonds():
-#             if bond.GetBeginAtomIdx() == idx:
-#                 oidx = bond.GetEndAtomIdx()
-#             else:
-#                 oidx = bond.GetBeginAtomIdx()
-#             # make sure every bond only gets added once:
-#             if oidx < idx:
-#                 continue
-#             em.AddBond(newIndices[idx],newIndices[oidx],bond.GetBondType())
-#     res = em.GetMol()
-#     res.ClearComputedProps()
-#     rdkit.Chem.GetSymmSSSR(res)
-#     res.UpdatePropertyCache(False)
-#     res._idxMap = newIndices
-#
-#     return res
-#
-# def _recursivelyModifyNs(self, mol, matches, indices=None):
-#     if indices is None:
-#         indices = []
-#     res = None
-#     while len(matches) and res is None:
-#         tIndices = indices[:]
-#         nextIdx = matches.pop(0)
-#         tIndices.append(nextIdx)
-#         nm = rdkit.Chem.Mol(mol)
-#         nm.GetAtomWithIdx(nextIdx).SetNoImplicit(True)
-#         nm.GetAtomWithIdx(nextIdx).SetNumExplicitHs(1)
-#         cp = rdkit.Chem.Mol(nm)
-#         try:
-#             rdkit.Chem.SanitizeMol(cp)
-#         except ValueError:
-#             res,indices = self._recursivelyModifyNs(mol=nm,matches=matches,indices=tIndices)
-#         else:
-#             indices = tIndices
-#             res = cp
-#     return res, indices
