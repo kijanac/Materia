@@ -64,14 +64,49 @@ class Structure:
 
         return bonds
 
-    def to_graph(self) -> nx.Graph:
+    def to_graph(self, explicit_hydrogen: Optional[bool] = True) -> nx.Graph:
         g = nx.Graph()
 
-        g.add_edges_from([(i, j) for i, v in self.bonds.items() for j in v])
+        bonds = self.bonds
 
-        nx.set_node_attributes(
-            G=g, values={i: {"Z": Z} for i, Z in enumerate(self.atomic_numbers)}
-        )
+        if not explicit_hydrogen:
+            non_hydrogens = [i for i, Z in enumerate(self.atomic_numbers) if Z != 1]
+            g.add_nodes_from(non_hydrogens)
+
+            edges = [
+                (i, j)
+                for i, v in bonds.items()
+                for j in v
+                if (i in non_hydrogens and j in non_hydrogens)
+            ]
+            g.add_edges_from(edges)
+
+            hydrogens = [i for i, Z in enumerate(self.atomic_numbers) if Z == 1]
+
+            nx.set_node_attributes(
+                G=g,
+                values={
+                    i: {
+                        "Z": self.atomic_numbers[i],
+                        "position": self.atomic_positions[:,i],
+                        "num_H": sum(1 for x in bonds[i] if x in hydrogens),
+                    }
+                    for i in non_hydrogens
+                },
+            )
+
+            g = nx.relabel_nodes(
+                g, {k: v for k, v in zip(g.nodes, range(len(g.nodes)))}
+            )
+        else:
+            g.add_nodes_from(range(len(self.atomic_numbers)))
+
+            edges = [(i, j) for i, v in bonds.items() for j in v]
+            g.add_edges_from(edges)
+
+            nx.set_node_attributes(
+                G=g, values={i: {"Z": Z, "position": self.atomic_positions[:,i]} for i, Z in enumerate(self.atomic_numbers)}
+            )
 
         return g
 
