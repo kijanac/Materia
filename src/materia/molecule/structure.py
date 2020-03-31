@@ -88,7 +88,7 @@ class Structure:
                 values={
                     i: {
                         "Z": self.atomic_numbers[i],
-                        "position": self.atomic_positions[:,i],
+                        "position": self.atomic_positions[:, i],
                         "num_H": sum(1 for x in bonds[i] if x in hydrogens),
                     }
                     for i in non_hydrogens
@@ -105,7 +105,11 @@ class Structure:
             g.add_edges_from(edges)
 
             nx.set_node_attributes(
-                G=g, values={i: {"Z": Z, "position": self.atomic_positions[:,i]} for i, Z in enumerate(self.atomic_numbers)}
+                G=g,
+                values={
+                    i: {"Z": Z, "position": self.atomic_positions[:, i]}
+                    for i, Z in enumerate(self.atomic_numbers)
+                },
             )
 
         return g
