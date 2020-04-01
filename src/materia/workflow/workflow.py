@@ -35,11 +35,10 @@ class Workflow:
             results = {}
             # NOTE: lookup table to track which tasks have been completed
             done = {node: False for node in range(len(tasks))}
-            # NOTE: hold nodes corresponding to tasks waiting to be recognized as done by the producer
+            # NOTE: holds nodes corresponding to tasks waiting to be recognized as done by the producer
             done_queue = queue.Queue()
             # NOTE: holds nodes corresponding to tasks currently being held by a consumer
             tracker = []
-            quit_producer = False
 
             producer_kwargs = {
                 "tasks": tasks,
@@ -48,7 +47,6 @@ class Workflow:
                 "done": done,
                 "done_queue": done_queue,
                 "tracker": tracker,
-                "quit_producer": quit_producer,
             }
             producer = threading.Thread(target=_produce, kwargs=producer_kwargs)
 
@@ -58,7 +56,6 @@ class Workflow:
                 "task_queue": task_queue,
                 "results": results,
                 "done_queue": done_queue,
-                "quit_producer": quit_producer,
             }
             consumers = tuple(
                 threading.Thread(target=_consume, kwargs=consumer_kwargs, daemon=True)
@@ -71,22 +68,16 @@ class Workflow:
             tasks = m.list(self.tasks)
             links = m.dict(self.links)
 
-            task_queue = (
-                m.Queue()
-            )  # holds nodes corresponding to tasks waiting to be run by a process
-            results = (
-                m.dict()
-            )  # record task outputs for handler checking and passing to successor tasks
-            done = m.dict(
-                {node: False for node in range(len(tasks))}
-            )  # lookup table to track which tasks have been completed
-            done_queue = (
-                m.Queue()
-            )  # hold nodes corresponding to tasks waiting to be recognized as done by the producer
-            tracker = (
-                m.list()
-            )  # holds nodes corresponding to tasks currently being held by a consumer
-            quit_producer = mp.Value("i", 0)
+            # NOTE: holds nodes corresponding to tasks waiting to be run by a process
+            task_queue = m.Queue()
+            # NOTE: records task outputs for handler checking and passing to successor tasks
+            results = m.dict()
+            # NOTE: lookup table to track which tasks have been completed
+            done = m.dict({node: False for node in range(len(tasks))})
+            # NOTE: holds nodes corresponding to tasks waiting to be recognized as done by the producer
+            done_queue = m.Queue()
+            # NOTE: holds nodes corresponding to tasks currently being held by a consumer
+            tracker = m.list()
 
             producer_kwargs = {
                 "tasks": tasks,
@@ -95,7 +86,6 @@ class Workflow:
                 "done": done,
                 "done_queue": done_queue,
                 "tracker": tracker,
-                "quit_producer": quit_producer,
             }
             producer = mp.Process(target=_produce, kwargs=producer_kwargs)
 
@@ -106,7 +96,6 @@ class Workflow:
                 "task_queue": task_queue,
                 "results": results,
                 "done_queue": done_queue,
-                "quit_producer": quit_producer,
             }
             consumers = tuple(
                 mp.Process(target=_consume, kwargs=consumer_kwargs, daemon=True)
@@ -130,13 +119,15 @@ class Workflow:
         return dict(results)
 
 
-def _produce(tasks, links, task_queue, done, done_queue, tracker, quit_producer):
+def _produce(tasks, links, task_queue, done, done_queue, tracker) -> None:
     _queue_tasks(
         tasks=tasks, links=links, task_queue=task_queue, done=done, tracker=tracker
     )
-    while not (all(done.values()) or quit_producer):
+    while not all(done.values()):
         try:
             node, actions = done_queue.get(block=False)
+            if isinstance(node, Exception):
+                raise node
         except queue.Empty:
             continue
 
@@ -157,7 +148,7 @@ def _produce(tasks, links, task_queue, done, done_queue, tracker, quit_producer)
         )
 
 
-def _consume(tasks, links, task_queue, results, done_queue, quit_producer):
+def _consume(tasks, links, task_queue, results, done_queue) -> None:
     while True:
         try:
             try:
@@ -187,14 +178,13 @@ def _consume(tasks, links, task_queue, results, done_queue, quit_producer):
 
             done_queue.put((node, actions))
         except Exception as e:
-            quit_producer = 1
-            raise e
+            done_queue.put((e, None))
 
 
 # _PRODUCE HELPER FUNCTIONS
 
 
-def _queue_tasks(tasks, links, task_queue, done, tracker):
+def _queue_tasks(tasks, links, task_queue, done, tracker) -> None:
     dag = _build_dag(tasks=tasks, links=links)
     for node in dag.nodes:
         if _task_is_ready(node=node, done=done, dag=dag, tracker=tracker):
@@ -202,7 +192,7 @@ def _queue_tasks(tasks, links, task_queue, done, tracker):
             task_queue.put(node)
 
 
-def _build_dag(tasks, links):
+def _build_dag(tasks, links) -> nx.DiGraph:
     # convert tasks and links into a NetworkX directed graph
     dag = nx.DiGraph()
     dag.add_nodes_from(range(len(tasks)))
@@ -215,7 +205,7 @@ def _build_dag(tasks, links):
     return dag
 
 
-def _task_is_ready(node, done, dag, tracker):
+def _task_is_ready(node, done, dag, tracker) -> bool:
     return (
         (not done[node])
         and all(done[ancestor] for ancestor in nx.ancestors(dag, node))
