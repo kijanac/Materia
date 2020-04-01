@@ -4,7 +4,6 @@ from typing import Any, Callable, Iterable, Optional, Tuple, Union
 import collections
 import contextlib
 import copy
-import dlib
 import functools
 import itertools
 import math
@@ -14,19 +13,17 @@ import os
 import pathlib
 import tempfile
 import rdkit, rdkit.Chem, rdkit.Chem.AllChem
-import scipy.interpolate, scipy.linalg, scipy.optimize, scipy.spatial
+import scipy.interpolate, scipy.linalg, scipy.spatial
 
 
 __all__ = [
     "closest_trio",
     "expand",
     "extrapolate",
-    "GoldenSectionSearch",
     "interpolate",
     "IO",
     "lcm",
     "linearly_independent",
-    "MaxLIPOTR",
     "memoize",
     "mkdir_safe",
     "NestedDictionary",
@@ -492,122 +489,6 @@ def work_dir(dir: Optional[str] = None):
             yield wd
         finally:
             pass
-
-
-# -------------------------------------------------------------------- #
-
-
-class GoldenSectionSearch:
-    def __init__(self, objective_function):
-        self.objective_function = objective_function
-
-    @memoize
-    def evaluate_objective(self, x):
-        return self.objective_function(x)
-
-    def optimize(self, delta, tolerance):
-        bracket = self._find_gss_bracket(delta=delta)
-
-        return scipy.optimize.minimize_scalar(
-            fun=self.evaluate_objective, bracket=bracket, method="Golden", tol=tolerance
-        )
-
-    def _find_gss_bracket(self, delta):
-        # FIXME: ugly but it works...
-        phi = (1 + math.sqrt(5)) / 2
-
-        self.evaluate_objective(x=1e-3)
-        self.evaluate_objective(x=delta)
-
-        while self.evaluate_objective.cache.last_result(
-            n=1
-        ) <= self.evaluate_objective.cache.last_result(n=2):
-            _, last1 = self.evaluate_objective.cache.last_args(n=1)
-            _, last2 = self.evaluate_objective.cache.last_args(n=2)
-
-            self.evaluate_objective(x=last1["x"] + phi * (last1["x"] - last2["x"]))
-
-        if len(self.evaluate_objective.cache) > 2:
-            _, last3 = self.evaluate_objective.cache.last_args(n=3)
-            _, last1 = self.evaluate_objective.cache.last_args(n=1)
-            return (last3["x"], last1["x"])
-        else:
-            _, last2 = self.evaluate_objective.cache.last_args(n=2)
-            _, last1 = self.evaluate_objective.cache.last_args(n=1)
-            return (last2["x"], last1["x"])
-
-        return bracket
-
-    # def plot_results(self):
-    #     x, y = zip(*sorted(self.evaluate_objective.cache.items()))
-    #     plt.plot(x, y)
-    #     plt.show()
-
-
-T = Union[int, float]
-
-
-class MaxLIPOTR:
-    def __init__(self, objective_function: Callable[T, T]) -> None:
-        self.objective_function = objective_function
-
-    @memoize
-    def evaluate_objective(self, *args):
-        return self.objective_function(*args)
-
-    def optimize(
-        self, x_min: T, x_max: T, num_evals: int, epsilon: Optional[float] = 0
-    ) -> Tuple[T, Union[int, float]]:
-
-        return dlib.find_min_global(
-            self.evaluate_objective,
-            x_min if isinstance(x_min, list) else [x_min],
-            x_max if isinstance(x_max, list) else [x_max],
-            num_evals,
-            solver_epsilon=epsilon,
-        )
-
-    # def plot_results(self):
-    #     x, y = zip(*sorted(self.evaluate_objective.cache.items()))
-    #     plt.plot(x, y)
-    #     plt.show()
-
-
-# FIXME: remove this before pushing
-# def f(x):
-#     return 2*(x-0.74249)**2 + 3
-
-# def g(f):
-#     errors = {}
-#     eps = float('inf')
-#     m = mtr.MaxLIPOTRMinimizer(lambda x: errors[x])
-#     while len(errors) < 10:
-#         try:
-#             m.optimize(0,1,len(errors)+1)
-#         except KeyError as e:
-#             try_next = float(str(e))
-#             errors[try_next] = f(try_next)
-#     return errors
-
-# errors = g(f)
-# x = np.array(list(errors.keys()))
-# y = np.array(list(errors.values()))
-# x[np.argmin(y)].round(3)
-
-# class Net(torch.nn.Module):
-#     def __init__(self):
-#         super().__init__()
-#         self.conv1 = torch_geometric.nn.GCNConv(dataset.num_node_features,16)
-#         self.conv2 = torch_geometric.nn.GCNConv(16,dataset.num_classes)
-#     def forward(self, data):
-#         x, edge_index = data.x,data.edge_index
-#         x = self.conv1(x,edge_index)
-#         x = torch.nn.functional.relu(x)
-#         x = torch.nn.functional.dropout(x,training=self.training)
-#         x = self.conv2(x,edge_index)
-#         return torch.nn.functional.log_softmax(x,dim=1)
-
-# -------------------------------------------------------------- #
 
 
 class NestedDictionary(collections.abc.MutableMapping):
