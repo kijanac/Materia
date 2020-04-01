@@ -222,7 +222,9 @@ class Structure:
     def to_xyz(self) -> str:
         return f"{self.num_atoms}\n\n" + "\n".join(
             f"{atom} {x} {y} {z}"
-            for atom, (x, y, z) in zip(self.atomic_symbols, self.atomic_positions.T)
+            for atom, (x, y, z) in zip(
+                self.atomic_symbols, self.atomic_positions.T.value
+            )
         )
 
     def to_rdkit(self, charge: Optional[int] = 0) -> rdkit.Chem.rdchem.Mol:
