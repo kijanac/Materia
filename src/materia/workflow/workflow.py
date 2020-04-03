@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
-import copy
+# import copy
+import collections
+import json
 import multiprocessing as mp
 import networkx as nx
 import queue
@@ -9,22 +11,45 @@ import threading
 
 from .actions import ActionSignal
 
-__all__ = ["Workflow"]
+__all__ = ["Workflow", "WorkflowResults"]
+
+
+class WorkflowResults:
+    def __init__(self, tasks: Iterable[materia.Task], results: Dict[int, Any]) -> None:
+        self.tasks = tasks
+        self.results = results
+
+    def __str__(self) -> str:
+        results = {f"{str(self.tasks[k])} ({k})": v for k, v in self.results.items()}
+        return json.dumps(results, sort_keys=True, indent=2, default=str)
 
 
 class Workflow:
     def __init__(self, *tasks: materia.Task) -> None:
-        self.tasks = copy.deepcopy(tasks)
-        self.links = {}
+        self.tasks = tuple(set(self._discover_tasks(*tasks)))
+        self.links = collections.defaultdict(list)
+
         for i, t in enumerate(self.tasks):
-            reqs, named_reqs = t.requirements
-            self.links[i] = [(None, self.tasks.index(p)) for p in reqs] + [
-                (k, self.tasks.index(p)) for k, p in named_reqs.items()
-            ]
+            for r in t.requirements:
+                self.links[i].append((None, self.tasks.index(r)))
+            for k, r in t.named_requirements.items():
+                self.links[i].append((k, self.tasks.index(r)))
+
+    def _discover_tasks(self, *tasks: Iterable[materia.Task]) -> List[materia.Task]:
+        discovered = list(tasks)
+
+        for t in tasks:
+            requirements = list(t.requirements) + list(t.named_requirements.values())
+            discovered.extend(requirements + self._discover_tasks(*requirements))
+
+        return discovered
 
     def run(
-        self, num_consumers: Optional[int] = 1, thread: Optional[bool] = True
-    ) -> Dict[int, Any]:
+        self,
+        available_cores: int,
+        num_consumers: Optional[int] = 1,
+        thread: Optional[bool] = True,
+    ) -> WorkflowResults:
         if thread:
             tasks = list(self.tasks)
             links = self.links
@@ -39,6 +64,7 @@ class Workflow:
             done_queue = queue.Queue()
             # NOTE: holds nodes corresponding to tasks currently being held by a consumer
             tracker = []
+            available_cores = available_cores
 
             producer_kwargs = {
                 "tasks": tasks,
@@ -47,6 +73,7 @@ class Workflow:
                 "done": done,
                 "done_queue": done_queue,
                 "tracker": tracker,
+                "available_cores": available_cores,
             }
             producer = threading.Thread(target=_produce, kwargs=producer_kwargs)
 
@@ -78,6 +105,7 @@ class Workflow:
             done_queue = m.Queue()
             # NOTE: holds nodes corresponding to tasks currently being held by a consumer
             tracker = m.list()
+            available_cores = mp.Value("i", available_cores)
 
             producer_kwargs = {
                 "tasks": tasks,
@@ -86,6 +114,7 @@ class Workflow:
                 "done": done,
                 "done_queue": done_queue,
                 "tracker": tracker,
+                "available_cores": available_cores,
             }
             producer = mp.Process(target=_produce, kwargs=producer_kwargs)
 
@@ -116,12 +145,20 @@ class Workflow:
         for _ in range(num_consumers):
             task_queue.put(None)
 
-        return dict(results)
+        return WorkflowResults(tasks, dict(results))
 
 
-def _produce(tasks, links, task_queue, done, done_queue, tracker) -> None:
-    _queue_tasks(
-        tasks=tasks, links=links, task_queue=task_queue, done=done, tracker=tracker
+def _produce(
+    tasks: Union[List[Task], mp.managers.ListProxy[Task]],
+    links: Union[Dict[str, Task], mp.managers.DictProxy[str, Task]],
+    task_queue,
+    done,
+    done_queue,
+    tracker,
+    available_cores,
+) -> None:
+    available_cores = _queue_tasks(
+        tasks, links, task_queue, done, tracker, available_cores
     )
     while not all(done.values()):
         try:
@@ -143,12 +180,19 @@ def _produce(tasks, links, task_queue, done, done_queue, tracker) -> None:
             action.run(node=node, tasks=tasks, links=links, done=done)
 
         tracker.remove(node)
-        _queue_tasks(
-            tasks=tasks, links=links, task_queue=task_queue, done=done, tracker=tracker
+        available_cores += tasks[node].num_cores
+        available_cores = _queue_tasks(
+            tasks, links, task_queue, done, tracker, available_cores
         )
 
 
-def _consume(tasks, links, task_queue, results, done_queue) -> None:
+def _consume(
+    tasks: Union[List[Task], mp.managers.ListProxy[Task]],
+    links: Union[Dict[str, Task], mp.managers.DictProxy[str, Task]],
+    task_queue,
+    results,
+    done_queue,
+) -> None:
     while True:
         try:
             try:
@@ -184,15 +228,31 @@ def _consume(tasks, links, task_queue, results, done_queue) -> None:
 # _PRODUCE HELPER FUNCTIONS
 
 
-def _queue_tasks(tasks, links, task_queue, done, tracker) -> None:
-    dag = _build_dag(tasks=tasks, links=links)
+def _queue_tasks(
+    tasks: Union[List[Task], mp.managers.ListProxy[Task]],
+    links: Union[Dict[str, Task], mp.managers.DictProxy[str, Task]],
+    task_queue,
+    done,
+    tracker,
+    available_cores,
+) -> None:
+    dag = _build_dag(tasks, links)
     for node in dag.nodes:
-        if _task_is_ready(node=node, done=done, dag=dag, tracker=tracker):
+        if (
+            _task_is_ready(node, done, dag, tracker)
+            and available_cores >= tasks[node].num_cores
+        ):
+            available_cores -= tasks[node].num_cores
             tracker.append(node)
             task_queue.put(node)
 
+    return available_cores
 
-def _build_dag(tasks, links) -> nx.DiGraph:
+
+def _build_dag(
+    tasks: Union[List[Task], mp.managers.ListProxy[Task]],
+    links: Union[Dict[str, Task], mp.managers.DictProxy[str, Task]],
+) -> nx.DiGraph:
     # convert tasks and links into a NetworkX directed graph
     dag = nx.DiGraph()
     dag.add_nodes_from(range(len(tasks)))
@@ -205,7 +265,7 @@ def _build_dag(tasks, links) -> nx.DiGraph:
     return dag
 
 
-def _task_is_ready(node, done, dag, tracker) -> bool:
+def _task_is_ready(node, done, dag: nx.DiGraph, tracker) -> bool:
     return (
         (not done[node])
         and all(done[ancestor] for ancestor in nx.ancestors(dag, node))
