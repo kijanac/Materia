@@ -5,6 +5,7 @@ import dlib
 import functools
 import materia as mtr
 from materia.utils import memoize
+import re
 
 # import scipy.optimize
 import subprocess
@@ -22,18 +23,34 @@ __all__ = [
 class Task:
     def __init__(
         self,
+        num_cores: Optional[int] = 1,
         handlers: Optional[Iterable[mtr.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
+        self.num_cores = num_cores
         self.handlers = handlers or []
-        self.name = name or ""
-        self.requirements = ([], {})
+        self.name = (
+            name
+            or re.match("<class '(?P<cls>.*)'>", str(self.__class__))
+            .group("cls")
+            .rsplit(".")[-1]
+        )
+
+        self.requirements = []
+        self.named_requirements = {}
 
     def requires(self, *args: Task, **kwargs: Task) -> None:
-        self.requirements = (args, kwargs)
+        self.requirements += [a if isinstance(a, Task) else InputTask(a) for a in args]
+        self.named_requirements = dict(
+            **self.named_requirements,
+            **{k: v if isinstance(v, Task) else InputTask(v) for k, v in kwargs.items()}
+        )
 
     def run(self, **kwargs: Any) -> Any:
         raise NotImplementedError
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class ExternalTask(Task):
@@ -46,7 +63,7 @@ class ExternalTask(Task):
     ) -> None:
         self.engine = engine
         self.io = io
-        super().__init__(handlers=handlers, name=name)
+        super().__init__(self.engine.num_processors or 1, handlers=handlers, name=name)
 
 
 class FunctionTask(Task):
@@ -70,7 +87,7 @@ class InputTask(Task):
         handlers: Optional[Iterable[Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
-        super().__init__(handlers=handlers, name=name)
+        super().__init__(1, handlers=handlers, name=name)
         self.value = value
 
     def run(self) -> Any:
@@ -160,7 +177,7 @@ class MaxLIPOTR(Task):
         handlers: Optional[Iterable[mtr.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
-        super().__init__(handlers, name)
+        super().__init__(1, handlers, name)
         self.objective_function = objective_function
 
     @memoize
