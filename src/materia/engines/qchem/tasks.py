@@ -5,17 +5,19 @@ import cclib
 import copy
 import os
 import materia as mtr
+import numpy as np
 import subprocess
 
-from ...workflow.tasks import Task, ExternalTask
+from ...workflow.tasks import Task, ExternalTask, InputTask
+from ...workflow.workflow import Workflow
 
 __all__ = [
-    #    "ComputeKoopmanError",
     #    "ExecuteQChem",
     "QChemAIMD",
+    "QChemKoopmanError",
     "QChemLRTDDFT",
+    "QChemMinimizeKoopmanError",
     "QChemOptimize",
-    #   "QChemOptimizeRangeSeparationParameter",
     "QChemPolarizability",
     #    "QChemRTTDDFT",
     "QChemSinglePoint",
@@ -60,48 +62,6 @@ class QChemBaseTask(ExternalTask):
             return self.parse(io.out)
 
 
-# class QChemOptimizeRangeSeparationParameter(QChemBaseTask):
-#     def run(
-#         self,
-#         structure: Union[mtr.QChemStructure, mtr.QChemFragments, mtr.Structure],
-#         settings: Optional[mtr.Settings] = None,
-#     ) -> Any:
-#         for x in np.linspace(0,1,5):
-
-
-# evals = {}
-# np.polynomial.polynomial.Polynomial.fit(x2,y2,2).deriv().roots()
-# def f(x):
-#     if x in evals:
-#         return evals[x]
-#     else:
-#         s = copy.deepcopy(settings)
-#         s['rem','omega'] = s['rem','omega2'] = x
-#         input_structure = mtr.InputTask(value=structure)
-#         input_settings = mtr.InputTask(value=settings)
-#         sp = QChemSinglePoint(self.engine,self.io)
-#         sp.requires(structure=input_structure,settings=input_settings)
-#         raise mtr.ActionSignal(actions=mtr.InsertTasks(input_structure,input_settings,sp))
-#         mtr.QChemInput(settings=settings["input"]).write(
-#             filepath=settings["input_path"]
-#         )
-
-# f(0.5)
-
-# FIXME: get output and save result to self.function_evals
-# FIXME: maybe this shouldn't run the jobs but instead should be the successor to three jobs (gs, cation, anion - links = {0:[3],1:[3],2:[3],3:[]}) and should gather their results to compute and save the HOMO-LUMO / IP-EA error
-#        then a handler is attached to this job which adds three parent tasks with modified omega/omega2 if the error is insufficiently small?
-
-
-# class ComputeKoopmanError(Task):
-#     def run(self, omega, gs, cation_energy, anion_energy) -> None:
-#         # FIXME: if ea is negative, don't use it?
-#         gs_energy, homo, lumo = gs
-#         ip = cation_energy - gs_energy
-#         ea = gs_energy - anion_energy
-#         return (homo.convert(mtr.eV) + ip) ** 2 + (lumo.convert(mtr.eV) + ea) ** 2
-
-
 # class ExecuteQChem(QChemBaseTask):
 #     def run(self) -> Any:
 #         with self.io() as io:
@@ -139,6 +99,94 @@ class QChemAIMD(QChemBaseTask):
         return settings
 
 
+class QChemKoopmanError(Task):
+    def __init__(
+        self,
+        engine: mtr.Engine,
+        gs_io: mtr.IO,
+        cation_io: mtr.IO,
+        anion_io: mtr.IO,
+        handlers: Optional[Iterable[mtr.Handler]] = None,
+        name: Optional[str] = None,
+    ) -> None:
+        super().__init__(
+            (engine.num_threads or 1) * (engine.num_processors or 1),
+            handlers=handlers,
+            name=name,
+        )
+        self.engine = engine
+        self.gs_io = gs_io
+        self.cation_io = cation_io
+        self.anion_io = anion_io
+
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
+        if ("rem", "exchange") not in settings and ("rem", "method") not in settings:
+            settings["rem", "exchange"] = "hf"
+        if ("rem", "basis") not in settings:
+            settings["rem", "basis"] = "3-21G"
+        if ("rem", "jobtype") not in settings:
+            settings["rem", "jobtype"] = "sp"
+
+        return settings
+
+    def run(
+        self,
+        structure: Union[mtr.QChemStructure, mtr.QChemFragments, mtr.Structure],
+        settings: Optional[mtr.Settings] = None,
+        num_consumers: Optional[int] = 1,
+    ) -> float:
+        s = mtr.Settings() if settings is None else copy.deepcopy(settings)
+
+        # if ("structure", "charge") not in settings:
+        #     settings["structure", "charge"] = 0
+        #     # FIXME: rather than guessing 0, use rdkit.Chem.rdmolops.GetFormalCharge?
+        # if ("structure", "multiplicity") not in settings:
+        #     settings["structure", "multiplicity"] = 1
+
+        input_settings = InputTask(self.defaults(s))
+
+        gs = QChemSinglePointFrontier(self.engine, self.gs_io)
+        gs_structure = InputTask(
+            mtr.QChemStructure(structure, charge=0, multiplicity=1)
+        )
+        gs.requires(structure=gs_structure, settings=input_settings)
+
+        cation = QChemSinglePoint(self.engine, self.cation_io)
+        cation_structure = InputTask(
+            mtr.QChemStructure(structure, charge=1, multiplicity=2)
+        )
+        cation.requires(structure=cation_structure, settings=input_settings)
+
+        anion = QChemSinglePoint(self.engine, self.anion_io)
+        anion_structure = InputTask(
+            mtr.QChemStructure(structure, charge=-1, multiplicity=2)
+        )
+        anion.requires(structure=anion_structure, settings=input_settings)
+
+        wf = Workflow(
+            gs,
+            cation,
+            anion,
+            input_settings,
+            gs_structure,
+            cation_structure,
+            anion_structure,
+        )
+
+        out = wf.run(available_cores=self.num_cores, num_consumers=num_consumers)
+
+        energy, homo, lumo = out[0]
+        cation = out[1]
+        anion = out[2]
+
+        ea = energy - anion
+        ip = cation - energy
+
+        J_squared = (ea + lumo) ** 2 + (ip + homo) ** 2
+
+        return np.sqrt(J_squared.convert(mtr.eV ** 2).value.item())
+
+
 class QChemLRTDDFT(QChemBaseTask):
     def parse(self, output: str) -> Any:
         # FIXME: implement using cclib
@@ -159,6 +207,75 @@ class QChemLRTDDFT(QChemBaseTask):
             settings["rem", "rpa"] = False
 
         return settings
+
+
+class QChemMinimizeKoopmanError(Task):
+    def __init__(
+        self,
+        engine: mtr.Engine,
+        io: mtr.IO,
+        handlers: Optional[Iterable[mtr.Handler]] = None,
+        name: Optional[str] = None,
+    ) -> None:
+        super().__init__(
+            (engine.num_threads or 1) * (engine.num_processors or 1),
+            handlers=handlers,
+            name=name,
+        )
+        self.engine = engine
+        self.io = io
+
+    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
+        if ("rem", "basis") not in settings:
+            settings["rem", "basis"] = "3-21G"
+        if ("rem", "jobtype") not in settings:
+            settings["rem", "jobtype"] = "sp"
+        if ("rem", "exchange") not in settings:
+            settings["rem", "exchange"] = "gen"
+        if ("rem", "lrc_dft") not in settings:
+            settings["rem", "lrc_dft"] = True
+        if ("rem", "src_dft") not in settings:
+            settings["rem", "src_dft"] = 2
+
+        return settings
+
+    def run(
+        self,
+        structure: Union[mtr.QChemStructure, mtr.QChemFragments, mtr.Structure],
+        settings: Optional[mtr.Settings] = None,
+        epsilon: Optional[Union[int, float]] = 1.0,
+        alpha: Optional[float] = 0.2,
+        num_evals: Optional[int] = 5,
+    ) -> float:
+        beta = 1 / epsilon - alpha
+
+        s = self.defaults(settings)
+        s["rem", "hf_sr"] = int(round(1000 * alpha))
+        s["rem", "hf_lr"] = int(round(1000 * (alpha + beta)))
+        s["xc_functional"] = (
+            ("X", "HF", alpha),
+            ("X", "wPBE", beta),
+            ("X", "PBE", 1 - alpha - beta),
+            ("C", "PBE", 1.0),
+        )
+
+        with self.io() as io:
+
+            def f(omega):
+                omega = int(round(1000 * omega))
+                s["rem", "omega"] = s["rem", "omega2"] = omega
+
+                wd = mtr.expand(f"{io.work_dir}/{omega}")
+
+                gs_io = mtr.IO("gs.in", "gs.out", wd)
+                cation_io = mtr.IO("cation.in", "cation.out", wd)
+                anion_io = mtr.IO("anion.in", "anion.out", wd)
+
+                ke = mtr.QChemKoopmanError(self.engine, gs_io, cation_io, anion_io)
+                # FIXME: not sure the best way to handle num_consumers here...
+                return ke.run(structure, s, num_consumers=3)
+
+            return mtr.MaxLIPOTR(f).run(x_min=1e-3, x_max=1, num_evals=num_evals)
 
 
 class QChemOptimize(QChemBaseTask):
@@ -321,9 +438,7 @@ class QChemSinglePointFrontier(QChemBaseTask):
                 homo, lumo = moe[h : h + 2]
                 homos.append(homo)
                 lumos.append(lumo)
-            # alpha_occ, beta_occ, alpha_unocc, beta_unocc = mtr.QChemOutput(output).get(
-            #     "orbital_energies"
-            # )
+
             homo = max(homos) * mtr.eV
             lumo = min(lumos) * mtr.eV
         except AttributeError:
@@ -334,7 +449,7 @@ class QChemSinglePointFrontier(QChemBaseTask):
         return energy, homo, lumo
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+        if ("rem", "exchange") not in settings and ("rem", "method") not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
             settings["rem", "basis"] = "3-21G"
