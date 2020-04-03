@@ -201,6 +201,8 @@ class QChem(Engine):
                     .strip(),
                 ).group(1)
             )
+        else:
+            d = {}
 
         if self.scratch_dir is not None:
             d["QCSCRATCH"] = mtr.expand(self.scratch_dir)
