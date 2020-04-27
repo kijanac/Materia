@@ -35,21 +35,25 @@ class Engine:
         self.arguments = arguments or []
 
     def env(self) -> Dict[str, str]:
-        return {}
+        return None
 
     def command(self, inp: str, out: str, work_dir: str) -> str:
         arg_str = " ".join(self.arguments)
         # FIXME: shlex.quote should be used but it doesn't work...
         return shlex.split(f"{self.executable} {arg_str}")
 
-    def execute(self, io_params: materia.IO) -> str:
-        with io_params() as io:
-            cmd = self.command(io.inp, io.out, io.work_dir)
-            with open(io.inp, "r") as inp:
-                with open(io.out, "w") as out:
-                    subprocess.call(cmd, stdin=inp, stdout=out, env=self.env())
+    def execute(self, io: materia.IO) -> str:
+        with io() as _io:
+            cmd = self.command(_io.inp, _io.out, _io.work_dir)
+            with open(_io.inp, "r") as inp:
+                with open(_io.out, "w") as out:
+                    env = self.env()
+                    if env is None:
+                        subprocess.call(cmd, stdin=inp, stdout=out)
+                    else:
+                        subprocess.call(cmd, stdin=inp, stdout=out, env=self.env())
 
-            with open(io.out, "r") as f:
+            with open(_io.out, "r") as f:
                 return "".join(f.readlines())
 
 
@@ -81,13 +85,24 @@ class FragIt(Engine):
         executable: Optional[str] = "fragit",
         arguments: Optional[Iterable[str]] = None,
     ) -> None:
-
         super().__init__(executable=executable, arguments=arguments)
 
     def command(self, inp: str, out: str, work_dir: str) -> str:
         arg_str = " ".join(self.arguments)
         # FIXME: shlex.quote should be used but it doesn't work...
         return shlex.split(f"{self.executable} {inp} {arg_str}")
+
+    def execute(self, io_params: materia.IO) -> str:
+        with io_params() as io:
+            cmd = self.command(io.inp, io.out, io.work_dir)
+            with open(io.inp, "r") as inp:
+                with open(io.out, "w") as out:
+                    subprocess.call(
+                        cmd, stdin=inp, stdout=out, env=self.env(), cwd=io.work_dir
+                    )
+
+            with open(io.out, "r") as f:
+                return "".join(f.readlines())
 
 
 class GPAW(Engine):
@@ -188,6 +203,9 @@ class QChem(Engine):
         )
 
     def env(self) -> Dict[str, str]:
+        if self.scratch_dir is None and self.qcenv is None:
+            return None
+            
         if self.qcenv is not None:
             # FIXME: shell=True needs to be avoided!!
             d = ast.literal_eval(
