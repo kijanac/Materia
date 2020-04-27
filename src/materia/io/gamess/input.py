@@ -1,6 +1,7 @@
 from __future__ import annotations
-import materia
 from typing import Any, Dict, Iterable, Optional, Tuple, Union
+
+import materia
 
 __all__ = [
     "GAMESSBasis",
@@ -51,7 +52,7 @@ class GAMESSContrl:
     def __init__(
         self,
         runtyp: Optional[str] = None,
-        units: Optional[Union[str, materia.Unit]] = None,
+        units: Optional[Union[str, materia.Qty]] = None,
         coord: Optional[str] = None,
         icut: Optional[int] = None,
         local: Optional[str] = None,
@@ -63,7 +64,7 @@ class GAMESSContrl:
         self.local = local
 
     def _process(self, k: str, v: Any) -> Tuple[str, Any]:
-        if k == "units" and isinstance(v, materia.Unit):
+        if k == "units" and isinstance(v, materia.Qty):
             if v == materia.angstrom:
                 return k, "angs"
             elif v == materia.bohr:
