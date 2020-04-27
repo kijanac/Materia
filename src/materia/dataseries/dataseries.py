@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import Any, Dict, Iterable, Optional, Tuple, Union
+
 import copy
 import materia as mtr
 import numpy as np
@@ -8,7 +11,7 @@ import warnings
 
 
 class DataSeries:
-    def __init__(self, x, y):
+    def __init__(self, x: mtr.Qty, y: mtr.Qty) -> None:
         self.x = x
         self.y = y
 
@@ -18,7 +21,7 @@ class DataSeries:
 
 
 class DeltaSeries:
-    def __init__(self, x, y):
+    def __init__(self, x: mtr.Qty, y: mtr.Qty) -> None:
         self.x = x
         self.y = y / x.unit
 
@@ -42,7 +45,7 @@ class DeltaSeries:
 
 class TimeSeries(DataSeries):
     @property
-    def dt(self):
+    def dt(self) -> mtr.Qty:
         # FIXME: should we even check for uniform spacing since this method,
         # like most/all methods, is susceptible to floating point errors?
         spacings = np.diff(self.x.value)
@@ -55,10 +58,10 @@ class TimeSeries(DataSeries):
             return dt * self.x.unit
 
     @property
-    def T(self):
+    def T(self) -> mtr.Qty:
         return self.x[-1] - self.x[0]  # * self.x.unit
 
-    def damp(self):  # , final_damp_value):
+    def damp(self) -> None:  # , final_damp_value):
         final_damp_value = 1e-4  # Qty(value=1e-4,unit=self.x.unit)
         etasq = -np.log(final_damp_value) / self.T ** 2
 
