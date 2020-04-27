@@ -7,8 +7,8 @@ import re
 import materia
 
 #
-from materia.workflow import Handler
-from materia.workflow import (
+from materia.handler import Handler
+from materia.actions import (
     QChemModifyRSHParameter,
     QChemIncreaseResponseIterations,
     QChemIncreaseSCFIterations,

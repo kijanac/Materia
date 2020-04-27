@@ -1,6 +1,7 @@
 from __future__ import annotations
-import materia
 from typing import Dict, Iterable, Optional, Tuple, Union
+
+import materia
 
 __all__ = ["QChemFragments", "QChemInput", "QChemStructure"]
 

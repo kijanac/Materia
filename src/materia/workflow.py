@@ -19,14 +19,24 @@ class WorkflowResults:
         self.tasks = tasks
         self.results = results
 
+    def __getitem__(self, key: str) -> Any:
+        return self.results[
+            self.tasks.index(next(t for t in self.tasks if t.name == key))
+        ]
+
     def __str__(self) -> str:
         results = {f"{str(self.tasks[k])} ({k})": v for k, v in self.results.items()}
+        # FIXME: figure out how to sort by self.results' keys and not results' keys (i.e. by node numbers not task names?)
         return json.dumps(results, sort_keys=True, indent=2, default=str)
 
 
 class Workflow:
     def __init__(self, *tasks: materia.Task) -> None:
         self.tasks = tuple(set(self._discover_tasks(*tasks)))
+        for task in self.tasks:
+            import materia
+            if isinstance(task,materia.InputTask):
+                print(task.run())
         self.links = collections.defaultdict(list)
 
         for i, t in enumerate(self.tasks):
@@ -34,6 +44,8 @@ class Workflow:
                 self.links[i].append((None, self.tasks.index(r)))
             for k, r in t.named_requirements.items():
                 self.links[i].append((k, self.tasks.index(r)))
+
+        print(self.links)
 
     def _discover_tasks(self, *tasks: Iterable[materia.Task]) -> List[materia.Task]:
         discovered = list(tasks)
@@ -207,9 +219,10 @@ def _consume(
             # NOTE: this is safe because the node assigned to a task never changes while the workflow runs
             task = tasks[node]
             # NOTE: this is safe because 1.) the dependencies of each task can only be changed by tasks which precede it, i.e. by the time a task is running, no actions can alter its dependencies, and 2.) only one consumer will write to results[node] at a time because only one consumer is running a particular task at a time
-            result = task.run(
+            result = task.run(*(results[v] for k,v in links[node] if k is None),
                 **{k: results[v] for k, v in links[node] if k is not None}
             )
+            print(links[node])
             try:
                 for h in task.handlers:
                     h.run(result=result, task=task)
