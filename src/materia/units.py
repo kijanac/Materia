@@ -45,7 +45,7 @@ au_time = (
 ).to_unit()
 attosecond = (1e-18 * second).to_unit()
 minute = min = (60 * second).to_unit()
-hour = h = (60 * minute).to_unit()
+hour = hr = (60 * minute).to_unit()
 day = d = (24 * hour).to_unit()
 
 
@@ -177,7 +177,7 @@ au_angular_frequency = (2 * scipy.constants.pi * au_frequency).to_unit()
 # CONSTANTS
 c = scipy.constants.c * meter / second
 h = scipy.constants.h * joule * second
-hbar = scipy.constants.hbar * joule / second
+hbar = scipy.constants.hbar * joule * second
 a_0 = scipy.constants.value("Bohr radius") * meter
 kB = scipy.constants.k * joule / kelvin
 epsilon_0 = scipy.constants.epsilon_0 * farad / meter
