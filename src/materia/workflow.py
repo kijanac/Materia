@@ -33,10 +33,6 @@ class WorkflowResults:
 class Workflow:
     def __init__(self, *tasks: materia.Task) -> None:
         self.tasks = tuple(set(self._discover_tasks(*tasks)))
-        for task in self.tasks:
-            import materia
-            if isinstance(task,materia.InputTask):
-                print(task.run())
         self.links = collections.defaultdict(list)
 
         for i, t in enumerate(self.tasks):
@@ -44,8 +40,6 @@ class Workflow:
                 self.links[i].append((None, self.tasks.index(r)))
             for k, r in t.named_requirements.items():
                 self.links[i].append((k, self.tasks.index(r)))
-
-        print(self.links)
 
     def _discover_tasks(self, *tasks: Iterable[materia.Task]) -> List[materia.Task]:
         discovered = list(tasks)
@@ -222,7 +216,7 @@ def _consume(
             result = task.run(*(results[v] for k,v in links[node] if k is None),
                 **{k: results[v] for k, v in links[node] if k is not None}
             )
-            print(links[node])
+
             try:
                 for h in task.handlers:
                     h.run(result=result, task=task)
