@@ -31,7 +31,7 @@ class QChemStructure:
                     " "
                     + "  ".join(
                         str(j + 1)
-                        for j in self.bonds[i] + (-1,) * (4 - len(self.bonds[i]))
+                        for j in self.bonds[i] + [-1] * (4 - len(self.bonds[i]))
                     )
                     if i in self.bonds
                     else ""
