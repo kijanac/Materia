@@ -29,6 +29,8 @@ __all__ = [
     "ShellCommand",
     "Task",
     "FragItFragmentStructure",
+    "MultiwfnNTO",
+    "MultiwfnTotalESP",
     "MultiwfnVolume",
     "PackmolSolvate",
     #    "ExecuteQChem",
@@ -51,6 +53,7 @@ __all__ = [
     "WriteQChemInputPolarizability",
     "WriteQChemInputSinglePoint",
     #    "WriteQChemTDSCF",
+    "XTBOptimize",
 ]
 
 
@@ -126,7 +129,7 @@ class InputTask(Task):
         super().__init__(1, handlers=handlers, name=name)
         self.value = value
 
-    def run(self) -> Any:
+    def run(self, *args) -> Any:
         return self.value
 
 
@@ -332,7 +335,7 @@ class MultiwfnBaseTask(ExternalTask):
         raise NotImplementedError
 
     def run(self, filepath: str) -> Any:
-        inp = mtr.MultiwfnInput(mtr.expand(filepath), *self.commands(), -10,)
+        inp = mtr.MultiwfnInput(mtr.expand(filepath), *self.commands(), -10)
 
         with self.io() as io:
             inp.write(io.inp)
@@ -356,6 +359,79 @@ class MultiwfnBaseTask(ExternalTask):
 
 #     def run(self) -> None:
 #         self.engine.execute(input_path=self.input_path)
+
+
+# excitations = mtr.QChemOutput(filepath=filepath).get("electronic_excitations")
+# excitation_filepath = mtr.expand(f"{io.work_dir}/excitations.txt")
+# with open(excitation_filepath, "w") as f:
+#     f.write(excitations.to_gaussian())
+
+# inp = mtr.MultiwfnInput(mtr.expand(filepath), *self.commands(excitation_filepath), -10)
+# inp.write(io.inp)
+
+
+class MultiwfnNTO(MultiwfnBaseTask):
+    def commands(
+        self, excitation_filepath: str, work_dir: str
+    ) -> Tuple[Union[str, int, float]]:
+        return (
+            18,
+            *(
+                a
+                for i in range(40)
+                for a in [6]
+                + ([excitation_filepath] if i == 0 else [])
+                + [i + 1, 2, mtr.expand(f"{work_dir}/S{i+1}.fch")]
+            ),
+            0,
+        )
+
+    def parse(self, output: str) -> None:
+        # FIXME: is there some useful output to return?
+        return None
+
+    def run(self, filepath: str, excitation_filepath: str) -> Any:
+        with self.io() as io:
+            inp = mtr.MultiwfnInput(
+                mtr.expand(filepath),
+                *self.commands(excitation_filepath, io.work_dir),
+                -10,
+            )
+            inp.write(io.inp)
+
+            self.engine.execute(self.io)
+
+            return self.parse(io.out)
+
+
+class MultiwfnTotalESP(MultiwfnBaseTask):
+    def __init__(
+        self,
+        grid_quality: str,
+        engine: mtr.Engine,
+        io: mtr.IO,
+        handlers: Optional[Iterable[mtr.Handler]] = None,
+        name: Optional[str] = None,
+    ) -> None:
+        self.grid_quality = grid_quality
+        super().__init__(engine=engine, io=io, handlers=handlers, name=name)
+
+    def commands(self):
+        grid_quality = dict(low=1, medium=2, high=3)
+        # FIXME: finish implementing this
+        raise NotImplementedError
+        return (
+            5,
+            12,
+            grid_quality[self.grid_quality],
+            "0,0,0",
+            0,
+        )
+
+    def parse(self, output: str) -> mtr.Qty:
+        # FIXME: finish implementing this
+        raise NotImplementedError
+        return mtr.MultiwfnOutput(output).get("volume")
 
 
 class MultiwfnVolume(MultiwfnBaseTask):
@@ -681,7 +757,7 @@ class QChemBaseTask(ExternalTask):
             molecule=structure
             if isinstance(structure, mtr.Structure)
             or isinstance(structure, mtr.QChemStructure)
-            or isinstance(structure,mtr.QChemFragments)
+            or isinstance(structure, mtr.QChemFragments)
             else mtr.QChemFragments(structures=structure),
             settings=self.defaults(s),
         )
@@ -858,7 +934,7 @@ class QChemKoopmanError(Task):
         wf = Workflow(gs, cation, anion)
 
         out = wf.run(available_cores=self.num_cores, num_consumers=num_consumers)
-        
+
         energy, homo, lumo = out["gs"]
         cation = out["cation"]
         anion = out["anion"]
@@ -869,6 +945,7 @@ class QChemKoopmanError(Task):
         J_squared = (ea + lumo) ** 2 + (ip + homo) ** 2
 
         return np.sqrt(J_squared.convert(mtr.eV ** 2).value.item())
+
 
 class QChemKoopmanErrorLPSCF(Task):
     def __init__(
@@ -914,9 +991,9 @@ class QChemKoopmanErrorLPSCF(Task):
         #     # FIXME: rather than guessing 0, use rdkit.Chem.rdmolops.GetFormalCharge?
         # if ("structure", "multiplicity") not in settings:
         #     settings["structure", "multiplicity"] = 1
-        
-        gs_charges = [0]*len(fragments)
-        gs_multiplicities = [1]*len(fragments)
+
+        gs_charges = [0] * len(fragments)
+        gs_multiplicities = [1] * len(fragments)
 
         cation_charges = gs_charges.copy()
         cation_multiplicities = gs_multiplicities.copy()
@@ -931,21 +1008,39 @@ class QChemKoopmanErrorLPSCF(Task):
         input_settings = self.defaults(s)
 
         gs = QChemSinglePointFrontier(self.engine, self.gs_io, name="gs")
-        gs_structure = mtr.QChemFragments(fragments, gs_charges, gs_multiplicities,total_charge=sum(gs_charges),total_multiplicity=1)
+        gs_structure = mtr.QChemFragments(
+            fragments,
+            gs_charges,
+            gs_multiplicities,
+            total_charge=sum(gs_charges),
+            total_multiplicity=1,
+        )
         gs.requires(structure=gs_structure, settings=input_settings)
 
         cation = QChemSinglePoint(self.engine, self.cation_io, name="cation")
-        cation_structure = mtr.QChemFragments(fragments, cation_charges, cation_multiplicities,total_charge=sum(cation_charges),total_multiplicity=2)
+        cation_structure = mtr.QChemFragments(
+            fragments,
+            cation_charges,
+            cation_multiplicities,
+            total_charge=sum(cation_charges),
+            total_multiplicity=2,
+        )
         cation.requires(structure=cation_structure, settings=input_settings)
 
         anion = QChemSinglePoint(self.engine, self.anion_io, name="anion")
-        anion_structure = mtr.QChemFragments(fragments, anion_charges, anion_multiplicities,total_charge=sum(anion_charges),total_multiplicity=2)
+        anion_structure = mtr.QChemFragments(
+            fragments,
+            anion_charges,
+            anion_multiplicities,
+            total_charge=sum(anion_charges),
+            total_multiplicity=2,
+        )
         anion.requires(structure=anion_structure, settings=input_settings)
 
         wf = Workflow(gs, cation, anion)
 
         out = wf.run(available_cores=self.num_cores, num_consumers=num_consumers)
-        
+
         energy, homo, lumo = out["gs"]
         cation = out["cation"]
         anion = out["anion"]
@@ -960,8 +1055,14 @@ class QChemKoopmanErrorLPSCF(Task):
 
 class QChemLRTDDFT(QChemBaseTask):
     def parse(self, output: str) -> Any:
-        # FIXME: implement using cclib
-        raise NotImplementedError
+        return mtr.QChemOutput(filepath=output).get("electronic_excitations")
+        # out = cclib.io.ccread(mtr.expand(output))
+        # engs = mtr.h*mtr.c*(out.etenergies/mtr.cm)
+        # engs = engs.convert(mtr.eV)
+        # excitations = tuple(mtr.Excitation(energy=eng,oscillator_strength=osc,symmetry=sym,contributions=cont) for eng,osc,sym,cont in zip(engs,out.etoscs,out.etsyms,out.etsecs))
+        # ees = mtr.ExcitationSpectrum(excitations)
+
+        # return ees
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
@@ -1018,21 +1119,50 @@ class QChemMinimizeKoopmanError(Task):
         alpha: Optional[float] = 0.2,
         num_evals: Optional[int] = 5,
     ) -> float:
-        beta = 1 / epsilon - alpha
+        # beta = 1 / epsilon - alpha
 
-        s = self.defaults(settings)
-        s["rem", "hf_sr"] = int(round(1000 * alpha))
-        s["rem", "hf_lr"] = int(round(1000 * (alpha + beta)))
-        s["xc_functional"] = (
-            ("X", "HF", alpha),
-            ("X", "wPBE", beta),
-            ("X", "PBE", 1 - alpha - beta),
-            ("C", "PBE", 1.0),
-        )
+        # s = self.defaults(settings)
+        # s["rem", "hf_sr"] = int(round(1000 * alpha))
+        # s["rem", "hf_lr"] = int(round(1000 * (alpha + beta)))
+        # s["xc_functional"] = (
+        #     ("X", "HF", alpha),
+        #     ("X", "wPBE", beta),
+        #     ("X", "PBE", 1 - alpha - beta),
+        #     ("C", "PBE", 1.0),
+        # )
+
+        # with self.io() as io:
+
+        #     def f(omega):
+        #         omega = int(round(1000 * omega))
+        #         s["rem", "omega"] = s["rem", "omega2"] = omega
+
+        #         wd = mtr.expand(f"{io.work_dir}/{omega}")
+
+        #         gs_io = mtr.IO("gs.in", "gs.out", wd)
+        #         cation_io = mtr.IO("cation.in", "cation.out", wd)
+        #         anion_io = mtr.IO("anion.in", "anion.out", wd)
+
+        #         ke = mtr.QChemKoopmanError(self.engine, gs_io, cation_io, anion_io)
+        #         # FIXME: not sure the best way to handle num_consumers here...
+        #         return ke.run(structure, s, num_consumers=3)
+
+        #     return mtr.MaxLIPOTR(f).run(x_min=1e-3, x_max=1, num_evals=num_evals)
 
         with self.io() as io:
 
-            def f(omega):
+            def f(alpha, omega):
+                beta = 1 / epsilon - alpha
+
+                s = self.defaults(settings)
+                s["rem", "hf_sr"] = int(round(1000 * alpha))
+                s["rem", "hf_lr"] = int(round(1000 * (alpha + beta)))
+                s["xc_functional"] = (
+                    ("X", "HF", alpha),
+                    ("X", "wPBE", beta),
+                    ("X", "PBE", 1 - alpha - beta),
+                    ("C", "PBE", 1.0),
+                )
                 omega = int(round(1000 * omega))
                 s["rem", "omega"] = s["rem", "omega2"] = omega
 
@@ -1044,9 +1174,13 @@ class QChemMinimizeKoopmanError(Task):
 
                 ke = mtr.QChemKoopmanError(self.engine, gs_io, cation_io, anion_io)
                 # FIXME: not sure the best way to handle num_consumers here...
-                return ke.run(structure, s, num_consumers=3)
+                koopman_error = ke.run(structure, s, num_consumers=3)
+                return koopman_error
 
-            return mtr.MaxLIPOTR(f).run(x_min=1e-3, x_max=1, num_evals=num_evals)
+            return mtr.MaxLIPOTR(f).run(
+                x_min=[0, 1e-3], x_max=[1 / epsilon, 1], num_evals=num_evals
+            )
+
 
 class QChemMinimizeKoopmanErrorLPSCF(Task):
     def __init__(
@@ -1087,9 +1221,6 @@ class QChemMinimizeKoopmanErrorLPSCF(Task):
         alpha: Optional[float] = 0.2,
         num_evals: Optional[int] = 5,
     ) -> float:
-        print(fragments)
-        print(active_fragment)
-        print(settings)
         beta = 1 / epsilon - alpha
 
         s = self.defaults(settings)
@@ -1116,10 +1247,15 @@ class QChemMinimizeKoopmanErrorLPSCF(Task):
 
                 ke = mtr.QChemKoopmanErrorLPSCF(self.engine, gs_io, cation_io, anion_io)
                 # FIXME: not sure the best way to handle num_consumers here...
-                print(len(fragments))
-                return ke.run(*fragments, active_fragment=active_fragment, settings=settings, num_consumers=3)
+                return ke.run(
+                    *fragments,
+                    active_fragment=active_fragment,
+                    settings=settings,
+                    num_consumers=3,
+                )
 
             return mtr.MaxLIPOTR(f).run(x_min=1e-3, x_max=1, num_evals=num_evals)
+
 
 class QChemOptimize(QChemBaseTask):
     def parse(self, output: str) -> Any:
@@ -1131,9 +1267,7 @@ class QChemOptimize(QChemBaseTask):
         except AttributeError:
             return None
         # FIXME: is this the correct unit?
-        atoms = (
-            mtr.Atom(element=Z, position=p) for Z, p in zip(zs, coords)
-        )
+        atoms = (mtr.Atom(element=Z, position=p) for Z, p in zip(zs, coords))
         return mtr.Structure(*atoms)
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
@@ -1471,3 +1605,15 @@ class WriteQChemInputSinglePoint(WriteQChemInput):
 #                 )
 #             else:
 #                 subprocess.call([self.settings["executable"]], stdout=f)
+
+
+class XTBOptimize(ExternalTask):
+    def run(self, structure: Union[mtr.Structure, str],) -> Any:
+        with self.io() as io:
+            if isinstance(structure, mtr.Structure):
+                with structure.tempfile(suffix=".xyz", dir=io.work_dir) as f:
+                    self.engine.execute(f.name, self.io, arguments=["--opt"])
+            else:
+                self.engine.execute(structure, self.io, arguments=["--opt"])
+
+            # return self.parse(io.out)
