@@ -1056,13 +1056,6 @@ class QChemKoopmanErrorLPSCF(Task):
 class QChemLRTDDFT(QChemBaseTask):
     def parse(self, output: str) -> Any:
         return mtr.QChemOutput(filepath=output).get("electronic_excitations")
-        # out = cclib.io.ccread(mtr.expand(output))
-        # engs = mtr.h*mtr.c*(out.etenergies/mtr.cm)
-        # engs = engs.convert(mtr.eV)
-        # excitations = tuple(mtr.Excitation(energy=eng,oscillator_strength=osc,symmetry=sym,contributions=cont) for eng,osc,sym,cont in zip(engs,out.etoscs,out.etsyms,out.etsecs))
-        # ees = mtr.ExcitationSpectrum(excitations)
-
-        # return ees
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
@@ -1116,70 +1109,45 @@ class QChemMinimizeKoopmanError(Task):
         structure: Union[mtr.QChemStructure, mtr.QChemFragments, mtr.Structure],
         settings: Optional[mtr.Settings] = None,
         epsilon: Optional[Union[int, float]] = 1.0,
-        alpha: Optional[float] = 0.2,
+        alpha: Optional[float] = None,
         num_evals: Optional[int] = 5,
     ) -> float:
-        # beta = 1 / epsilon - alpha
+        def _objective(omega, _alpha):
+            beta = 1 / epsilon - _alpha
 
-        # s = self.defaults(settings)
-        # s["rem", "hf_sr"] = int(round(1000 * alpha))
-        # s["rem", "hf_lr"] = int(round(1000 * (alpha + beta)))
-        # s["xc_functional"] = (
-        #     ("X", "HF", alpha),
-        #     ("X", "wPBE", beta),
-        #     ("X", "PBE", 1 - alpha - beta),
-        #     ("C", "PBE", 1.0),
-        # )
+            s = self.defaults(settings)
+            s["rem", "hf_sr"] = int(round(1000 * _alpha))
+            print(s["rem", "hf_sr"])
+            s["rem", "hf_lr"] = int(round(1000 * (_alpha + beta)))
+            s["xc_functional"] = (
+                ("X", "HF", _alpha),
+                ("X", "wPBE", beta),
+                ("X", "PBE", 1 - _alpha - beta),
+                ("C", "PBE", 1.0),
+            )
+            omega = int(round(1000 * omega))
+            s["rem", "omega"] = s["rem", "omega2"] = omega
 
-        # with self.io() as io:
+            wd = mtr.expand(f"{io.work_dir}/{omega}")
 
-        #     def f(omega):
-        #         omega = int(round(1000 * omega))
-        #         s["rem", "omega"] = s["rem", "omega2"] = omega
+            gs_io = mtr.IO("gs.in", "gs.out", wd)
+            cation_io = mtr.IO("cation.in", "cation.out", wd)
+            anion_io = mtr.IO("anion.in", "anion.out", wd)
 
-        #         wd = mtr.expand(f"{io.work_dir}/{omega}")
-
-        #         gs_io = mtr.IO("gs.in", "gs.out", wd)
-        #         cation_io = mtr.IO("cation.in", "cation.out", wd)
-        #         anion_io = mtr.IO("anion.in", "anion.out", wd)
-
-        #         ke = mtr.QChemKoopmanError(self.engine, gs_io, cation_io, anion_io)
-        #         # FIXME: not sure the best way to handle num_consumers here...
-        #         return ke.run(structure, s, num_consumers=3)
-
-        #     return mtr.MaxLIPOTR(f).run(x_min=1e-3, x_max=1, num_evals=num_evals)
+            ke = mtr.QChemKoopmanError(self.engine, gs_io, cation_io, anion_io)
+            # FIXME: not sure the best way to handle num_consumers here...
+            return ke.run(structure, s, num_consumers=3)
 
         with self.io() as io:
-
-            def f(alpha, omega):
-                beta = 1 / epsilon - alpha
-
-                s = self.defaults(settings)
-                s["rem", "hf_sr"] = int(round(1000 * alpha))
-                s["rem", "hf_lr"] = int(round(1000 * (alpha + beta)))
-                s["xc_functional"] = (
-                    ("X", "HF", alpha),
-                    ("X", "wPBE", beta),
-                    ("X", "PBE", 1 - alpha - beta),
-                    ("C", "PBE", 1.0),
+            if alpha is None:
+                return mtr.MaxLIPOTR(_objective).run(
+                    x_min=[0, 1e-3], x_max=[1 / epsilon, 1], num_evals=num_evals
                 )
-                omega = int(round(1000 * omega))
-                s["rem", "omega"] = s["rem", "omega2"] = omega
-
-                wd = mtr.expand(f"{io.work_dir}/{omega}")
-
-                gs_io = mtr.IO("gs.in", "gs.out", wd)
-                cation_io = mtr.IO("cation.in", "cation.out", wd)
-                anion_io = mtr.IO("anion.in", "anion.out", wd)
-
-                ke = mtr.QChemKoopmanError(self.engine, gs_io, cation_io, anion_io)
-                # FIXME: not sure the best way to handle num_consumers here...
-                koopman_error = ke.run(structure, s, num_consumers=3)
-                return koopman_error
-
-            return mtr.MaxLIPOTR(f).run(
-                x_min=[0, 1e-3], x_max=[1 / epsilon, 1], num_evals=num_evals
-            )
+            else:
+                print(alpha)
+                return mtr.MaxLIPOTR(functools.partial(_objective, _alpha=alpha)).run(
+                    x_min=1e-3, x_max=1, num_evals=num_evals
+                )
 
 
 class QChemMinimizeKoopmanErrorLPSCF(Task):
