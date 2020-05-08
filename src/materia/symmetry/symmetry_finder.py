@@ -385,7 +385,7 @@ class SpglibSymmetryFinder:
         fractional_positions = coordinates.T @ scipy.linalg.inv(lattice)
 
         cell = (lattice, fractional_positions, atomic_numbers)
-        
+
         return spglib.get_spacegroup_type(
             spglib.get_symmetry_dataset(cell=cell, symprec=symprec)["hall_number"]
         )["pointgroup_schoenflies"]
