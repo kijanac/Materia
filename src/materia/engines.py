@@ -296,9 +296,17 @@ class XTB(Engine):
             with open(_io.out, "w") as out:
                 env = self.env()
                 if env is None:
-                    subprocess.call(cmd, stdout=out, cwd=io.work_dir)
+                    subprocess.call(
+                        cmd, stdout=out, stderr=subprocess.STDOUT, cwd=io.work_dir
+                    )
                 else:
-                    subprocess.call(cmd, stdout=out, env=self.env(), cwd=io.work_dir)
+                    subprocess.call(
+                        cmd,
+                        stdout=out,
+                        stderr=subprocess.STDOUT,
+                        env=self.env(),
+                        cwd=io.work_dir,
+                    )
 
             with open(_io.out, "r") as f:
                 return "".join(f.readlines())
