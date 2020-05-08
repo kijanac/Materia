@@ -1608,7 +1608,16 @@ class WriteQChemInputSinglePoint(WriteQChemInput):
 
 
 class XTBOptimize(ExternalTask):
-    def run(self, structure: Union[mtr.Structure, str],) -> Any:
+    def parse(self, output: str) -> mtr.Structure:
+        with open(output, "r") as f:
+            structure_file = re.search(
+                r"optimized geometry written to:\s*(?P<structure>.*)\s*",
+                "".join(f.readlines()),
+            ).group("structure")
+
+        return mtr.Structure.read(f"{pathlib.Path(output).parent}/{structure_file}")
+
+    def run(self, structure: Union[mtr.Structure, str]) -> mtr.Structure:
         with self.io() as io:
             if isinstance(structure, mtr.Structure):
                 with structure.tempfile(suffix=".xyz", dir=io.work_dir) as f:
@@ -1616,4 +1625,4 @@ class XTBOptimize(ExternalTask):
             else:
                 self.engine.execute(structure, self.io, arguments=["--opt"])
 
-            # return self.parse(io.out)
+            return self.parse(io.out)
