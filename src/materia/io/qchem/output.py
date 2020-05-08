@@ -1,81 +1,20 @@
 from __future__ import annotations
+import cclib
 import inspect
 import numpy as np
-import materia
+import materia as mtr
 import re
 from typing import Dict, Tuple, TypeVar, Union
 
 __all__ = ["QChemOutput"]
-
-# class QChemOutput: #FIXME: inherit Output
-#     def parse(self):
-#         flag = ''
-#         with open(self.filepath,'r') as f:
-#             for line in f:
-#                 flag = _set_flag(line=line,current_flag=flag)
-#                 _parse_with_flag(flag=flag)(line=line,output=self.output)
-#
-# def _set_flag(line, current_flag):
-#     if 'Archival summary' in line:
-#         return 'footer'
-#     elif 'Ground-State Mulliken Net Atomic Charges' in line:
-#         return 'net_atomic_charges'
-#     elif 'Orbital Energies' in line:
-#         return 'orbital_energies'
-#     else:
-#         return current_flag
-#
-# def _parse_with_flag(flag):
-#     if flag == 'footer':
-#         return _parse_footer
-#     elif flag == 'net_atomic_charges':
-#         return _parse_net_atomic_charges
-#     elif flag == 'orbital_energies':
-#         return _parse_orbital_energies
-#
-# def _parse_footer(line, output):
-#     if 'Total job time' in line:
-#         wall_time,cpu_time = re.search(r'.*?(\d*\.\d*)s.*?(\d*\.\d*)s.*$',line).groups()
-#         output['footer','wall_time'] = materia.Qty(value=float(wall_time),unit=materia.second)
-#         output['footer','cpu_time'] = materia.Qty(value=float(cpu_time),unit=materia.second)
-#
-# def _parse_net_atomic_charges(line, output):
-#     if 'Atom ' in line:
-#         (charge_unit_string,) = re.search(r'.*\((.*)\).*$',line).groups()
-#         if charge_unit_string.lower() == 'ev':
-#             output['net_atomic_charges','unit'] = materia.eV
-#         elif charge_unit_string.lower() == 'a.u.':
-#             output['net_atomic_charges','unit'] = materia.au_charge
-#     elif 'Sum of atomic charges' in line:
-#         *_,sum_of_atomic_charges_str = line.split()
-#         output['net_atomic_charges','sum_of_atomic_charges'] = materia.Qty(value=float(sum_of_atomic_charges_str),unit=output['net_atomic_charges','unit'])
-#     elif len(line.split()) > 0 and line.split()[0].isdigit():
-#         atom_number,atomic_species,charge = line.split()
-#         output['net_atomic_charges',atom_number,'species'] = atomic_species
-#         output['net_atomic_charges',atom_number,'charge'] = materia.Qty(value=float(charge),unit=output['net_atomic_charges','unit'])
-#
-# def _parse_orbital_energies(line, output):
-#     if 'Orbital Energies' in line:
-#         (unit_str,) = re.search(r'.*\((.*)\).*$',line).groups()
-#         if unit_str == 'a.u.':
-#             output['orbital_energies','unit'] = materia.hartree
-#     elif 'Alpha' in line:
-#         parse_alpha_orbitals = True
-#     elif 'Beta' in line:
-#         parse_alpha_orbitals = False
-#     elif 'Occupied' in line:
-#         parse_occupied_orbitals = True
-#     elif 'Virtual' in line:
-#         parse_occupied_orbitals = False
-#     else:
-#         output['orbital_energies','alpha' if parse_alpha_orbitals else 'beta','occupied' if parse_occupied_orbitals else 'unoccupied'].extend(materia.Qty(value=float(eng),unit=output['orbital_energies','unit']) for eng in line.strip().split())
 
 T = TypeVar("T")
 
 
 class QChemOutput:
     def __init__(self, filepath: str) -> None:
-        self.filepath = materia.expand(filepath)
+        self.filepath = mtr.expand(filepath)
+        self.cclib_out = cclib.io.ccread(self.filepath)
 
     def get(self, *quantity_names: str) -> Union[T, Tuple[T]]:
         method_dict = dict(inspect.getmembers(self, predicate=inspect.isroutine))
@@ -93,7 +32,7 @@ class QChemOutput:
 
     def footer(
         self, lines: str
-    ):  # FIXME: not sure how to annotate type hint: is it -> Dict[materia.Qty,materia.Qty,Tuple[int,str,int,int,int,int,str]] ?
+    ):  # FIXME: not sure how to annotate type hint: is it -> Dict[mtr.Qty,mtr.Qty,Tuple[int,str,int,int,int,int,str]] ?
         s = r"\s*Total\s*job\s*time\s*:\s*(\d*\.\d*)\s*s\s*\(\s*wall\s*\)\s*,\s*(\d*\.\d*)\s*s\s*\(\s*cpu\s*\)\s*(\w*)\s*(\w*)\s*(\d*)\s*(\d*)\s*:\s*(\d*)\s*:\s*(\d*)\s*(\d*)\s*"
         pattern = re.compile(s)
         (
@@ -108,8 +47,8 @@ class QChemOutput:
             year,
         ) = pattern.search(lines).groups()
 
-        walltime = float(walltime) * materia.second
-        cputime = float(cputime) * materia.second
+        walltime = float(walltime) * mtr.second
+        cputime = float(cputime) * mtr.second
         date = tuple(
             int(year), month, int(date), int(hour), int(minutes), int(seconds), day
         )
@@ -126,7 +65,7 @@ class QChemOutput:
         energy_unit_str, homo, lumo, gap = re.search(s, lines).groups()
 
         if energy_unit_str.lower() == "ev":
-            unit = materia.eV
+            unit = mtr.eV
         else:
             raise ValueError("Cannot parse energy unit.")
 
@@ -136,7 +75,7 @@ class QChemOutput:
 
         return {"homo": homo, "lumo": lumo, "gap": gap}
 
-    def polarizability(self, lines: str) -> materia.Qty:
+    def polarizability(self, lines: str) -> mtr.Qty:
         s = (
             r"\s*Polarizability tensor\s*\[(.*)\]\s*(-?\d*\.\d*)\s*"
             r"(-?\d*\.\d*)\s*(-?\d*\.\d*)\s*(-?\d*\.\d*)\s*(-?\d*\.\d*)\s*"
@@ -147,13 +86,13 @@ class QChemOutput:
         unit_str, *tensor_components = pattern.search(lines).groups()
 
         if unit_str.lower() == "a.u.":
-            unit = materia.au_volume
+            unit = mtr.au_volume
 
         polarizability_tensor = (
             np.array(tuple(float(tc) for tc in tensor_components)).reshape(3, 3) * unit
         )
 
-        return materia.Polarizability(polarizability_tensor=polarizability_tensor)
+        return mtr.Polarizability(polarizability_tensor=polarizability_tensor)
 
     def rttddft(self, lines: str):  # FIXME: not sure how to annotate type hint
         s = r"ITER:\s*(\d*)\s*T:\s*(\d*\.\d*)\(fs\)\s*dt\s*(\d*\.\d*)\(fs\)\s*Hr/Ps:\s*(\d*\.\d*)\s*-\s*Lpsd/Rem\.:\s*(\d*\.\d*),\s*([^\s]*)\s*\(min\)\s*Tr\.Dev:\s*(\d*\.\d*)\s*Hrm:\s*(\d*\.\d*)\s*Enrgy:\s*(-?\d*\.\d*)\s*Entr:\s*(-?\d*.\d*)\s*Fld\s*(\d*)\s*NFk:\s*(\d*)\s*Mu\s*(-?\d*\.\d*e?-?\d*)\s*(-?\d*\.\d*e?-?\d*)\s*(-?\d*\.\d*e?-?\d*)"
@@ -210,48 +149,39 @@ class QChemOutput:
 
         return {
             "iterations": iterations,
-            "T": np.array(Ts) * materia.fs,
-            "dt": np.array(dts) * materia.fs,
-            "hours_per_picosecond": np.array(hours_per_ps) * materia.hr / materia.ps,
-            "lapsed": np.array(lapsed) * materia.minute,
-            "remaining": np.array(remaining) * materia.minute,
+            "T": np.array(Ts) * mtr.fs,
+            "dt": np.array(dts) * mtr.fs,
+            "hours_per_picosecond": np.array(hours_per_ps) * mtr.hr / mtr.ps,
+            "lapsed": np.array(lapsed) * mtr.minute,
+            "remaining": np.array(remaining) * mtr.minute,
             "trace_deviations": trace_deviations,
             "hrm": hrms,
-            "energies": np.array(energies) * materia.hartree,
+            "energies": np.array(energies) * mtr.hartree,
             "entr": entrs,
             "field": field,
             "number_fock": number_fock,
-            "mu_x": np.array(mu_xs) * materia.au_dipole_moment,
-            "mu_y": np.array(mu_ys) * materia.au_dipole_moment,
-            "mu_z": np.array(mu_zs) * materia.au_dipole_moment,
+            "mu_x": np.array(mu_xs) * mtr.au_dipole_moment,
+            "mu_y": np.array(mu_ys) * mtr.au_dipole_moment,
+            "mu_z": np.array(mu_zs) * mtr.au_dipole_moment,
         }
 
     def electronic_excitations(
         self, lines: str
     ):  # FIXME: not sure how to annotate type hint
-        s = (
-            r"\s*excitation\s*energy\s*"
-            r"\((.*)\)\s*=\s*(-?\d*.\d*)\s*Total\s*energy\s*for\s*state\s*"
-            r"\d*:\s*(-?\d*.\d*)\s*([^\s]*)\s*Multiplicity\s*:\s*([^\s]*)\s*"
-            r"Trans.\s*Mom.\s*:\s*(-?\d*.\d*)\s*X\s*(-?\d*.\d*)\s*Y"
-            r"\s*(-?\d*.\d*)\s*Z\s*Strength\s*:\s*(-?\d*.\d*)\s*"
-            r"(([DSV]\(\s*\d*\s*\)\s*-*>\s*[DSV]\(\s*\d*\s*\)\s*"
-            r"amplitude\s*=\s*-?\d*.\d*\s*)*)"
-        )
-        pattern_1 = re.compile(s)
-
-        s = (
-            r"([DSV])\(\s*(\d*)\s*\)\s*-*>\s*([DSV])\(\s*(\d*)\s*\)\s*"
-            r"amplitude\s*=\s*(-?\d*.\d*)\s*"
-        )
-        pattern_2 = re.compile(s)
-
-        return tuple(
-            self._process_ee_block(
-                block=block, pattern_1=pattern_1, pattern_2=pattern_2
+        engs = mtr.h * mtr.c * (self.cclib_out.etenergies / mtr.cm)
+        engs = engs.convert(mtr.eV)
+        excitations = tuple(
+            mtr.Excitation(
+                energy=eng, oscillator_strength=osc, symmetry=sym, contributions=cont
             )
-            for block in re.split(r"\s*Excited\s*state\s*\d*\s*:", lines)[1:]
+            for eng, osc, sym, cont in zip(
+                engs,
+                self.cclib_out.etoscs,
+                self.cclib_out.etsyms,
+                self.cclib_out.etsecs,
+            )
         )
+        return mtr.ExcitationSpectrum(excitations)
 
     def _process_ee_block(
         self, block, pattern_1, pattern_2
@@ -270,11 +200,11 @@ class QChemOutput:
         ) = pattern_1.search(block).groups()
 
         if excitation_energy_unit_str.lower() == "ev":
-            excitation_energy_unit = materia.eV
+            excitation_energy_unit = mtr.eV
         excitation_energy = float(excitation_energy) * excitation_energy_unit
 
         if total_energy_unit_str.lower() == "au":
-            total_energy_unit = materia.au_energy
+            total_energy_unit = mtr.au_energy
         total_energy = float(total_energy) * total_energy_unit
 
         if multiplicity.lower() == "singlet":
@@ -292,7 +222,7 @@ class QChemOutput:
                 (from_occ, int(from_num), to_occ, int(to_num), float(amplitude))
             )
 
-        return materia.ElectronicExcitation(
+        return mtr.ElectronicExcitation(
             excitation_energy=excitation_energy,
             total_energy=total_energy,
             multiplicity=mult,
@@ -301,7 +231,7 @@ class QChemOutput:
             contributions=contributions,
         )
 
-    def orbital_energies(self, lines: str) -> Tuple[Tuple[materia.Qty]]:
+    def orbital_energies(self, lines: str) -> Tuple[Tuple[mtr.Qty]]:
         energy_symmetry_pattern = re.compile(
             r"((?:-?\d*\.\d*\s*)*(?:\d*\s*[a-zA-Z]*\d*\s*)*)"
         )
@@ -312,7 +242,7 @@ class QChemOutput:
         pattern = re.compile(s)
         (energy_unit_str,) = pattern.search(lines).groups()
         if energy_unit_str == "a.u.":
-            energy_unit = materia.hartree
+            energy_unit = mtr.hartree
         else:
             raise ValueError("Cannot parse energy unit in Orbital Energies section.")
 
@@ -371,19 +301,19 @@ class QChemOutput:
             beta_orbital_virtual_energies,
         )
 
-    def scf_energy(self, lines: str) -> materia.Qty:
+    def scf_energy(self, lines: str) -> mtr.Qty:
         s = r"\s*SCF\s*energy\s*in\s*the\s*final\s*basis\s*set\s*=\s*(-?\d*\.\d*)\s*"
         # FIXME: this doesn't seem like a great way to handle multiple groups... better fix?
         *_, energy_str = re.search(s, lines).groups()
 
-        return float(energy_str) * materia.hartree
+        return float(energy_str) * mtr.hartree
 
-    def total_energy(self, lines: str) -> materia.Qty:
+    def total_energy(self, lines: str) -> mtr.Qty:
         s = r"\s*Total\s*energy\s*in\s*the\s*final\s*basis\s*set\s*=\s*(-?\d*\.\d*)\s*"
         # FIXME: this doesn't seem like a great way to handle multiple groups... better fix?
         *_, energy_str = re.search(s, lines).groups()
 
-        return float(energy_str) * materia.hartree
+        return float(energy_str) * mtr.hartree
 
 
 # class Section:
@@ -498,17 +428,17 @@ class QChemOutput:
 #
 #     def todict(self):
 #         dipole_value = np.array([self.x,self.y,self.z])
-#         dipole = materia.Qty(value=dipole_value,unit=self.dipole_unit)
+#         dipole = mtr.Qty(value=dipole_value,unit=self.dipole_unit)
 #
 #         quad_value = np.array([self.xx,self.xy,self.xz,self.yx,self.yy,self.yz,self.zx,self.zy,self.zz]).reshape(3,3)
-#         quadrupole = materia.Qty(value=quad_value,unit=self.quadrupole_unit)
+#         quadrupole = mtr.Qty(value=quad_value,unit=self.quadrupole_unit)
 #
 #         oct_value = np.array([self.xxx,self.xxy,self.xxz,self.xyx,self.xyy,self.xyz,
 #                               self.xzx,self.xzy,self.xzz,self.yxx,self.yxy,self.yxz,
 #                               self.yyx,self.yyy,self.yyz,self.yzx,self.yzy,self.yzz,
 #                               self.zxx,self.zxy,self.zxz,self.zyx,self.zyy,self.zyz,
 #                               self.zzx,self.zzy,self.zzz]).reshape(3,3,3)
-#         octopole = materia.Qty(value=oct_value,unit=self.octopole_unit)
+#         octopole = mtr.Qty(value=oct_value,unit=self.octopole_unit)
 #
 #         hex_value = np.array([self.xxxx,self.xxxy,self.xxxz,self.xxyx,self.xxyy,
 #                               self.xxyz,self.xxzx,self.xxzy,self.xxzz,self.xyxx,
@@ -527,7 +457,7 @@ class QChemOutput:
 #                               self.zyzy,self.zyzz,self.zzxx,self.zzxy,self.zzxz,
 #                               self.zzyx,self.zzyy,self.zzyz,self.zzzx,self.zzzy,
 #                               self.zzzz]).reshape(3,3,3,3)
-#         hexadecapole = materia.Qty(value=hex_value,unit=self.hexadecapole_unit)
+#         hexadecapole = mtr.Qty(value=hex_value,unit=self.hexadecapole_unit)
 #
 #         return {'charge': self.charge,'dipole': dipole,'total_dipole': self.total_dipole,
 #                 'quadrupole': quadrupole,'octopole': octopole,'hexadecapole': hexadecapole}
@@ -556,14 +486,14 @@ class QChemOutput:
 #
 #     def _parse_charge(self, line):
 #         charge_value = float(line.strip())*self.charge_multiplier
-#         self.charge = materia.Qty(value=charge_value,unit=self.charge_unit)
+#         self.charge = mtr.Qty(value=charge_value,unit=self.charge_unit)
 #
 #     def _parse_charge_unit_and_multiplier(self, line):
 #         charge_unit_str,charge_prefactor_base,charge_prefactor_exp = re.search(r'.*\((.*)\s*x\s*(\d*)\^(\d*).*\).*',line).groups()
 #
 #         charge_unit_str = charge_unit_str.strip().lower()
 #         if charge_unit_str == 'esu':
-#             self.charge_unit = materia.esu
+#             self.charge_unit = mtr.esu
 #         else:
 #             raise ValueError('Cannot parse charge unit in Cartesian Multipole Moments section.')
 #
@@ -573,7 +503,7 @@ class QChemOutput:
 #         (dipole_unit_str,) = re.search(r'.*\((.*).*\).*',line).groups()
 #         dipole_unit_str = dipole_unit_str.strip().lower()
 #         if dipole_unit_str == 'debye':
-#             self.dipole_unit = materia.debye
+#             self.dipole_unit = mtr.debye
 #         else:
 #             raise ValueError('Cannot parse dipole unit in Cartesian Multipole Moments section.')
 #
@@ -581,7 +511,7 @@ class QChemOutput:
 #         (quad_unit_str,) = re.search(r'.*\((.*).*\).*',line).groups()
 #         quad_unit_str = quad_unit_str.strip().lower()
 #         if quad_unit_str == 'debye-ang':
-#             self.quadrupole_unit = materia.debye*materia.angstrom
+#             self.quadrupole_unit = mtr.debye*mtr.angstrom
 #         else:
 #             raise ValueError('Cannot parse quadrupole unit in Cartesian Multipole Moments section.')
 #
@@ -589,7 +519,7 @@ class QChemOutput:
 #         (oct_unit_str,) = re.search(r'.*\((.*).*\).*',line).groups()
 #         oct_unit_str = oct_unit_str.strip().lower()
 #         if oct_unit_str == 'debye-ang^2':
-#             self.octopole_unit = materia.debye*materia.angstrom**2
+#             self.octopole_unit = mtr.debye*mtr.angstrom**2
 #         else:
 #             raise ValueError('Cannot parse octopole unit in Cartesian Multipole Moments section.')
 #
@@ -597,13 +527,13 @@ class QChemOutput:
 #         (hex_unit_str,) = re.search(r'.*\((.*).*\).*',line).groups()
 #         hex_unit_str = hex_unit_str.strip().lower()
 #         if hex_unit_str == 'debye-ang^3':
-#             self.hexadecapole_unit = materia.debye*materia.angstrom**3
+#             self.hexadecapole_unit = mtr.debye*mtr.angstrom**3
 #         else:
 #             raise ValueError('Cannot parse hexadecapole unit in Cartesian Multipole Moments section.')
 #
 #     def _parse_total_dipole(self, line):
 #         _,dipole_total_value = line.split()
-#         self.total_dipole = materia.Qty(value=float(dipole_total_value),unit=self.dipole_unit)
+#         self.total_dipole = mtr.Qty(value=float(dipole_total_value),unit=self.dipole_unit)
 #
 #     def _parse_multipole_elements(self, line):
 #         for multipole_element_symbol,multipole_element_value in self._pairwise(iterable=line.split()):
@@ -632,8 +562,8 @@ class QChemOutput:
 #
 #     def _parse_job_time(self, line):
 #         wall_time,cpu_time = re.search(r'.*?(\d*\.\d*)s.*?(\d*\.\d*)s.*$',line).groups()
-#         self.wall_time = materia.Qty(value=float(wall_time),unit=materia.second)
-#         self.cpu_time = materia.Qty(value=float(cpu_time),unit=materia.second)
+#         self.wall_time = mtr.Qty(value=float(wall_time),unit=mtr.second)
+#         self.cpu_time = mtr.Qty(value=float(cpu_time),unit=mtr.second)
 #
 # class Header(Section):
 #     def __init__(self):
@@ -660,21 +590,21 @@ class QChemOutput:
 #     def _parse_unit(self, line):
 #         (unit_string,) = re.search(r'.*\((.*)\).*$',line).groups()
 #         if unit_string == 'eV':
-#             self.unit = materia.eV
+#             self.unit = mtr.eV
 #         else:
 #             raise ValueError('Cannot parse energy unit in Kohn-Sham Gap section.')
 #
 #     def _parse_homo(self, line):
 #         *_,homo_value = line.split()
-#         self.homo = materia.Qty(value=float(homo_value),unit=self.unit)
+#         self.homo = mtr.Qty(value=float(homo_value),unit=self.unit)
 #
 #     def _parse_lumo(self, line):
 #         *_,lumo_value = line.split()
-#         self.lumo = materia.Qty(value=float(lumo_value),unit=self.unit)
+#         self.lumo = mtr.Qty(value=float(lumo_value),unit=self.unit)
 #
 #     def _parse_gap(self, line):
 #         *_,gap_value = line.split()
-#         self.gap = materia.Qty(value=float(gap_value),unit=self.unit)
+#         self.gap = mtr.Qty(value=float(gap_value),unit=self.unit)
 #
 # class NetAtomicCharges(Section):
 #     def __init__(self):
@@ -698,19 +628,19 @@ class QChemOutput:
 #     def _parse_unit(self, line):
 #         (charge_unit_string,) = re.search(r'.*\((.*)\).*$',line).groups()
 #         if charge_unit_string == 'eV':
-#             self.unit = materia.eV
+#             self.unit = mtr.eV
 #         elif charge_unit_string == 'a.u.':
-#             self.unit = materia.au_charge
+#             self.unit = mtr.au_charge
 #         else:
 #             raise ValueError('Cannot parse charge unit in Net Atomic Charges section.')
 #
 #     def _parse_atomic_charge(self, line):
 #         atom_number,atomic_species,charge = line.split()
-#         self.charge_dictionary[int(atom_number)] = (atomic_species,materia.Qty(value=float(charge),unit=self.unit))
+#         self.charge_dictionary[int(atom_number)] = (atomic_species,mtr.Qty(value=float(charge),unit=self.unit))
 #
 #     def _parse_sum_of_atomic_charges(self, line):
 #         *_,sum_of_atomic_charges_str = line.split()
-#         self.sum_of_atomic_charges = materia.Qty(value=float(sum_of_atomic_charges_str),unit=self.unit)
+#         self.sum_of_atomic_charges = mtr.Qty(value=float(sum_of_atomic_charges_str),unit=self.unit)
 #
 # class OrbitalEnergies(Section):
 #     def __init__(self):
@@ -744,13 +674,13 @@ class QChemOutput:
 #     def _parse_energy_unit(self, line):
 #         (unit_str,) = re.search(r'.*\((.*)\).*$',line).groups()
 #         if unit_str == 'a.u.':
-#             self.unit = materia.hartree
+#             self.unit = mtr.hartree
 #         else:
 #             raise ValueError('Cannot parse energy unit in Orbital Energies section.')
 #
 #     def _parse_orbital_energies(self, line):
 #         try:
-#             energies = [materia.Qty(value=float(eng),unit=self.unit) for eng in line.strip().split()]
+#             energies = [mtr.Qty(value=float(eng),unit=self.unit) for eng in line.strip().split()]
 #             self.energy_dict['alpha' if self.alpha else 'beta']['occupied' if self.occupied else 'unoccupied'].extend(energies)
 #         except:
 #             pass
@@ -787,13 +717,13 @@ class QChemOutput:
 # #     def _parse_energy_unit(self, line):
 # #         (unit_str,) = re.search(r'.*\((.*)\).*$',line).groups()
 # #         if unit_str == 'a.u.':
-# #             self.unit = materia.hartree
+# #             self.unit = mtr.hartree
 # #         else:
 # #             raise ValueError('Cannot parse energy unit in Orbital Energies section.')
 # #
 # #     def _parse_orbital_energies(self, line):
 # #         try:
-# #             energies = [materia.Qty(value=float(eng),unit=self.unit) for eng in line.strip().split()]
+# #             energies = [mtr.Qty(value=float(eng),unit=self.unit) for eng in line.strip().split()]
 # #             self.energy_dict['alpha' if self.alpha else 'beta']['occupied' if self.occupied else 'unoccupied'].extend(energies)
 # #         except:
 # #             pass
@@ -850,9 +780,9 @@ class QChemOutput:
 #     def _parse_energy(self, line):
 #         energy_type,energy = re.search(r'\s*(.*?)\s*energy in the final basis set.*?(-?\d*\.\d*)\.*$',line).groups()
 #         if energy_type == 'SCF':
-#             self.scf_energy = materia.Qty(value=float(energy),unit=materia.hartree)
+#             self.scf_energy = mtr.Qty(value=float(energy),unit=mtr.hartree)
 #         elif energy_type == 'Total':
-#             self.total_energy = materia.Qty(value=float(energy),unit=materia.hartree)
+#             self.total_energy = mtr.Qty(value=float(energy),unit=mtr.hartree)
 #         else:
 #             pass
 #
@@ -865,12 +795,12 @@ class QChemOutput:
 #
 #     def _parse_scf_step(self, line):
 #         scf_step_num,energy,error = re.search(r'\s*(\d*)\s*(-?\d*\.\d*)\s*(\d*\.\d*e-?\d*).*$',line).groups()
-#         self.scf_steps[int(scf_step_num)] = (materia.Qty(value=float(energy),unit=materia.hartree),float(error))
+#         self.scf_steps[int(scf_step_num)] = (mtr.Qty(value=float(energy),unit=mtr.hartree),float(error))
 #
 #     def _parse_scf_time(self, line):
 #         cpu_time,cpu_time_unit,wall_time,wall_time_unit = re.search(r'SCF time:\s*CPU (\d*\.\d*)(.*?)\s*wall (\d*\.\d*)(.*?)\s*$',line).groups()
-#         self.cpu_time = materia.Qty(value=float(cpu_time),unit=getattr(materia,cpu_time_unit))
-#         self.wall_time = materia.Qty(value=float(wall_time),unit=getattr(materia,wall_time_unit))
+#         self.cpu_time = mtr.Qty(value=float(cpu_time),unit=getattr(mtr,cpu_time_unit))
+#         self.wall_time = mtr.Qty(value=float(wall_time),unit=getattr(mtr,wall_time_unit))
 #
 # class SCFGradient(Section):
 #     def __init__(self):
@@ -897,7 +827,7 @@ class QChemOutput:
 #     def _parse_atomic_position_unit(self, line):
 #         (unit_str,) = re.search(r'.*\((.*)\).*$',line).groups()
 #         if unit_str == 'Angstroms':
-#             self.position_unit = materia.angstrom
+#             self.position_unit = mtr.angstrom
 #         else:
 #             raise ValueError('Cannot parse atomic position unit in Standard Nuclear Orientation section.')
 #
@@ -905,7 +835,7 @@ class QChemOutput:
 #         try:
 #             atom_number,atomic_symbol,x,y,z = line.strip().split()
 #             atomic_position_value = np.array([float(x),float(y),float(z)]).reshape(3,1)
-#             self.atom_dictionary[int(atom_number)] = (atomic_symbol,materia.Qty(value=atomic_position_value,unit=self.position_unit))
+#             self.atom_dictionary[int(atom_number)] = (atomic_symbol,mtr.Qty(value=atomic_position_value,unit=self.position_unit))
 #         except ValueError: # wrong line got passed into this function, so just pass without processing
 #             pass
 #
@@ -933,26 +863,26 @@ class QChemOutput:
 #     def _parse_excited_state(self, line):
 #         (energy_unit_str,energy_value_str) = re.search(r'.*\((.*)\).*=\s*(\d*).*$',line).groups()
 #         if energy_unit_str == 'eV':
-#             excitation_energy_unit = materia.eV
+#             excitation_energy_unit = mtr.eV
 #         else:
 #             raise ValueError('Cannot parse excitation energy unit in TDDFT Excitation section.')
 #         energy_value = float(energy_value_str)#float(line.strip().split()[-1])
-#         self.excitation_energy = materia.Qty(value=energy_value,unit=excitation_energy_unit)
+#         self.excitation_energy = mtr.Qty(value=energy_value,unit=excitation_energy_unit)
 #
 #     def _parse_excited_total_energy(self, line):
 #         *_,tot_energy_val_str,tot_energy_unit_str = line.strip().split()
 #         if tot_energy_unit_str == 'au':
-#             tot_energy_unit = materia.hartree
+#             tot_energy_unit = mtr.hartree
 #         else:
 #             raise ValueError('Cannot parse total energy unit in TDDFT Excitation section.')
-#         self.total_energy = materia.Qty(value=float(tot_energy_val_str),unit=tot_energy_unit)
+#         self.total_energy = mtr.Qty(value=float(tot_energy_val_str),unit=tot_energy_unit)
 #
 #     def _parse_multiplicity(self, line):
 #         *_,self.multiplicity = line.lower().strip().split()
 #
 #     def _parse_transition_dipole(self, line):
 #         *_,x,_,y,_,z,_ = line.strip().split()
-#         self.transition_dipole = materia.Qty(value=np.array([float(x),float(y),float(z)]),unit=materia.debye) # Unit is debye as stated here: http://iopenshell.usc.edu/forum/topic.php?id=3696
+#         self.transition_dipole = mtr.Qty(value=np.array([float(x),float(y),float(z)]),unit=mtr.debye) # Unit is debye as stated here: http://iopenshell.usc.edu/forum/topic.php?id=3696
 #
 #     def _parse_oscillator_strength(self, line):
 #         *_,strength_val_str = line.strip().split()
