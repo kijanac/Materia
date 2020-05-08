@@ -1117,7 +1117,6 @@ class QChemMinimizeKoopmanError(Task):
 
             s = self.defaults(settings)
             s["rem", "hf_sr"] = int(round(1000 * _alpha))
-            print(s["rem", "hf_sr"])
             s["rem", "hf_lr"] = int(round(1000 * (_alpha + beta)))
             s["xc_functional"] = (
                 ("X", "HF", _alpha),
@@ -1144,7 +1143,6 @@ class QChemMinimizeKoopmanError(Task):
                     x_min=[0, 1e-3], x_max=[1 / epsilon, 1], num_evals=num_evals
                 )
             else:
-                print(alpha)
                 return mtr.MaxLIPOTR(functools.partial(_objective, _alpha=alpha)).run(
                     x_min=1e-3, x_max=1, num_evals=num_evals
                 )
