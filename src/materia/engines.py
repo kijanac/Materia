@@ -17,6 +17,7 @@ __all__ = [
     "Openbabel",
     "Packmol",
     "QChem",
+    "XTB",
 ]
 
 
@@ -37,21 +38,30 @@ class Engine:
     def env(self) -> Dict[str, str]:
         return None
 
-    def command(self, inp: str, out: str, work_dir: str) -> str:
-        arg_str = " ".join(self.arguments)
+    def command(
+        self,
+        inp: str,
+        out: str,
+        work_dir: str,
+        arguments: Optional[Iterable[str]] = None,
+    ) -> str:
+        args = list(self.arguments) + list(arguments or [])
+        arg_str = " ".join(args)
         # FIXME: shlex.quote should be used but it doesn't work...
         return shlex.split(f"{self.executable} {arg_str}")
 
-    def execute(self, io: materia.IO) -> str:
+    def execute(self, io: materia.IO, arguments: Optional[Iterable[str]] = None) -> str:
         with io() as _io:
-            cmd = self.command(_io.inp, _io.out, _io.work_dir)
+            cmd = self.command(_io.inp, _io.out, _io.work_dir, arguments)
             with open(_io.inp, "r") as inp:
                 with open(_io.out, "w") as out:
                     env = self.env()
                     if env is None:
-                        subprocess.call(cmd, stdin=inp, stdout=out)
+                        subprocess.call(cmd, stdin=inp, stdout=out, cwd=io.work_dir)
                     else:
-                        subprocess.call(cmd, stdin=inp, stdout=out, env=self.env())
+                        subprocess.call(
+                            cmd, stdin=inp, stdout=out, env=self.env(), cwd=io.work_dir
+                        )
 
             with open(_io.out, "r") as f:
                 return "".join(f.readlines())
@@ -87,8 +97,15 @@ class FragIt(Engine):
     ) -> None:
         super().__init__(executable=executable, arguments=arguments)
 
-    def command(self, inp: str, out: str, work_dir: str) -> str:
-        arg_str = " ".join(self.arguments)
+    def command(
+        self,
+        inp: str,
+        out: str,
+        work_dir: str,
+        arguments: Optional[Iterable[str]] = None,
+    ) -> str:
+        args = list(self.arguments) + list(arguments or [])
+        arg_str = " ".join(args)
         # FIXME: shlex.quote should be used but it doesn't work...
         return shlex.split(f"{self.executable} {inp} {arg_str}")
 
@@ -113,7 +130,6 @@ class GPAW(Engine):
         num_threads: Optional[int] = None,
         arguments: Optional[Iterable[str]] = None,
     ) -> None:
-
         super().__init__(executable, num_processors, num_threads, arguments)
 
     def execute(self, structure_file):
@@ -128,7 +144,6 @@ class Multiwfn(Engine):
         num_threads: Optional[int] = None,
         arguments: Optional[Iterable[str]] = None,
     ) -> None:
-
         super().__init__(executable, num_processors, num_threads, arguments)
 
     def execute(self, io_params: materia.IO) -> str:
@@ -172,8 +187,15 @@ class Openbabel(Engine):
     ) -> None:
         super().__init__(executable=executable, arguments=arguments)
 
-    def command(self, inp: str, out: str, work_dir: str) -> str:
-        arg_str = " ".join(self.arguments)
+    def command(
+        self,
+        inp: str,
+        out: str,
+        work_dir: str,
+        arguments: Optional[Iterable[str]] = None,
+    ) -> str:
+        args = list(self.arguments) + list(arguments or [])
+        arg_str = " ".join(args)
         # FIXME: shlex.quote should be used but it doesn't work...
         return shlex.split(f"{self.executable} {inp} {arg_str}")
 
@@ -205,7 +227,7 @@ class QChem(Engine):
     def env(self) -> Dict[str, str]:
         if self.scratch_dir is None and self.qcenv is None:
             return None
-            
+
         if self.qcenv is not None:
             # FIXME: shell=True needs to be avoided!!
             d = ast.literal_eval(
@@ -227,10 +249,16 @@ class QChem(Engine):
 
         return d
 
-    def command(self, inp: str, out: str, work_dir: str) -> str:
+    def command(
+        self,
+        inp: str,
+        out: str,
+        work_dir: str,
+        arguments: Optional[Iterable[str]] = None,
+    ) -> str:
         cmd = [self.executable]
         if self.arguments is not None:
-            cmd.extend(self.arguments)
+            cmd.extend(list(self.arguments) + list(arguments or []))
         if self.num_processors is not None:
             cmd.append(f"-np {self.num_processors}")
         if self.num_threads is not None:
@@ -238,3 +266,39 @@ class QChem(Engine):
 
         # FIXME: shlex.quote should be used but it doesn't work...
         return shlex.split(" ".join(cmd + [inp, out]))
+
+
+class XTB(Engine):
+    def __init__(
+        self,
+        executable: Optional[str] = "xtb",
+        arguments: Optional[Iterable[str]] = None,
+    ) -> None:
+        super().__init__(executable=executable, arguments=arguments)
+
+    def command(
+        self,
+        out: str,
+        work_dir: str,
+        coord: str,
+        arguments: Optional[Iterable[str]] = None,
+    ) -> str:
+        args = list(self.arguments) + list(arguments or [])
+        arg_str = " ".join(args)
+        # FIXME: shlex.quote should be used but it doesn't work...
+        return shlex.split(f"{self.executable} {coord} {arg_str}")
+
+    def execute(
+        self, coord: str, io: materia.IO, arguments: Optional[Iterable[str]] = None
+    ) -> str:
+        with io() as _io:
+            cmd = self.command(_io.out, _io.work_dir, mtr.expand(coord), arguments)
+            with open(_io.out, "w") as out:
+                env = self.env()
+                if env is None:
+                    subprocess.call(cmd, stdout=out, cwd=io.work_dir)
+                else:
+                    subprocess.call(cmd, stdout=out, env=self.env(), cwd=io.work_dir)
+
+            with open(_io.out, "r") as f:
+                return "".join(f.readlines())
