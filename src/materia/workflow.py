@@ -213,8 +213,9 @@ def _consume(
             # NOTE: this is safe because the node assigned to a task never changes while the workflow runs
             task = tasks[node]
             # NOTE: this is safe because 1.) the dependencies of each task can only be changed by tasks which precede it, i.e. by the time a task is running, no actions can alter its dependencies, and 2.) only one consumer will write to results[node] at a time because only one consumer is running a particular task at a time
-            result = task.run(*(results[v] for k,v in links[node] if k is None),
-                **{k: results[v] for k, v in links[node] if k is not None}
+            result = task.run(
+                *(results[v] for k, v in links[node] if k is None),
+                **{k: results[v] for k, v in links[node] if k is not None},
             )
 
             try:
