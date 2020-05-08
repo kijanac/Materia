@@ -26,14 +26,14 @@ class Excitation:
         energy: mtr.Quantity,
         oscillator_strength: Optional[float, mtr.Quantity],
         transition_moment=None,
-        multiplicity=None,
+        symmetry=None,
         total_energy=None,
         contributions=None,
     ) -> None:
         self.energy = energy
         self.oscillator_strength = oscillator_strength
         self.transition_moment = transition_moment
-        self.multiplicity = multiplicity
+        self.symmetry = symmetry
         self.total_energy = total_energy
         self.contributions = contributions
 
@@ -41,6 +41,16 @@ class Excitation:
 class ExcitationSpectrum:
     def __init__(self, excitations: Iterable[Excitation]) -> None:
         self.excitations = excitations
+
+    def to_gaussian(self) -> str:
+        return "\n".join(
+            f"Excited State {i+1} {1 if exc.symmetry == 'Singlet' else 2} {exc.energy.convert(mtr.eV).value}\n"
+            + "".join(
+                f"    {e} -> {h}    {coeff}\n"
+                for (e, _), (h, _), coeff in exc.contributions
+            )
+            for i, exc in enumerate(self.excitations)
+        )
 
     # def plot_stick_spectrum(self):
     #     linecoll = matplotlib.collections.LineCollection(
