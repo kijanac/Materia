@@ -62,16 +62,39 @@ class ExcitationSpectrum:
 
     #     plt.show()
 
-    def broaden_spectrum(
+    def broaden(
         self, fwhm: mtr.Quantity
     ) -> Callable[Iterable[Union[int, float]], Iterable[Union[int, float]]]:
         def f(energies: mtr.Quantity) -> Iterable[Union[int, float]]:
             s = 0
+            # for excitation in self.excitations:
+            #     x = (energies - excitation.energy) / fwhm
+            #     x = np.array([e.value for e in x])
+            #     s += excitation.oscillator_strength * np.exp(-np.log(2) * (2 * x ** 2))
+            # return s
             for excitation in self.excitations:
                 x = (energies - excitation.energy) / fwhm
                 x = np.array([e.value for e in x])
-                s += excitation.oscillator_strength * np.exp(-np.log(2) * (2 * x ** 2))
-            return s
+                s += excitation.oscillator_strength * np.exp(-0.5 * x ** 2)
+            return s/(np.sqrt(2*np.pi)*fwhm)
+
+        return f
+
+    def dipole_strength(self, fwhm: mtr.Quantity) -> Callable[Iterable[Union[int,float]],Iterable[Union[int,float]]]:
+        def f(energies: mtr.Quantity) -> Iterable[Union[int, float]]:
+            return self.broaden(fwhm)(energies)#/energies
+
+        return f
+
+    def cross_section(self, fwhm: mtr.Quantity) -> Callable[Iterable[Union[int,float]],Iterable[Union[int,float]]]:
+        def f(energies: mtr.Quantity) -> Iterable[Union[int, float]]:
+            return (np.pi*mtr.e**2*mtr.hbar/(2*mtr.epsilon_0*mtr.m_e*mtr.c))*self.dipole_strength(fwhm)(energies)
+
+        return f
+
+    def molar_absorptivity(self, fwhm: mtr.Quantity) -> Callable[Iterable[Union[int,float]],Iterable[Union[int,float]]]:
+        def f(energies: mtr.Quantity) -> Iterable[Union[int, float]]:
+            return (mtr.N_A*self.cross_section(fwhm)(energies)/1e3/np.log(10)).convert(mtr.L/mtr.mol/mtr.cm)
 
         return f
 
