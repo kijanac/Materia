@@ -4,9 +4,6 @@ import materia as mtr
 # UNITLESS
 unitless = mtr.Quantity()
 
-# QUANTITY
-mole = mol = mtr.Quantity(prefactor=scipy.constants.N_A, N=1)
-
 # LENGTH
 meter = m = mtr.Quantity(L=1)
 centimeter = cm = (1e-2 * meter).to_unit()
@@ -181,3 +178,5 @@ hbar = scipy.constants.hbar * joule * second
 a_0 = scipy.constants.value("Bohr radius") * meter
 kB = scipy.constants.k * joule / kelvin
 epsilon_0 = scipy.constants.epsilon_0 * farad / meter
+m_e = scipy.constants.m_e * kilogram
+N_A = scipy.constants.N_A/mole
