@@ -649,50 +649,31 @@ class MultiwfnVolume(MultiwfnBaseTask):
 
 
 class PackmolSolvate(ExternalTask):
-    def __init__(
-        self,
-        shells: int,
-        tolerance: float,
-        engine: mtr.PackmolEngine,
-        io: mtr.IO,
-        number_density: Optional[mtr.Qty] = None,
-        mass_density: Optional[mtr.Qty] = None,
-        handlers: Optional[Iterable[mtr.Handler]] = None,
-        name: Optional[str] = None,
-    ) -> None:
-        super().__init__(engine=engine, io=io, handlers=handlers, name=name)
-
-        self.shells = shells
-        self.number_density = number_density
-        self.mass_density = mass_density
-
-        self.tolerance = tolerance
-
-    def _packing_params(self, solvent: mtr.Structure) -> Tuple[int, mtr.Qty]:
-        if self.number_density is None:
-            if self.mass_density is None:
-                raise ValueError(
-                    "Either mass density or number density required to pack shells."
-                )
-            if isinstance(solvent, str):
-                solvent = mtr.Structure.read(solvent)
-            number_density = self.mass_density / solvent.mass
-        else:
-            number_density = self.number_density
-
+    def _packing_params(self, shells: int, number_density: Optional[mtr.Qty] = None) -> Tuple[int, mtr.Qty]:
         # these are the ideal gas packing values:
-        n = int((2 / 3) * self.shells ** 3)
-        sphere_radius = self.shells * (2 * np.pi * number_density) ** (-1 / 3)
+        n = int((2 / 3) * shells ** 3)
+        sphere_radius = shells * (2 * np.pi * number_density) ** (-1 / 3)
 
         return n, sphere_radius
 
     def run(
-        self, solute: Union[mtr.Structure, str], solvent: Union[mtr.Structure, str],
+        self,
+        solute: Union[mtr.Structure, str],
+        solvent: Union[mtr.Structure, str],
+        shells: int,
+        tolerance: float,
+        solvent_density: mtr.Qty,
     ) -> mtr.Structure:
-        n, sphere_radius = self._packing_params(solvent=solvent)
+        if solvent_density.dimension == mtr.Dimension(M=1,L=-3):
+            number_density = solvent_density/solvent.mass
+        else:
+            number_density = solvent_density
+
+        n, sphere_radius = self._packing_params(shells=shells, number_density=number_density)
+        
         with self.io() as io:
             inp = mtr.PackmolInput(
-                tolerance=self.tolerance,
+                tolerance=tolerance,
                 filetype="xyz",
                 output_name=mtr.expand(path="packed", dir=io.work_dir),
             )
@@ -749,6 +730,7 @@ class QChemBaseTask(ExternalTask):
         self,
         structure: Union[mtr.QChemStructure, mtr.QChemFragments, mtr.Structure],
         settings: Optional[mtr.Settings] = None,
+        arguments: Optional[Iterable[str]] = None,
     ) -> Any:
         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
 
@@ -765,7 +747,7 @@ class QChemBaseTask(ExternalTask):
         with self.io() as io:
             inp.write(io.inp)
 
-            self.engine.execute(self.io)
+            self.engine.execute(self.io,arguments=arguments)
 
             return self.parse(io.out)
 
