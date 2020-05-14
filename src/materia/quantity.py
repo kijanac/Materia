@@ -6,7 +6,7 @@ import copy
 import numpy as np
 
 
-__all__ = ["Dimension", "Quantity"]  # ,"qty_wrap"]
+__all__ = ["Dimension", "Quantity"]
 
 
 class Dimension(collections.abc.MutableMapping):
@@ -141,22 +141,6 @@ def _precast(func):
 
     return dec
 
-
-# def qty_wrap(*attrs):
-#     def dec_factory(func):
-#         def dec(self,*args,**kwargs):
-#             attr_units = tuple(getattr(self,attr).unit for attr in attrs)
-#             for attr in attrs:
-#                 setattr(self,attr,getattr(self,attr).value)
-#             result = func(self,*(a.value if isinstance(a,Quantity) else a for a in args),**{k:v.value if isinstance(v,Quantity) else v for k,v in kwargs.items()})
-#             for attr,unit in zip(attrs,attr_units):
-#                 setattr(self,attr,getattr(self,attr)*unit)
-#             return result
-#         return dec
-
-#     return dec_factory
-
-
 class Quantity(collections.abc.Sequence):
     def __init__(
         self,
@@ -187,12 +171,6 @@ class Quantity(collections.abc.Sequence):
         # FIXME: how to preserve value dtype?
         return Quantity(prefactor=self.prefactor * self.value, **self.dimension)
 
-    # def is_dimensionless(self) -> bool:
-    #     return all(v == 0 for v in self.dimension.values())
-
-    # def norm(self):
-    #     return np.linalg.norm(self.value)*self.unit
-
     def convert(self, convert_to: Quantity) -> Quantity:
         if self.dimension != convert_to.dimension:
             raise ValueError("Cannot convert quantities with different dimensions.")
@@ -204,9 +182,6 @@ class Quantity(collections.abc.Sequence):
                 **convert_to.dimension,
             )
         return Quantity(self.value, self.prefactor, **self.dimension)
-
-    # def trace(self, *args, **kwargs):
-    #     return self.value.trace(*args, **kwargs) * self.unit
 
     @property
     def T(self):
