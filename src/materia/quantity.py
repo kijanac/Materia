@@ -141,6 +141,7 @@ def _precast(func):
 
     return dec
 
+
 class Quantity(collections.abc.Sequence):
     def __init__(
         self,

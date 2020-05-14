@@ -649,7 +649,9 @@ class MultiwfnVolume(MultiwfnBaseTask):
 
 
 class PackmolSolvate(ExternalTask):
-    def _packing_params(self, shells: int, number_density: Optional[mtr.Qty] = None) -> Tuple[int, mtr.Qty]:
+    def _packing_params(
+        self, shells: int, number_density: Optional[mtr.Qty] = None
+    ) -> Tuple[int, mtr.Qty]:
         # these are the ideal gas packing values:
         n = int((2 / 3) * shells ** 3)
         sphere_radius = shells * (2 * np.pi * number_density) ** (-1 / 3)
@@ -664,13 +666,15 @@ class PackmolSolvate(ExternalTask):
         tolerance: float,
         solvent_density: mtr.Qty,
     ) -> mtr.Structure:
-        if solvent_density.dimension == mtr.Dimension(M=1,L=-3):
-            number_density = solvent_density/solvent.mass
+        if solvent_density.dimension == mtr.Dimension(M=1, L=-3):
+            number_density = solvent_density / solvent.mass
         else:
             number_density = solvent_density
 
-        n, sphere_radius = self._packing_params(shells=shells, number_density=number_density)
-        
+        n, sphere_radius = self._packing_params(
+            shells=shells, number_density=number_density
+        )
+
         with self.io() as io:
             inp = mtr.PackmolInput(
                 tolerance=tolerance,
@@ -747,7 +751,7 @@ class QChemBaseTask(ExternalTask):
         with self.io() as io:
             inp.write(io.inp)
 
-            self.engine.execute(self.io,arguments=arguments)
+            self.engine.execute(self.io, arguments=arguments)
 
             return self.parse(io.out)
 

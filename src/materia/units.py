@@ -179,4 +179,4 @@ a_0 = scipy.constants.value("Bohr radius") * meter
 kB = scipy.constants.k * joule / kelvin
 epsilon_0 = scipy.constants.epsilon_0 * farad / meter
 m_e = scipy.constants.m_e * kilogram
-N_A = scipy.constants.N_A/mole
+N_A = scipy.constants.N_A / mole
