@@ -928,7 +928,9 @@ class QChemKoopmanError(Task):
         ea = energy - anion
         ip = cation - energy
 
-        J_squared = (ea + lumo) ** 2 + (ip + homo) ** 2
+        J_squared = (ip + homo) ** 2
+        if ea > 0 * ea.unit:
+            J_squared += (ea + lumo) ** 2
 
         return np.sqrt(J_squared.convert(mtr.eV ** 2).value.item())
 
