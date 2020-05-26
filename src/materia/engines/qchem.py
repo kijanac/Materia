@@ -622,7 +622,7 @@ class QChemLPSCF(QChemBaseTask):
         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
 
         # FIXME: this is essentially a hotpatch to handle fragments - come up with something more elegant/sensible ASAP
-        inp = mtr.QChemInput(*fragments
+        inp = mtr.QChemInput(*fragments,
             settings=self.defaults(s),
         )
 
