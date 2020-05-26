@@ -46,6 +46,7 @@ class QChemInput:
             for block_name, block_params in self.settings.d.items()
         )
 
+
 def _molecule_to_structure_block(
     molecule: mtr.Molecule,
     charge: Optional[int] = None,
@@ -117,6 +118,7 @@ def _xc_functional_str(*functional_tuples: Tuple[str, str, str]) -> str:
     s += "$end\n"
 
     return s
+
 
 # --------------------------- OUTPUT ----------------------------- #
 
@@ -338,7 +340,9 @@ class QChemOutput:
     def total_energy(self) -> mtr.Quantity:
         return cclib.io.ccread(output).scfenergies * mtr.eV
 
+
 # ------------------------ ENGINE -------------------------- #
+
 
 class QChem(Engine):
     def __init__(
@@ -411,6 +415,7 @@ class QChem(Engine):
         return QChemAIMD(engine=self, io=io, handlers=handlers, name=name)
 
     def koopman_error(
+        self,
         gs_io: mtr.IO,
         cation_io: mtr.IO,
         anion_io: mtr.IO,
@@ -427,6 +432,7 @@ class QChem(Engine):
         )
 
     def koopman_error_lpscf(
+        self,
         gs_io: mtr.IO,
         cation_io: mtr.IO,
         anion_io: mtr.IO,
@@ -622,9 +628,7 @@ class QChemLPSCF(QChemBaseTask):
         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
 
         # FIXME: this is essentially a hotpatch to handle fragments - come up with something more elegant/sensible ASAP
-        inp = mtr.QChemInput(*fragments,
-            settings=self.defaults(s),
-        )
+        inp = mtr.QChemInput(*fragments, settings=self.defaults(s),)
 
         with self.io() as io:
             inp.write(io.inp)
@@ -1377,5 +1381,3 @@ class QChemSinglePointFrontier(QChemBaseTask):
 #                     k + " " * (max_length - len(k) + 1) + str(settings[k]) for k in keys
 #                 )
 #             )
-
-
