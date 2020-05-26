@@ -496,7 +496,7 @@ def _structure_from_identifier(
 ) -> mtr.Structure:
     # for motivation on generating 25 (as opposed to, say, 10 or 100) conformers, see:
     # https://github.com/rdkit/UGM_2015/blob/master/Presentations/ETKDG.SereinaRiniker.pdf
-    rdkit.RDLogger.DisableLog('rdApp.*')
+    rdkit.RDLogger.DisableLog("rdApp.*")
     if smiles is not None:
         mol = rdkit.Chem.MolFromSmiles(smiles, sanitize=False)
     elif inchi is not None:
