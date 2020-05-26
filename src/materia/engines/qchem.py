@@ -20,25 +20,37 @@ from ..tasks import ExternalTask, Task
 __all__ = ["QChem", "QChemInput", "QChemOutput"]
 
 
-# FIXME: make it possible to take user-defined charges & multiplicities, both for the overall structure and for fragments?
 class QChemInput:
-    def __init__(self, *molecules: mtr.Molecule, settings: mtr.Settings,) -> None:
+    def __init__(
+        self,
+        *molecules: mtr.Molecule,
+        settings: mtr.Settings,
+        charges: Optional[Iterable[int]] = None,
+        multiplicities: Optional[Iterable[int]] = None,
+        total_charge: Optional[int] = None,
+        total_multiplicity: Optional[int] = None,
+    ) -> None:
         self.molecules = molecules
         self.settings = settings
+        self.charges = charges or [m.charge for m in self.molecules]
+        self.multiplicities = multiplicities or [m.multiplicity for m in self.molecules]
+        # FIXME: seems more rigorously correct to determine the total charge and multiplicity from combined structures rather than just adding individual charges & multiplicities
+        self.total_charge = total_charge or sum(self.charges)
+        self.total_multiplicity = total_multiplicity or self.total_charge % 2 + 1
 
     def write(self, filepath: str) -> None:
         with open(mtr.expand(filepath), "w") as f:
             f.write(str(self))
 
     def __str__(self) -> str:
-        # FIXME: seems more rigorously correct to determine the total charge and multiplicity from combined structures rather than just adding individual charges & multiplicities
-        charge = sum(m.charge for m in self.molecules)
-        multiplicity = charge % 2 + 1
         total_block = (
-            f"  {charge} {multiplicity}\n--\n" if len(self.molecules) > 1 else ""
+            f"  {self.total_charge} {self.total_multiplicity}\n--\n"
+            if len(self.molecules) > 1
+            else ""
         )
         molecule_block = total_block + "\n--\n".join(
-            _molecule_to_structure_block(molecule=m) for m in self.molecules
+            _molecule_to_structure_block(molecule=m, charge=c, multiplicity=mult)
+            for m, c, mult in zip(self.molecules, self.charges, self.multiplicities)
         )
 
         return f"$molecule\n{molecule_block}\n$end\n" + "\n".join(
@@ -431,38 +443,38 @@ class QChem(Engine):
             name=name,
         )
 
-    def koopman_error_lpscf(
-        self,
-        gs_io: mtr.IO,
-        cation_io: mtr.IO,
-        anion_io: mtr.IO,
-        handlers: Optional[Iterable[mtr.Handler]] = None,
-        name: Optional[str] = None,
-    ) -> QChemKoopmanErrorLPSCF:
-        return QChemKoopmanErrorLPSCF(
-            engine=self,
-            gs_io=gs_io,
-            cation_io=cation_io,
-            anion_io=anion_io,
-            handlers=handlers,
-            name=name,
-        )
+    # def koopman_error_lpscf(
+    #     self,
+    #     gs_io: mtr.IO,
+    #     cation_io: mtr.IO,
+    #     anion_io: mtr.IO,
+    #     handlers: Optional[Iterable[mtr.Handler]] = None,
+    #     name: Optional[str] = None,
+    # ) -> QChemKoopmanErrorLPSCF:
+    #     return QChemKoopmanErrorLPSCF(
+    #         engine=self,
+    #         gs_io=gs_io,
+    #         cation_io=cation_io,
+    #         anion_io=anion_io,
+    #         handlers=handlers,
+    #         name=name,
+    #     )
 
-    def lpscf(
-        self,
-        io: mtr.IO,
-        handlers: Optional[Iterable[mtr.Handler]] = None,
-        name: Optional[str] = None,
-    ) -> QChemLPSCF:
-        return QChemLPSCF(engine=self, io=io, handlers=handlers, name=name)
+    # def lpscf(
+    #     self,
+    #     io: mtr.IO,
+    #     handlers: Optional[Iterable[mtr.Handler]] = None,
+    #     name: Optional[str] = None,
+    # ) -> QChemLPSCF:
+    #     return QChemLPSCF(engine=self, io=io, handlers=handlers, name=name)
 
-    def lpscfrs(
-        self,
-        io: mtr.IO,
-        handlers: Optional[Iterable[mtr.Handler]] = None,
-        name: Optional[str] = None,
-    ) -> QChemLPSCFRS:
-        return QChemLPSCFRS(engine=self, io=io, handlers=handlers, name=name)
+    # def lpscfrs(
+    #     self,
+    #     io: mtr.IO,
+    #     handlers: Optional[Iterable[mtr.Handler]] = None,
+    #     name: Optional[str] = None,
+    # ) -> QChemLPSCFRS:
+    #     return QChemLPSCFRS(engine=self, io=io, handlers=handlers, name=name)
 
     def lrtddft(
         self,
@@ -482,15 +494,15 @@ class QChem(Engine):
             engine=self, io=io, handlers=handlers, name=name
         )
 
-    def minimize_koopman_error_lpscf(
-        self,
-        io: mtr.IO,
-        handlers: Optional[Iterable[mtr.Handler]] = None,
-        name: Optional[str] = None,
-    ) -> QChemMinimizeKoopmanErrorLPSCF:
-        return QChemMinimizeKoopmanErrorLPSCF(
-            engine=self, io=io, handlers=handlers, name=name
-        )
+    # def minimize_koopman_error_lpscf(
+    #     self,
+    #     io: mtr.IO,
+    #     handlers: Optional[Iterable[mtr.Handler]] = None,
+    #     name: Optional[str] = None,
+    # ) -> QChemMinimizeKoopmanErrorLPSCF:
+    #     return QChemMinimizeKoopmanErrorLPSCF(
+    #         engine=self, io=io, handlers=handlers, name=name
+    #     )
 
     def optimize(
         self,
@@ -597,65 +609,65 @@ class QChemAIMD(QChemBaseTask):
         return settings
 
 
-class QChemLPSCF(QChemBaseTask):
-    def parse(self, output: str) -> Any:
-        try:
-            energy = cclib.io.ccread(output).scfenergies * mtr.eV
-        except AttributeError:
-            energy = None
+# class QChemLPSCF(QChemBaseTask):
+#     def parse(self, output: str) -> Any:
+#         try:
+#             energy = cclib.io.ccread(output).scfenergies * mtr.eV
+#         except AttributeError:
+#             energy = None
 
-        return energy
+#         return energy
 
-    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
-            settings["rem", "exchange"] = "HF"
-        if ("rem", "basis") not in settings:
-            settings["rem", "basis"] = "3-21G"
-        if ("rem", "jobtype") not in settings:
-            settings["rem", "jobtype"] = "sp"
-        if ("rem", "frgm_method") not in settings:
-            settings["rem", "frgm_method"] = "stoll"
-        if ("rem_frgm", "scf_convergence") not in settings:
-            settings["rem_frgm", "scf_convergence"] = 2
-        if ("rem_frgm", "thresh") not in settings:
-            settings["rem_frgm", "thresh"] = 5
+#     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
+#         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+#             settings["rem", "exchange"] = "HF"
+#         if ("rem", "basis") not in settings:
+#             settings["rem", "basis"] = "3-21G"
+#         if ("rem", "jobtype") not in settings:
+#             settings["rem", "jobtype"] = "sp"
+#         if ("rem", "frgm_method") not in settings:
+#             settings["rem", "frgm_method"] = "stoll"
+#         if ("rem_frgm", "scf_convergence") not in settings:
+#             settings["rem_frgm", "scf_convergence"] = 2
+#         if ("rem_frgm", "thresh") not in settings:
+#             settings["rem_frgm", "thresh"] = 5
 
-        return settings
+#         return settings
 
-    def run(
-        self, *fragments: mtr.Molecule, settings: Optional[mtr.Settings] = None,
-    ) -> Any:
-        s = mtr.Settings() if settings is None else copy.deepcopy(settings)
+#     def run(
+#         self, *fragments: mtr.Molecule, settings: Optional[mtr.Settings] = None,
+#     ) -> Any:
+#         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
 
-        # FIXME: this is essentially a hotpatch to handle fragments - come up with something more elegant/sensible ASAP
-        inp = mtr.QChemInput(*fragments, settings=self.defaults(s),)
+#         # FIXME: this is essentially a hotpatch to handle fragments - come up with something more elegant/sensible ASAP
+#         inp = mtr.QChemInput(*fragments, settings=self.defaults(s),)
 
-        with self.io() as io:
-            inp.write(io.inp)
+#         with self.io() as io:
+#             inp.write(io.inp)
 
-            self.engine.execute(self.io)
+#             self.engine.execute(self.io)
 
-            return self.parse(io.out)
+#             return self.parse(io.out)
 
 
-class QChemLPSCFRS(QChemBaseTask):
-    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
-            settings["rem", "exchange"] = "HF"
-        if ("rem", "basis") not in settings:
-            settings["rem", "basis"] = "3-21G"
-        if ("rem", "jobtype") not in settings:
-            settings["rem", "jobtype"] = "sp"
-        if ("rem", "frgm_method") not in settings:
-            settings["rem", "frgm_method"] = "stoll"
-        if ("rem_frgm", "scf_convergence") not in settings:
-            settings["rem_frgm", "scf_convergence"] = 2
-        if ("rem_frgm", "thresh") not in settings:
-            settings["rem_frgm", "thresh"] = 5
-        if ("rem_frgm", "frgm_lpcorr") not in settings:
-            settings["rem_frgm", "frgm_lpcorr"] = "rs_exact_scf"
+# class QChemLPSCFRS(QChemBaseTask):
+#     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
+#         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+#             settings["rem", "exchange"] = "HF"
+#         if ("rem", "basis") not in settings:
+#             settings["rem", "basis"] = "3-21G"
+#         if ("rem", "jobtype") not in settings:
+#             settings["rem", "jobtype"] = "sp"
+#         if ("rem", "frgm_method") not in settings:
+#             settings["rem", "frgm_method"] = "stoll"
+#         if ("rem_frgm", "scf_convergence") not in settings:
+#             settings["rem_frgm", "scf_convergence"] = 2
+#         if ("rem_frgm", "thresh") not in settings:
+#             settings["rem_frgm", "thresh"] = 5
+#         if ("rem_frgm", "frgm_lpcorr") not in settings:
+#             settings["rem_frgm", "frgm_lpcorr"] = "rs_exact_scf"
 
-        return settings
+#         return settings
 
 
 class QChemKoopmanError(Task):
@@ -701,27 +713,22 @@ class QChemKoopmanError(Task):
         cation_sp = self.engine.single_point(self.cation_io, name="cation")
         anion_sp = self.engine.single_point(self.anion_io, name="anion")
 
+        cation = molecule.copy()
+        cation.charge += 1
+        cation.multiplicity = cation.multiplicity % 2 + 1
+
+        anion = molecule.copy()
+        anion.charge -= 1
+        anion.multiplicity = anion.multiplicity % 2 + 1
+
         neutral_sp.requires(
-            molecule=mtr.QChemStructure(
-                molecule, charge=molecule.charge, multiplicity=molecule.multiplicity
-            ),
-            settings=input_settings,
+            molecule=molecule, settings=input_settings,
         )
         cation_sp.requires(
-            structure=mtr.QChemStructure(
-                structure,
-                charge=molecule.charge + 1,
-                multiplicity=(molecule.multiplicity + 1) % 2,
-            ),
-            settings=input_settings,
+            molecule=cation, settings=input_settings,
         )
         anion_sp.requires(
-            structure=mtr.QChemStructure(
-                structure,
-                charge=molecule.charge - 1,
-                multiplicity=(molecule.multiplicity + 1) % 2,
-            ),
-            settings=input_settings,
+            molecule=anion, settings=input_settings,
         )
 
         wf = Workflow(neutral_sp, cation_sp, anion_sp)
@@ -742,110 +749,104 @@ class QChemKoopmanError(Task):
         return np.sqrt(J_squared.convert(mtr.eV ** 2).value.item()) * mtr.eV
 
 
-class QChemKoopmanErrorLPSCF(Task):
-    def __init__(
-        self,
-        engine: mtr.Engine,
-        gs_io: mtr.IO,
-        cation_io: mtr.IO,
-        anion_io: mtr.IO,
-        handlers: Optional[Iterable[mtr.Handler]] = None,
-        name: Optional[str] = None,
-    ) -> None:
-        super().__init__(
-            (engine.num_threads or 1) * (engine.num_processors or 1),
-            handlers=handlers,
-            name=name,
-        )
-        self.engine = engine
-        self.gs_io = gs_io
-        self.cation_io = cation_io
-        self.anion_io = anion_io
+# class QChemKoopmanErrorLPSCF(Task):
+#     def __init__(
+#         self,
+#         engine: mtr.Engine,
+#         gs_io: mtr.IO,
+#         cation_io: mtr.IO,
+#         anion_io: mtr.IO,
+#         handlers: Optional[Iterable[mtr.Handler]] = None,
+#         name: Optional[str] = None,
+#     ) -> None:
+#         super().__init__(
+#             (engine.num_threads or 1) * (engine.num_processors or 1),
+#             handlers=handlers,
+#             name=name,
+#         )
+#         self.engine = engine
+#         self.gs_io = gs_io
+#         self.cation_io = cation_io
+#         self.anion_io = anion_io
 
-    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method") not in settings:
-            settings["rem", "exchange"] = "hf"
-        if ("rem", "basis") not in settings:
-            settings["rem", "basis"] = "3-21G"
-        if ("rem", "jobtype") not in settings:
-            settings["rem", "jobtype"] = "sp"
+#     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
+#         if ("rem", "exchange") not in settings and ("rem", "method") not in settings:
+#             settings["rem", "exchange"] = "hf"
+#         if ("rem", "basis") not in settings:
+#             settings["rem", "basis"] = "3-21G"
+#         if ("rem", "jobtype") not in settings:
+#             settings["rem", "jobtype"] = "sp"
 
-        return settings
+#         return settings
 
-    def run(
-        self,
-        *fragments: mtr.Structure,
-        active_fragment: int,
-        settings: Optional[mtr.Settings] = None,
-        num_consumers: Optional[int] = 1,
-    ) -> float:
-        s = mtr.Settings() if settings is None else copy.deepcopy(settings)
+#     def run(
+#         self,
+#         *fragments: mtr.Structure,
+#         active_fragment: int,
+#         settings: Optional[mtr.Settings] = None,
+#         num_consumers: Optional[int] = 1,
+#     ) -> float:
+#         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
 
-        # if ("structure", "charge") not in settings:
-        #     settings["structure", "charge"] = 0
-        #     # FIXME: rather than guessing 0, use rdkit.Chem.rdmolops.GetFormalCharge?
-        # if ("structure", "multiplicity") not in settings:
-        #     settings["structure", "multiplicity"] = 1
+#         gs_charges = [0] * len(fragments)
+#         gs_multiplicities = [1] * len(fragments)
 
-        gs_charges = [0] * len(fragments)
-        gs_multiplicities = [1] * len(fragments)
+#         cation_charges = gs_charges.copy()
+#         cation_multiplicities = gs_multiplicities.copy()
+#         cation_charges[active_fragment] += 1
+#         cation_multiplicities[active_fragment] = 2
 
-        cation_charges = gs_charges.copy()
-        cation_multiplicities = gs_multiplicities.copy()
-        cation_charges[active_fragment] += 1
-        cation_multiplicities[active_fragment] = 2
+#         anion_charges = gs_charges.copy()
+#         anion_multiplicities = gs_multiplicities.copy()
+#         anion_charges[active_fragment] -= 1
+#         anion_multiplicities[active_fragment] = 2
 
-        anion_charges = gs_charges.copy()
-        anion_multiplicities = gs_multiplicities.copy()
-        anion_charges[active_fragment] -= 1
-        anion_multiplicities[active_fragment] = 2
+#         input_settings = self.defaults(s)
 
-        input_settings = self.defaults(s)
+#         gs = self.engine.single_point_frontier(self.gs_io, name="gs")
+#         gs_structure = mtr.QChemFragments(
+#             fragments,
+#             gs_charges,
+#             gs_multiplicities,
+#             total_charge=sum(gs_charges),
+#             total_multiplicity=1,
+#         )
+#         gs.requires(structure=gs_structure, settings=input_settings)
 
-        gs = QChemSinglePointFrontier(self.engine, self.gs_io, name="gs")
-        gs_structure = mtr.QChemFragments(
-            fragments,
-            gs_charges,
-            gs_multiplicities,
-            total_charge=sum(gs_charges),
-            total_multiplicity=1,
-        )
-        gs.requires(structure=gs_structure, settings=input_settings)
+#         cation = self.engine.single_point(self.cation_io, name="cation")
+#         cation_structure = mtr.QChemFragments(
+#             fragments,
+#             cation_charges,
+#             cation_multiplicities,
+#             total_charge=sum(cation_charges),
+#             total_multiplicity=2,
+#         )
+#         cation.requires(structure=cation_structure, settings=input_settings)
 
-        cation = QChemSinglePoint(self.engine, self.cation_io, name="cation")
-        cation_structure = mtr.QChemFragments(
-            fragments,
-            cation_charges,
-            cation_multiplicities,
-            total_charge=sum(cation_charges),
-            total_multiplicity=2,
-        )
-        cation.requires(structure=cation_structure, settings=input_settings)
+#         anion = self.engine.single_point(self.anion_io, name="anion")
+#         anion_structure = mtr.QChemFragments(
+#             fragments,
+#             anion_charges,
+#             anion_multiplicities,
+#             total_charge=sum(anion_charges),
+#             total_multiplicity=2,
+#         )
+#         anion.requires(structure=anion_structure, settings=input_settings)
 
-        anion = QChemSinglePoint(self.engine, self.anion_io, name="anion")
-        anion_structure = mtr.QChemFragments(
-            fragments,
-            anion_charges,
-            anion_multiplicities,
-            total_charge=sum(anion_charges),
-            total_multiplicity=2,
-        )
-        anion.requires(structure=anion_structure, settings=input_settings)
+#         wf = Workflow(gs, cation, anion)
 
-        wf = Workflow(gs, cation, anion)
+#         out = wf.run(available_cores=self.num_cores, num_consumers=num_consumers)
 
-        out = wf.run(available_cores=self.num_cores, num_consumers=num_consumers)
+#         energy, homo, lumo = out["gs"]
+#         cation = out["cation"]
+#         anion = out["anion"]
 
-        energy, homo, lumo = out["gs"]
-        cation = out["cation"]
-        anion = out["anion"]
+#         ea = energy - anion
+#         ip = cation - energy
 
-        ea = energy - anion
-        ip = cation - energy
+#         J_squared = (ea + lumo) ** 2 + (ip + homo) ** 2
 
-        J_squared = (ea + lumo) ** 2 + (ip + homo) ** 2
-
-        return np.sqrt(J_squared.convert(mtr.eV ** 2).value.item())
+#         return np.sqrt(J_squared.convert(mtr.eV ** 2).value.item())
 
 
 class QChemLRTDDFT(QChemBaseTask):
@@ -945,79 +946,79 @@ class QChemMinimizeKoopmanError(Task):
         return omega, alpha, J * mtr.eV
 
 
-class QChemMinimizeKoopmanErrorLPSCF(Task):
-    def __init__(
-        self,
-        engine: mtr.Engine,
-        io: mtr.IO,
-        handlers: Optional[Iterable[mtr.Handler]] = None,
-        name: Optional[str] = None,
-    ) -> None:
-        super().__init__(
-            (engine.num_threads or 1) * (engine.num_processors or 1),
-            handlers=handlers,
-            name=name,
-        )
-        self.engine = engine
-        self.io = io
+# class QChemMinimizeKoopmanErrorLPSCF(Task):
+#     def __init__(
+#         self,
+#         engine: mtr.Engine,
+#         io: mtr.IO,
+#         handlers: Optional[Iterable[mtr.Handler]] = None,
+#         name: Optional[str] = None,
+#     ) -> None:
+#         super().__init__(
+#             (engine.num_threads or 1) * (engine.num_processors or 1),
+#             handlers=handlers,
+#             name=name,
+#         )
+#         self.engine = engine
+#         self.io = io
 
-    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "basis") not in settings:
-            settings["rem", "basis"] = "3-21G"
-        if ("rem", "jobtype") not in settings:
-            settings["rem", "jobtype"] = "sp"
-        if ("rem", "exchange") not in settings:
-            settings["rem", "exchange"] = "gen"
-        if ("rem", "lrc_dft") not in settings:
-            settings["rem", "lrc_dft"] = True
-        if ("rem", "src_dft") not in settings:
-            settings["rem", "src_dft"] = 2
+#     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
+#         if ("rem", "basis") not in settings:
+#             settings["rem", "basis"] = "3-21G"
+#         if ("rem", "jobtype") not in settings:
+#             settings["rem", "jobtype"] = "sp"
+#         if ("rem", "exchange") not in settings:
+#             settings["rem", "exchange"] = "gen"
+#         if ("rem", "lrc_dft") not in settings:
+#             settings["rem", "lrc_dft"] = True
+#         if ("rem", "src_dft") not in settings:
+#             settings["rem", "src_dft"] = 2
 
-        return settings
+#         return settings
 
-    def run(
-        self,
-        *fragments: mtr.Structure,
-        active_fragment: int,
-        settings: Optional[mtr.Settings] = None,
-        epsilon: Optional[Union[int, float]] = 1.0,
-        alpha: Optional[float] = 0.2,
-        num_evals: Optional[int] = 5,
-    ) -> float:
-        beta = 1 / epsilon - alpha
+#     def run(
+#         self,
+#         *fragments: mtr.Structure,
+#         active_fragment: int,
+#         settings: Optional[mtr.Settings] = None,
+#         epsilon: Optional[Union[int, float]] = 1.0,
+#         alpha: Optional[float] = 0.2,
+#         num_evals: Optional[int] = 5,
+#     ) -> float:
+#         beta = 1 / epsilon - alpha
 
-        s = self.defaults(settings)
-        s["rem", "hf_sr"] = int(round(1000 * alpha))
-        s["rem", "hf_lr"] = int(round(1000 * (alpha + beta)))
-        s["xc_functional"] = (
-            ("X", "HF", alpha),
-            ("X", "wPBE", beta),
-            ("X", "PBE", 1 - alpha - beta),
-            ("C", "PBE", 1.0),
-        )
+#         s = self.defaults(settings)
+#         s["rem", "hf_sr"] = int(round(1000 * alpha))
+#         s["rem", "hf_lr"] = int(round(1000 * (alpha + beta)))
+#         s["xc_functional"] = (
+#             ("X", "HF", alpha),
+#             ("X", "wPBE", beta),
+#             ("X", "PBE", 1 - alpha - beta),
+#             ("C", "PBE", 1.0),
+#         )
 
-        with self.io() as io:
+#         with self.io() as io:
 
-            def f(omega):
-                omega = int(round(1000 * omega))
-                s["rem", "omega"] = s["rem", "omega2"] = omega
+#             def f(omega):
+#                 omega = int(round(1000 * omega))
+#                 s["rem", "omega"] = s["rem", "omega2"] = omega
 
-                wd = mtr.expand(f"{io.work_dir}/{omega}")
+#                 wd = mtr.expand(f"{io.work_dir}/{omega}")
 
-                gs_io = mtr.IO("gs.in", "gs.out", wd)
-                cation_io = mtr.IO("cation.in", "cation.out", wd)
-                anion_io = mtr.IO("anion.in", "anion.out", wd)
+#                 gs_io = mtr.IO("gs.in", "gs.out", wd)
+#                 cation_io = mtr.IO("cation.in", "cation.out", wd)
+#                 anion_io = mtr.IO("anion.in", "anion.out", wd)
 
-                ke = mtr.QChemKoopmanErrorLPSCF(self.engine, gs_io, cation_io, anion_io)
-                # FIXME: not sure the best way to handle num_consumers here...
-                return ke.run(
-                    *fragments,
-                    active_fragment=active_fragment,
-                    settings=settings,
-                    num_consumers=3,
-                )
+#                 ke = mtr.QChemKoopmanErrorLPSCF(self.engine, gs_io, cation_io, anion_io)
+#                 # FIXME: not sure the best way to handle num_consumers here...
+#                 return ke.run(
+#                     *fragments,
+#                     active_fragment=active_fragment,
+#                     settings=settings,
+#                     num_consumers=3,
+#                 )
 
-            return mtr.MaxLIPOTR(f).run(x_min=1e-3, x_max=1, num_evals=num_evals)
+#             return mtr.MaxLIPOTR(f).run(x_min=1e-3, x_max=1, num_evals=num_evals)
 
 
 class QChemOptimize(QChemBaseTask):
