@@ -228,7 +228,11 @@ class Structure:
         )
 
     def to_rdkit(self, charge: Optional[int] = 0) -> rdkit.Chem.rdchem.Mol:
-        return mtr.xyz2mol(self.atomic_numbers, charge, self.atomic_positions.T)
+        return mtr.xyz2mol(
+            self.atomic_numbers,
+            charge,
+            self.atomic_positions.T.convert(mtr.angstrom).value,
+        )
 
     @property
     def num_atoms(self) -> int:
