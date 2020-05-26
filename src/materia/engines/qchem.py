@@ -544,8 +544,7 @@ class QChemBaseTask(ExternalTask):
     ) -> Any:
         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
 
-        # FIXME: this is essentially a hotpatch to handle fragments - come up with something more elegant/sensible ASAP
-        inp = mtr.QChemInput(molecule=molecule, settings=self.defaults(s),)
+        inp = mtr.QChemInput(molecule, settings=self.defaults(s))
 
         with self.io() as io:
             inp.write(io.inp)
@@ -623,8 +622,7 @@ class QChemLPSCF(QChemBaseTask):
         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
 
         # FIXME: this is essentially a hotpatch to handle fragments - come up with something more elegant/sensible ASAP
-        inp = mtr.QChemInput(
-            molecule=mtr.QChemFragments(structures=fragments),
+        inp = mtr.QChemInput(*fragments
             settings=self.defaults(s),
         )
 
