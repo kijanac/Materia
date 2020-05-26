@@ -212,6 +212,7 @@ class Quantity(collections.abc.Sequence):
     @_preconvert
     def __iadd__(self, other: Union[Quantity, int, float]) -> Quantity:
         self.value += other.value
+        return self
 
     # SUBTRACTION
 
@@ -229,6 +230,7 @@ class Quantity(collections.abc.Sequence):
     @_preconvert
     def __isub__(self, other: Union[Quantity, int, float]) -> Quantity:
         self.value -= other.convert(self.unit).value
+        return self
 
     # MULTIPLICATION
 
