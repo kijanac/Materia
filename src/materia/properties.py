@@ -166,13 +166,12 @@ class Polarizability:
     @property
     @memoize
     def isotropic(self):
-        print(self.pol_tensor)
-
         return np.trace(self.pol_tensor.value) * self.pol_tensor.unit / 3
 
     @property
     @memoize
     def anisotropy(self):
+        # FIXME: verify accuracy of this method
         return (
             np.sqrt(
                 (
