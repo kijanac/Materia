@@ -66,8 +66,7 @@ def test_molecular_pointgroup_h2o_norot():
     o = mtr.Atom(element="O", position=(0.000, 0.000, 0.000) * mtr.angstrom)
     h1 = mtr.Atom(element="H", position=(0.757, 0.586, 0.000) * mtr.angstrom)
     h2 = mtr.Atom(element="H", position=(-0.757, 0.586, 0.000) * mtr.angstrom)
-    h2o = mtr.Molecule()
-    h2o.structure = StructureTestClass(o, h1, h2)
+    h2o = mtr.Molecule(StructureTestClass(o, h1, h2))
 
     test_result = ssf.molecular_pointgroup(molecule=h2o)
 
@@ -82,8 +81,7 @@ def test_symfinder_molecular_pointgroup_h2o_rot():
     o = mtr.Atom(element="O", position=(0.000, 0.000, 0.000) * mtr.angstrom)
     h1 = mtr.Atom(element="H", position=(0.757, 0.000, 0.586) * mtr.angstrom)
     h2 = mtr.Atom(element="H", position=(-0.757, 0.000, 0.586) * mtr.angstrom)
-    h2o = mtr.Molecule()
-    h2o.structure = StructureTestClass(o, h1, h2)
+    h2o = mtr.Molecule(StructureTestClass(o, h1, h2))
 
     test_result = ssf.molecular_pointgroup(molecule=h2o)
 
