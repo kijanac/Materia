@@ -1,14 +1,63 @@
 from __future__ import annotations
-import pickle
-import materia
 from typing import Any
+
+import materia as mtr
+import pickle
+import rdkit, rdkit.Chem
 
 __all__ = ["Molecule"]
 
 
+def first(flist, default=None):
+    """ Try each function in `flist` until one does not throw an exception, and
+    return the return value of that function. If all functions throw exceptions,
+    return `default` 
+
+    Args: 
+        flist - list of functions to try
+        default - value to return if all functions fail
+
+    Returns:
+        return value of first function that does not throw exception, or
+        `default` if all throw exceptions.
+
+    TODO: Also accept a list of (f, (exceptions)) tuples, where f is the
+    function as above and (exceptions) is a tuple of exceptions that f should
+    expect. This allows you to still re-raise unexpected exceptions.
+    """
+    # from https://stackoverflow.com/a/13874877
+
+    for f in flist:
+        try:
+            return f()
+        except:
+            continue
+    else:
+        return default
+
+
 class Molecule:
-    def __init__(self) -> None:
+    def __init__(self, structure) -> None:
         super().__setattr__("properties", {})
+        if isinstance(structure, mtr.Structure):
+            self.structure = structure
+        elif isinstance(structure, str):
+            self.structure = first(
+                [
+                    lambda: mtr.Structure.read(structure),
+                    lambda: mtr.Structure.generate(smiles=structure),
+                    lambda: mtr.Structure.retrieve(name=structure),
+                ]
+            )
+
+        self.charge = rdkit.Chem.GetFormalCharge(self.structure.to_rdkit())
+        self.multiplicity = (sum(self.structure.atomic_numbers) + self.charge) % 2 + 1
+
+    def _from_file(self, structure):
+        try:
+            return mtr.Structure.read
+        except:
+            return False
 
     def save(self, filepath: str) -> None:
         """
@@ -17,7 +66,7 @@ class Molecule:
         Args:
             filepath: Path to file in which the molecule will be pickled. Can be an absolute or a relative path.
         """
-        with open(materia.expand(filepath), "wb") as f:
+        with open(mtr.expand(filepath), "wb") as f:
             pickle.dump(obj=self, file=f)
 
     @staticmethod
@@ -32,33 +81,28 @@ class Molecule:
             Molecule retrieved from pickle file.
 
         """
-        with open(materia.expand(filepath), "rb") as f:
+        with open(mtr.expand(filepath), "rb") as f:
             mol = pickle.load(file=f)
 
         return mol
 
     def __getattr__(self, name: str) -> Any:
-        return self.properties[name] if name != "properties" else self.properties
+        if name == "properties":
+            return self.properties
+        try:
+            return self.properties[name]
+        except KeyError:
+            return getattr(self.structure, name)
 
     def __setattr__(self, name: str, value) -> None:
         self.properties[name] = value
 
-    # @memoize
-    # def compute_property(self, property_name: str, calculation, engine): # FIXME: no more engines!
-    #     # FIXME: a better arrangement is to get rid of compute_property and allow property setting on molecules, i.e. manually type "molecule.polarizability = engine.compute(calculation)"
-    #     # inp = calculation.input()
-    #     setattr(
-    #         self, property_name, engine.compute(calculation=calculation)
-    #     )  # .get(property_name)
-    #     return getattr(self, property_name)
-    #     # out = calculation.output()
-    #     # return out.get(property_name)
+    # @property
+    # def mass(self) -> mtr.Qty:
+    #     value = sum(self.atomic_masses.value)
+    #     unit = self.atomic_masses.unit
 
-    # def __getattr__(self, name):
-    #     return self.properties[name]
-    #
-    # def __setattr(self, name, value):
-    #     self.properties[name] = value
+    #     return value * unit
 
     # # STRUCTURE
     #
@@ -78,7 +122,7 @@ class Molecule:
     #
     # @volume.setter
     # def volume(self, value):
-    #     self.properties['volume'] = materia.Volume(volume=value)
+    #     self.properties['volume'] = mtr.Volume(volume=value)
     #
     # @property
     # def energy(self):
@@ -86,7 +130,7 @@ class Molecule:
     #
     # @energy.setter
     # def energy(self, value):
-    #     # FIXME: should this be the raw value or a materia wrapper?
+    #     # FIXME: should this be the raw value or a mtr wrapper?
     #     self.properties['energy'] = value
     #
     # # EXCITATION ENERGIES
@@ -99,7 +143,7 @@ class Molecule:
     # def excitation_energies(self, value):
     #     self.properties['excitation_energies'] = value
     #     #excitation_energies,oscillator_strengths = value
-    #     #self.properties['excitation_energies'] = materia.ExcitationEnergies(excitation_energies=excitation_energies,oscillator_strengths=oscillator_strengths)
+    #     #self.properties['excitation_energies'] = mtr.ExcitationEnergies(excitation_energies=excitation_energies,oscillator_strengths=oscillator_strengths)
     #
     # # DIPOLE MOMENT
     #
@@ -109,7 +153,7 @@ class Molecule:
     #
     # @dipole.setter
     # def dipole(self, value):
-    #     self.properties['dipole'] = materia.Dipole(dipole_moment=value)
+    #     self.properties['dipole'] = mtr.Dipole(dipole_moment=value)
     #
     # # TIME-DEPENDENT DIPOLE MOMENT
     #
@@ -119,7 +163,7 @@ class Molecule:
     #
     # @tddipole_x.setter
     # def tddipole_x(self, value):
-    #     self.properties['tddipole_x'] = materia.TDDipole(time=value['time'],tddipole=value['tddipole'])
+    #     self.properties['tddipole_x'] = mtr.TDDipole(time=value['time'],tddipole=value['tddipole'])
     #
     # @property
     # def tddipole_y(self):
@@ -127,7 +171,7 @@ class Molecule:
     #
     # @tddipole_y.setter
     # def tddipole_y(self, value):
-    #     self.properties['tddipole_y'] = materia.TDDipole(time=value['time'],tddipole=value['tddipole'])
+    #     self.properties['tddipole_y'] = mtr.TDDipole(time=value['time'],tddipole=value['tddipole'])
     #
     # @property
     # def tddipole_z(self):
@@ -135,7 +179,7 @@ class Molecule:
     #
     # @tddipole_z.setter
     # def tddipole_z(self, value):
-    #     self.properties['tddipole_z'] = materia.TDDipole(time=value['time'],tddipole=value['tddipole'])
+    #     self.properties['tddipole_z'] = mtr.TDDipole(time=value['time'],tddipole=value['tddipole'])
     #
     # # POLARIZABILITY
     #
@@ -145,7 +189,7 @@ class Molecule:
     #
     # @polarizability.setter
     # def polarizability(self, value):
-    #     self.properties['polarizability'] = value#materia.Polarizability(polarizability_tensor=value)
+    #     self.properties['polarizability'] = value#mtr.Polarizability(polarizability_tensor=value)
     #
     # # TIME-DEPENDENT POLARIZABILITY
     #
@@ -155,7 +199,7 @@ class Molecule:
     #
     # @td_polarizability_xx.setter
     # def td_polarizability_xx(self, value):
-    #     self.properties['td_polarizability_xx'] = materia.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
+    #     self.properties['td_polarizability_xx'] = mtr.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
     #
     # @property
     # def td_polarizability_xy(self):
@@ -163,7 +207,7 @@ class Molecule:
     #
     # @td_polarizability_xy.setter
     # def td_polarizability_xy(self, value):
-    #     self.properties['td_polarizability_xy'] = materia.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
+    #     self.properties['td_polarizability_xy'] = mtr.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
     #
     # @property
     # def td_polarizability_xz(self):
@@ -171,7 +215,7 @@ class Molecule:
     #
     # @td_polarizability_xz.setter
     # def td_polarizability_xz(self, value):
-    #     self.properties['td_polarizability_xz'] = materia.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
+    #     self.properties['td_polarizability_xz'] = mtr.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
     #
     # @property
     # def td_polarizability_yx(self):
@@ -179,7 +223,7 @@ class Molecule:
     #
     # @td_polarizability_yx.setter
     # def td_polarizability_yx(self, value):
-    #     self.properties['td_polarizability_yx'] = materia.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
+    #     self.properties['td_polarizability_yx'] = mtr.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
     #
     # @property
     # def td_polarizability_yy(self):
@@ -187,7 +231,7 @@ class Molecule:
     #
     # @td_polarizability_yy.setter
     # def td_polarizability_yy(self, value):
-    #     self.properties['td_polarizability_yy'] = materia.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
+    #     self.properties['td_polarizability_yy'] = mtr.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
     #
     # @property
     # def td_polarizability_yz(self):
@@ -195,7 +239,7 @@ class Molecule:
     #
     # @td_polarizability_yz.setter
     # def td_polarizability_yz(self, value):
-    #     self.properties['td_polarizability_yz'] = materia.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
+    #     self.properties['td_polarizability_yz'] = mtr.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
     #
     # @property
     # def td_polarizability_zx(self):
@@ -203,7 +247,7 @@ class Molecule:
     #
     # @td_polarizability_zx.setter
     # def td_polarizability_zx(self, value):
-    #     self.properties['td_polarizability_zx'] = materia.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
+    #     self.properties['td_polarizability_zx'] = mtr.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
     #
     # @property
     # def td_polarizability_zy(self):
@@ -211,7 +255,7 @@ class Molecule:
     #
     # @td_polarizability_zy.setter
     # def td_polarizability_zy(self, value):
-    #     self.properties['td_polarizability_zy'] = materia.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
+    #     self.properties['td_polarizability_zy'] = mtr.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
     #
     # @property
     # def td_polarizability_zz(self):
@@ -219,7 +263,7 @@ class Molecule:
     #
     # @td_polarizability_zz.setter
     # def td_polarizability_zz(self, value):
-    #     self.properties['td_polarizability_zz'] = materia.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
+    #     self.properties['td_polarizability_zz'] = mtr.TDPolarizability(time=value['time'],td_polarizability=value['td_polarizability'])
     #
     # @property
     # def permittivity(self):
@@ -229,10 +273,10 @@ class Molecule:
     #         raise AttributeError('Polarizability not present in self.properties. Try computing polarizability first.')
     #
     #     volume = self.volume
-    #     volume.convert(new_unit=materia.au_volume)
+    #     volume.convert(new_unit=mtr.au_volume)
     #
     #     polarizability = self.polarizability
-    #     polarizability.convert(new_unit=materia.au_volume)
+    #     polarizability.convert(new_unit=mtr.au_volume)
     #
     #     # this is an approximation!
     #     number_density = 1/volume
@@ -243,7 +287,7 @@ class Molecule:
     #     # polarizability should be given as polarizability volume (computed in CGS) in cubic bohr
     #     X = 4*scipy.constants.pi*number_density*polarizability/3
     #
-    #     return (materia.Qty(value=1,unit=materia.unitless) + 2*X)/(materia.Qty(value=1,unit=materia.unitless) - X)
+    #     return (mtr.Qty(value=1,unit=mtr.unitless) + 2*X)/(mtr.Qty(value=1,unit=mtr.unitless) - X)
     #
     # # FIXME: should add an option/method for LRTDDFT later
     # @property
