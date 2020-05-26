@@ -770,13 +770,13 @@ def _get_bond_orders(ac, ua, du, valences, ua_pairs):
     BO = ac.copy()
     du_save = []
 
-    while du_save != du:
+    while du_save != list(du):
         for i, j in ua_pairs:
             BO[i, j] += 1
             BO[j, i] += 1
 
         BO_valence = list(BO.sum(axis=1))
-        du_save = copy.copy(du)
+        du_save = list(copy.copy(du))
         ua, du = _get_unsaturated_atoms(valences, BO_valence)
         ua_pairs, *_ = _get_ua_pairs(ua, ac)
 
