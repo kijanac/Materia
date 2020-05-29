@@ -365,9 +365,13 @@ class QChem(Engine):
         num_processors: Optional[int] = None,
         num_threads: Optional[int] = None,
         arguments: Optional[Iterable[str]] = None,
+        save: Optional[bool] = False,
+        savename: Optional[str] = None,
     ) -> None:
         self.scratch_dir = mtr.expand(scratch_dir) if scratch_dir is not None else None
         self.qcenv = shlex.quote(mtr.expand(qcenv)) if qcenv is not None else None
+        self.save = save
+        self.savename = savename
         super().__init__(
             executable=executable,
             num_processors=num_processors,
@@ -408,12 +412,16 @@ class QChem(Engine):
         arguments: Optional[Iterable[str]] = None,
     ) -> str:
         cmd = [self.executable]
+        if self.save:
+            cmd.append("-save")
         if self.arguments is not None:
             cmd.extend(list(self.arguments) + list(arguments or []))
         if self.num_processors is not None:
             cmd.append(f"-np {self.num_processors}")
         if self.num_threads is not None:
             cmd.append(f"-nt {self.num_threads}")
+        if self.save and self.savename:
+            cmd.append(f" {self.savename}")
 
         # FIXME: shlex.quote should be used but it doesn't work...
         return shlex.split(" ".join(cmd + [inp, out]))
@@ -713,11 +721,11 @@ class QChemKoopmanError(Task):
         cation_sp = self.engine.single_point(self.cation_io, name="cation")
         anion_sp = self.engine.single_point(self.anion_io, name="anion")
 
-        cation = molecule.copy()
+        cation = copy.deepcopy(molecule)
         cation.charge += 1
         cation.multiplicity = cation.multiplicity % 2 + 1
 
-        anion = molecule.copy()
+        anion = copy.deepcopy(molecule)
         anion.charge -= 1
         anion.multiplicity = anion.multiplicity % 2 + 1
 
@@ -740,7 +748,7 @@ class QChemKoopmanError(Task):
         anion = out["anion"]
 
         ea = neutral - anion
-        ip = cation - energy
+        ip = cation - neutral
 
         J_squared = (ip + homo) ** 2
         if ea > 0 * ea.unit:
@@ -851,7 +859,7 @@ class QChemKoopmanError(Task):
 
 class QChemLRTDDFT(QChemBaseTask):
     def parse(self, output: str) -> Any:
-        return mtr.QChemOutput(filepath=output).get("electronic_excitations")
+        return mtr.QChemOutput(filepath=output).electronic_excitations
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
@@ -935,11 +943,11 @@ class QChemMinimizeKoopmanError(Task):
 
         with self.io() as io:
             if alpha is None:
-                [omega], J = mtr.MaxLIPOTR(_objective).run(
+                [omega,alpha], J = mtr.MaxLIPOTR(_objective).run(
                     x_min=[1e-3, 0], x_max=[1, 1 / epsilon], num_evals=num_evals
                 )
             else:
-                [omega, alpha], J = mtr.MaxLIPOTR(
+                [omega], J = mtr.MaxLIPOTR(
                     functools.partial(_objective, _alpha=alpha)
                 ).run(x_min=1e-3, x_max=1, num_evals=num_evals)
 
@@ -1284,7 +1292,7 @@ class QChemSinglePointFrontier(QChemBaseTask):
 
 #     def run(
 #         self,
-#         structure: Union[mtr.QChemStructure, mtr.QChemFragments, mtr.Structure],
+#         structure: Union[mtr.QChemStructure, mtr. , mtr.Structure],
 #         settings: Optional[mtr.Settings] = None,
 #     ) -> None:
 #         s = mtr.Settings() if settings is None else copy.deepcopy(settings)

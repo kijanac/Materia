@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Iterable, Optional, Tuple
 
 import materia as mtr
+import numpy as np
 
 from .engine import Engine
 from ..tasks import ExternalTask
