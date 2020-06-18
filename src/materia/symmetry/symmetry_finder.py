@@ -1,5 +1,6 @@
 import collections
 import itertools
+import materia as mtr
 import numpy as np
 import scipy.linalg
 
@@ -7,13 +8,41 @@ import materia.symmetry
 import materia.utils
 
 
-def fragment_seas(structure):
-    return {
-        Z: materia.Structure(atoms=atoms)
+def sea_sets(structure: mtr.Structure):
+    return tuple(materia.Structure(*atoms)
         for Z, atoms in itertools.groupby(
             sorted(structure.atoms, key=lambda a: a.Z), lambda a: a.Z
         )
-    }
+    )
+
+# def is_linear(structure, symprec):# -> mtr.Qty:
+#     moments = structure.principal_moments.value / sum(structure.principal_moments.value)
+#     (m1, m2, m3) = sorted(moments)
+#     return round(m1,symprec) == 0 and is_planar(structure,symprec)
+
+# def is_planar(structure, symprec):# -> mtr.Qty:
+#     moments = structure.principal_moments.value / sum(structure.principal_moments.value)
+#     (m1, m2, m3) = sorted(moments)
+#     return (round(m1 + m2,symprec) == round(m3,symprec))
+
+# import materia as mtr
+# import itertools
+
+# m = mtr.Molecule("anthracene")
+
+# sea_sets = mtr.symmetry.symmetry_finder.sea_sets(m.structure)
+# k = max(sea.num_atoms for sea in sea_sets)
+
+# candidates = []
+# candidates.append(mtr.Inversion())
+# candidates.extend([mtr.Reflection(axis=mtr.normalize(B-A)) for sea in sea_sets for A,B in itertools.combinations(sea.atomic_positions.T.value,r=2)])
+# len([R for R in candidates if R.is_symmetry_of(m.structure,2)])
+
+# for sea in sea_sets:
+#     is_linear(sea,2)
+#     is_planar(sea,2)
+#     m1,m2,m3 = sea.principal_moments
+#     round(m1+m2,3) == round(m3,3)
 
 
 import functools

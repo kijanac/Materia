@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.linalg
 
-import materia
+import materia as mtr
 
 
 class SymmetryOperation:
@@ -28,7 +28,10 @@ class SymmetryOperation:
                 self.matrix, _ = scipy.linalg.polar(rotation @ reflection)
 
     def __eq__(self, other):
-        return hasattr(other, "matrix") and np.allclose(self.matrix, other.matrix)
+        #print(self.axis or [])
+        #print(other.axis or [])
+        #return np.allclose((self.det,self.tr),(other.det,other.tr)) and np.allclose(self.axis if self.axis is not None else [],other.axis if other.axis is not None else [])
+        return hasattr(other, "matrix") and np.allclose(self.matrix, other.matrix, atol=1e-3)
 
     @property
     def det(self):
@@ -53,10 +56,14 @@ class SymmetryOperation:
         axis = np.sqrt(
             np.abs(np.diag(S) / (3 - np.sign(self.det) * self.tr))
         )  # scipy.linalg.null_space(R-det*np.eye(3)).squeeze()
-        u = materia.Geometry()._perpendicular_vector(p=axis)
+        u = mtr.perpendicular_vector(axis)
         axis *= np.sign(np.dot(axis, np.cross(u, self.matrix @ u)))
 
         return axis
+
+    @property
+    def inverse(self):
+        return SymmetryOperation(matrix=self.matrix.T)
 
     def is_symmetry_of(self, structure, symprec):
         transformed_atomic_positions = (
@@ -69,6 +76,12 @@ class SymmetryOperation:
             for row in structure.centered_atomic_positions.value.T.round(symprec)
         )
 
+    @property
+    def order(self):
+        return mtr.periodicity(self.matrix)
+
+    def __mul__(self, other):
+        return SymmetryOperation(matrix=self.matrix@other.matrix)
 
 class Inversion(SymmetryOperation):
     def __init__(self):
@@ -91,6 +104,8 @@ class ProperRotation(SymmetryOperation):
         trace = 2 * np.cos(2 * np.pi / order) + determinant
         super().__init__(determinant=determinant, trace=trace, axis=axis)
 
+    def __repr__(self) -> str:
+        return f'ProperRotation(order={self.order})'
 
 class ImproperRotation(SymmetryOperation):
     def __init__(self, order, axis):

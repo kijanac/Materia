@@ -299,23 +299,9 @@ class Structure:
     @property
     @memoize
     def inertia_tensor(self) -> mtr.Qty:
-        atomic_masses = self.atomic_masses
-        centered_atomic_positions = self.centered_atomic_positions
-
-        xx, xy, xz, yy, yz, zz = (
-            np.dot(atomic_masses.value, a * b)
-            for a, b in itertools.combinations_with_replacement(
-                centered_atomic_positions.value, r=2
-            )
-        )
-
-        I = np.zeros((3, 3))
-        I[np.tril_indices(3, -1)] = -xy, -xz, -yz
-        I += I.T + np.diag([yy + zz, xx + zz, xx + yy])
-
-        unit = atomic_masses.unit * centered_atomic_positions.unit ** 2
-
-        return I * unit
+        ms = self.atomic_masses
+        rs = self.centered_atomic_positions
+        return sum(m*(np.dot(a,a.T)*np.eye(3) - np.outer(a,a)) for m,a in zip(ms.value,rs.value.T))*ms.unit*rs.unit**2
 
     @property
     @memoize
@@ -377,12 +363,12 @@ class Structure:
     @property
     @memoize
     def principal_moments(self) -> mtr.Qty:
-        scipy.linalg.eigvalsh(self.inertia_tensor) * self.inertia_tensor.unit
+        return scipy.linalg.eigvalsh(self.inertia_tensor.value) * self.inertia_tensor.unit
 
     @property
     @memoize
     def principal_axes(self) -> Tuple[float]:
-        _, axes = scipy.linalg.eigh(self.inertia_tensor)
+        _, axes = scipy.linalg.eigh(self.inertia_tensor.value)
         return tuple(mtr.normalize(ax) for ax in axes.T)
 
     @property
