@@ -943,7 +943,7 @@ class QChemMinimizeKoopmanError(Task):
 
         with self.io() as io:
             if alpha is None:
-                [omega,alpha], J = mtr.MaxLIPOTR(_objective).run(
+                [omega, alpha], J = mtr.MaxLIPOTR(_objective).run(
                     x_min=[1e-3, 0], x_max=[1, 1 / epsilon], num_evals=num_evals
                 )
             else:
