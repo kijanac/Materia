@@ -88,8 +88,8 @@ deploy:
 
 SPHINX_TEMPLATE_DIR ?= sphinx/templates
 .PHONY: docs
-docs: | docs/index.html
-docs/index.html: $(call rwildcard,.,*.py)
+docs: | index.html
+index.html: $(call rwildcard,.,*.py)
 ifeq ("$(wildcard $(CONDA_BASE)/envs/$(CONDA_ENV))","")
 	@$(error run "make setup" first)
 endif
