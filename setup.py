@@ -33,11 +33,11 @@ class Clean(clean):
         self.remove_paths(
             pathlib.Path("build"),
             pathlib.Path("conda-build").resolve(),
-            pathlib.Path("docs"),
             pathlib.Path(".pytest_cache"),
             pathlib.Path(".coverage"),
             pathlib.Path("coverage.xml"),
             pathlib.Path("dist"),
+            *pathlib.Path("docs").glob("*"),
             *pathlib.Path("src").glob("*.egg-info"),
             *pathlib.Path(".").glob(".coverage*"),
             *pathlib.Path(".").rglob("__pycache__"),
@@ -259,6 +259,9 @@ class Docs(setuptools.Command):
             ]
         )
         subprocess.run(["make", "-C", "docs", "clean"] + self.builder.split())
+        shutil.move(pathlib.Path('docs/build/html/index.html'),pathlib.Path('docs/index.html'))
+        pdf,*_ = pathlib.Path('docs/build/latex').glob('*.pdf')
+        shutil.move(pdf,pathlib.Path('docs',pdf.name))
 
 
 class Env(setuptools.Command):
