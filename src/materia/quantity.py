@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Optional, Union
+from typing import Any, Iterable, Optional, Union
 
 import collections
 import copy
@@ -372,6 +372,9 @@ class Quantity(collections.abc.Sequence):
         return Quantity(~self.value, self.prefactor, **self.dimension)
 
     # OTHER
+
+    def __round__(self, number):
+        return Quantity(np.round(self.value,number),self.prefactor,**self.dimension)
 
     def __getitem__(self, index):
         return Quantity(self.value[index], self.prefactor, **self.dimension)

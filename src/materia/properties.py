@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Iterable, Optional, Union
+from typing import Callable, Iterable, Optional, Union
 
 import numpy as np
 import scipy.linalg, scipy.spatial
