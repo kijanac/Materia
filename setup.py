@@ -48,7 +48,7 @@ class Clean(clean):
         if self.clean_all or self.conda_build:
             paths.append(pathlib.Path("conda-build").resolve())
         if self.clean_all or self.docs:
-            paths.append(pathlib.Path("docs"))
+            paths.extend([pathlib.Path("docs/build"),pathlib.Path("docs/source"),pathlib.Path("docs/Makefile"),pathlib.Path("docs/make.bat")])
         if self.clean_all or self.test:
             paths.extend(
                 [pathlib.Path(".coverage"),pathlib.Path("coverage.xml"), *pathlib.Path(".").glob(".coverage*")]
@@ -282,11 +282,10 @@ class Docs(setuptools.Command):
         )
 
         subprocess.run(["make", "-C", "docs", "clean"] + self.builder.split())
-        shutil.move(
-            pathlib.Path("docs/build/html/index.html"), pathlib.Path("index.html")
-        )
-        tex, *_ = pathlib.Path("docs/build/latex/").glob("*.tex")
-        shutil
+        for p in pathlib.Path("docs/build/html").glob("*.html"):
+            shutil.move(p,pathlib.Path("docs",p.name))
+        #tex, *_ = pathlib.Path("docs/build/latex/").glob("*.tex")
+        #shutil
         # subprocess.run(["tectonic",tex])
         # pdf,*_ = pathlib.Path('docs/build/latex').glob('*.pdf')
         # shutil.move(pdf,pathlib.Path('docs',pdf.name))

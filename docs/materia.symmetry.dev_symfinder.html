@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>materia.symmetry.dev_symfinder module &#8212; materia 8.0.8 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="materia.symmetry.group_theory module" href="materia.symmetry.group_theory.html" />
+    <link rel="prev" title="materia.symmetry package" href="materia.symmetry.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="materia.symmetry.group_theory.html" title="materia.symmetry.group_theory module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="materia.symmetry.html" title="materia.symmetry package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="materia.html" >materia package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="materia.symmetry.html" accesskey="U">materia.symmetry package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">materia.symmetry.dev_symfinder module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-materia.symmetry.dev_symfinder">
+<span id="materia-symmetry-dev-symfinder-module"></span><h1>materia.symmetry.dev_symfinder module<a class="headerlink" href="#module-materia.symmetry.dev_symfinder" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="materia.symmetry.dev_symfinder.AxesGenerator">
+<em class="property">class </em><code class="sig-name descname">AxesGenerator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.AxesGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.AxesGenerator.generate_axes">
+<code class="sig-name descname">generate_axes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pointgroup_symbol</span></em>, <em class="sig-param"><span class="n">inertia_tensor</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.AxesGenerator.generate_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.symmetry.dev_symfinder.Geometry">
+<em class="property">class </em><code class="sig-name descname">Geometry</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.add_excluded_circles">
+<code class="sig-name descname">add_excluded_circles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">excluded_circles</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.add_excluded_circles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.add_excluded_points">
+<code class="sig-name descname">add_excluded_points</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">excluded_points</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.add_excluded_points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.closest_pair">
+<code class="sig-name descname">closest_pair</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">points</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.closest_pair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the two closest points from a given list of points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>points</strong> (<em>numpy.ndarray</em>) – 3xNp Numpy array whose columns represent points on the unit sphere, where Np is the number of points.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>3x2 Numpy array whose columns are the two closest points from the given list of points.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.make_nontrivial_vector">
+<code class="sig-name descname">make_nontrivial_vector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">R</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.make_nontrivial_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a vector which is acted upon nontrivially (i.e. is sent to a linearly independent vector) by the given rotation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>R</strong> (<em>numpy.ndarray</em>) – 3x3 numpy array representing a rotation matrix.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>3x1 numpy array representing a vector which is acted upon nontrivially by R.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.perpendicular_vector">
+<code class="sig-name descname">perpendicular_vector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.perpendicular_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a unit vector which is perpendicular to one or two given nonzero vector(s).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing a nonzero vector.</p></li>
+<li><p><strong>b</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing a nonzero vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>3x1 Numpy array representing a unit vector which is perpendicular to a (and b, if applicable).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.points_to_circles">
+<code class="sig-name descname">points_to_circles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.points_to_circles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.rotation_matrix">
+<code class="sig-name descname">rotation_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">cos_theta</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.rotation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a matrix which rotates a vector a given angle about a given axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing the vector whose direction is the axis of rotation.</p></li>
+<li><p><strong>cos_theta</strong> (<em>float</em>) – Cosine of angle of rotation about the axis of rotation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>3x3 Numpy array representing the rotation matrix which rotates a vector by the given angle about the given axis.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.rotation_matrix_m_to_n">
+<code class="sig-name descname">rotation_matrix_m_to_n</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">m</span></em>, <em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.rotation_matrix_m_to_n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a matrix which rotates one given vector to another.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing the vector to be rotated.</p></li>
+<li><p><strong>n</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing the vector after rotation, i.e. the target vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>3x3 Numpy array representing the rotation matrix which maps m to n.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.sample_axis">
+<code class="sig-name descname">sample_axis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.sample_axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.sample_from_lune">
+<code class="sig-name descname">sample_from_lune</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n1</span></em>, <em class="sig-param"><span class="n">n2</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.sample_from_lune" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.Geometry.sample_from_standard_lune">
+<code class="sig-name descname">sample_from_standard_lune</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dphi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.Geometry.sample_from_standard_lune" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.symmetry.dev_symfinder.SymmetryFinder">
+<em class="property">class </em><code class="sig-name descname">SymmetryFinder</code><a class="headerlink" href="#materia.symmetry.dev_symfinder.SymmetryFinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.SymmetryFinder.get_rotations">
+<code class="sig-name descname">get_rotations</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pointgroup_symbol</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.SymmetryFinder.get_rotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates two lists of rotations, one proper and one improper, which are symmetries corresponding to the given point group symbol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pointgroup_symbol</strong> (<em>str</em>) – String denoting a Schoenflies point group symbol.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>list of numpy.ndarrays</em> – List of unique proper rotation matrices corresponding to pointgroup_symbol, excluding the identity matrix.</p></li>
+<li><p><em>list of numpy.ndarrays</em> – List of unique improper rotation matrices corresponding to pointgroup_symbol, excluding the negative identity matrix.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.dev_symfinder.SymmetryFinder.molecular_pointgroup">
+<code class="sig-name descname">molecular_pointgroup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span></em>, <em class="sig-param"><span class="n">atomic_numbers</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.dev_symfinder.SymmetryFinder.molecular_pointgroup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="materia.symmetry.html"
+                        title="previous chapter">materia.symmetry package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="materia.symmetry.group_theory.html"
+                        title="next chapter">materia.symmetry.group_theory module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/materia.symmetry.dev_symfinder.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="materia.symmetry.group_theory.html" title="materia.symmetry.group_theory module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="materia.symmetry.html" title="materia.symmetry package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="materia.html" >materia package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="materia.symmetry.html" >materia.symmetry package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">materia.symmetry.dev_symfinder module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.1.
+    </div>
+  </body>
+</html>

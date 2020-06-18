@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>materia.symmetry.symmetry module &#8212; materia 8.0.8 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="materia.symmetry.symmetry_finder module" href="materia.symmetry.symmetry_finder.html" />
+    <link rel="prev" title="materia.symmetry.symmetric_axes_generator module" href="materia.symmetry.symmetric_axes_generator.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="materia.symmetry.symmetry_finder.html" title="materia.symmetry.symmetry_finder module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="materia.symmetry.symmetric_axes_generator.html" title="materia.symmetry.symmetric_axes_generator module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="materia.html" >materia package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="materia.symmetry.html" accesskey="U">materia.symmetry package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">materia.symmetry.symmetry module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-materia.symmetry.symmetry">
+<span id="materia-symmetry-symmetry-module"></span><h1>materia.symmetry.symmetry module<a class="headerlink" href="#module-materia.symmetry.symmetry" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="materia.symmetry.symmetry.ImproperRotation">
+<em class="property">class </em><code class="sig-name descname">ImproperRotation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.symmetry.ImproperRotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#materia.symmetry.symmetry.SymmetryOp" title="materia.symmetry.symmetry.SymmetryOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.symmetry.symmetry.SymmetryOp</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.symmetry.symmetry.Inversion">
+<em class="property">class </em><code class="sig-name descname">Inversion</code><a class="headerlink" href="#materia.symmetry.symmetry.Inversion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#materia.symmetry.symmetry.SymmetryOp" title="materia.symmetry.symmetry.SymmetryOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.symmetry.symmetry.SymmetryOp</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.symmetry.symmetry.PointGroup">
+<em class="property">class </em><code class="sig-name descname">PointGroup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reps</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.symmetry.PointGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.symmetry.symmetry.PointGroup.cayley_table">
+<code class="sig-name descname">cayley_table</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reps</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.symmetry.PointGroup.cayley_table" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.symmetry.symmetry.ProperRotation">
+<em class="property">class </em><code class="sig-name descname">ProperRotation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.symmetry.ProperRotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#materia.symmetry.symmetry.SymmetryOp" title="materia.symmetry.symmetry.SymmetryOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.symmetry.symmetry.SymmetryOp</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.symmetry.symmetry.Reflection">
+<em class="property">class </em><code class="sig-name descname">Reflection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.symmetry.Reflection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#materia.symmetry.symmetry.SymmetryOp" title="materia.symmetry.symmetry.SymmetryOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.symmetry.symmetry.SymmetryOp</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.symmetry.symmetry.SymmetryAnalyzer">
+<em class="property">class </em><code class="sig-name descname">SymmetryAnalyzer</code><a class="headerlink" href="#materia.symmetry.symmetry.SymmetryAnalyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.symmetry.symmetry.SymmetryAnalyzer.symmetry_operations">
+<code class="sig-name descname">symmetry_operations</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">molecule</span></em>, <em class="sig-param"><span class="n">symprec</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">graph</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.symmetry.SymmetryAnalyzer.symmetry_operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.symmetry.symmetry.SymmetryOp">
+<em class="property">class </em><code class="sig-name descname">SymmetryOp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matrix</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">determinant</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">trace</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.symmetry.SymmetryOp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.symmetry.symmetry.SymmetryOp.axis">
+<em class="property">property </em><code class="sig-name descname">axis</code><a class="headerlink" href="#materia.symmetry.symmetry.SymmetryOp.axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.symmetry.SymmetryOp.cos_theta">
+<em class="property">property </em><code class="sig-name descname">cos_theta</code><a class="headerlink" href="#materia.symmetry.symmetry.SymmetryOp.cos_theta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.symmetry.SymmetryOp.det">
+<em class="property">property </em><code class="sig-name descname">det</code><a class="headerlink" href="#materia.symmetry.symmetry.SymmetryOp.det" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.symmetry.SymmetryOp.is_symmetry_of">
+<code class="sig-name descname">is_symmetry_of</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">structure</span></em>, <em class="sig-param"><span class="n">symprec</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.symmetry.SymmetryOp.is_symmetry_of" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.symmetry.symmetry.SymmetryOp.tr">
+<em class="property">property </em><code class="sig-name descname">tr</code><a class="headerlink" href="#materia.symmetry.symmetry.SymmetryOp.tr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="materia.symmetry.symmetry.find_symmetry">
+<code class="sig-name descname">find_symmetry</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mol</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.symmetry.symmetry.find_symmetry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="materia.symmetry.symmetric_axes_generator.html"
+                        title="previous chapter">materia.symmetry.symmetric_axes_generator module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="materia.symmetry.symmetry_finder.html"
+                        title="next chapter">materia.symmetry.symmetry_finder module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/materia.symmetry.symmetry.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="materia.symmetry.symmetry_finder.html" title="materia.symmetry.symmetry_finder module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="materia.symmetry.symmetric_axes_generator.html" title="materia.symmetry.symmetric_axes_generator module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="materia.html" >materia package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="materia.symmetry.html" >materia.symmetry package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">materia.symmetry.symmetry module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.1.
+    </div>
+  </body>
+</html>

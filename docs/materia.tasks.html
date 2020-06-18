@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>materia.tasks module &#8212; materia 8.0.8 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="materia.units module" href="materia.units.html" />
+    <link rel="prev" title="materia.quantity module" href="materia.quantity.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="materia.units.html" title="materia.units module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="materia.quantity.html" title="materia.quantity module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="materia.html" accesskey="U">materia package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">materia.tasks module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-materia.tasks">
+<span id="materia-tasks-module"></span><h1>materia.tasks module<a class="headerlink" href="#module-materia.tasks" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="materia.tasks.ExternalTask">
+<em class="property">class </em><code class="sig-name descname">ExternalTask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">engine</span></em>, <em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.ExternalTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#materia.tasks.Task" title="materia.tasks.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.tasks.Task</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.tasks.FunctionTask">
+<em class="property">class </em><code class="sig-name descname">FunctionTask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.FunctionTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#materia.tasks.Task" title="materia.tasks.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.tasks.Task</span></code></a></p>
+<dl class="py method">
+<dt id="materia.tasks.FunctionTask.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.FunctionTask.run" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.tasks.InputTask">
+<em class="property">class </em><code class="sig-name descname">InputTask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.InputTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#materia.tasks.Task" title="materia.tasks.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.tasks.Task</span></code></a></p>
+<dl class="py method">
+<dt id="materia.tasks.InputTask.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.InputTask.run" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.tasks.MaxLIPOTR">
+<em class="property">class </em><code class="sig-name descname">MaxLIPOTR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">objective_function</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.MaxLIPOTR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#materia.tasks.Task" title="materia.tasks.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.tasks.Task</span></code></a></p>
+<dl class="py method">
+<dt id="materia.tasks.MaxLIPOTR.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_min</span></em>, <em class="sig-param"><span class="n">x_max</span></em>, <em class="sig-param"><span class="n">num_evals</span></em>, <em class="sig-param"><span class="n">epsilon</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.MaxLIPOTR.run" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.tasks.ShellCommand">
+<em class="property">class </em><code class="sig-name descname">ShellCommand</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">command</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.ShellCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#materia.tasks.Task" title="materia.tasks.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.tasks.Task</span></code></a></p>
+<dl class="py method">
+<dt id="materia.tasks.ShellCommand.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.ShellCommand.run" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.tasks.Task">
+<em class="property">class </em><code class="sig-name descname">Task</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_cores</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.Task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.tasks.Task.requires">
+<code class="sig-name descname">requires</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.Task.requires" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="materia.tasks.Task.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.Task.run" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="materia.quantity.html"
+                        title="previous chapter">materia.quantity module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="materia.units.html"
+                        title="next chapter">materia.units module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/materia.tasks.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="materia.units.html" title="materia.units module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="materia.quantity.html" title="materia.quantity module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="materia.html" >materia package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">materia.tasks module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.1.
+    </div>
+  </body>
+</html>

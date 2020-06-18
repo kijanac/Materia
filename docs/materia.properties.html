@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>materia.properties module &#8212; materia 8.0.8 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="materia.quantity module" href="materia.quantity.html" />
+    <link rel="prev" title="materia.handler module" href="materia.handler.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="materia.quantity.html" title="materia.quantity module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="materia.handler.html" title="materia.handler module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="materia.html" accesskey="U">materia package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">materia.properties module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-materia.properties">
+<span id="materia-properties-module"></span><h1>materia.properties module<a class="headerlink" href="#module-materia.properties" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="materia.properties.Dipole">
+<em class="property">class </em><code class="sig-name descname">Dipole</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dipole_moment</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.properties.Dipole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.properties.Dipole.norm">
+<em class="property">property </em><code class="sig-name descname">norm</code><a class="headerlink" href="#materia.properties.Dipole.norm" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="materia.quantity.html#materia.quantity.Quantity" title="materia.quantity.Quantity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.properties.Excitation">
+<em class="property">class </em><code class="sig-name descname">Excitation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">energy</span></em>, <em class="sig-param"><span class="n">oscillator_strength</span></em>, <em class="sig-param"><span class="n">transition_moment</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">symmetry</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">total_energy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">contributions</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.properties.Excitation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.properties.ExcitationSpectrum">
+<em class="property">class </em><code class="sig-name descname">ExcitationSpectrum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">excitations</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.properties.ExcitationSpectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.properties.ExcitationSpectrum.broaden">
+<code class="sig-name descname">broaden</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fwhm</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.properties.ExcitationSpectrum.broaden" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.properties.ExcitationSpectrum.cross_section">
+<code class="sig-name descname">cross_section</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fwhm</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.properties.ExcitationSpectrum.cross_section" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.properties.ExcitationSpectrum.dipole_strength">
+<code class="sig-name descname">dipole_strength</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fwhm</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.properties.ExcitationSpectrum.dipole_strength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.properties.ExcitationSpectrum.molar_absorptivity">
+<code class="sig-name descname">molar_absorptivity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fwhm</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.properties.ExcitationSpectrum.molar_absorptivity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.properties.ExcitationSpectrum.to_gaussian">
+<code class="sig-name descname">to_gaussian</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#materia.properties.ExcitationSpectrum.to_gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="materia.properties.Polarizability">
+<em class="property">class </em><code class="sig-name descname">Polarizability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">polarizability_tensor</span></em>, <em class="sig-param"><span class="n">applied_field</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.properties.Polarizability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="materia.properties.Polarizability.anisotropy">
+<em class="property">property </em><code class="sig-name descname">anisotropy</code><a class="headerlink" href="#materia.properties.Polarizability.anisotropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.properties.Polarizability.eigenvalues">
+<em class="property">property </em><code class="sig-name descname">eigenvalues</code><a class="headerlink" href="#materia.properties.Polarizability.eigenvalues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="materia.properties.Polarizability.isotropic">
+<em class="property">property </em><code class="sig-name descname">isotropic</code><a class="headerlink" href="#materia.properties.Polarizability.isotropic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="materia.handler.html"
+                        title="previous chapter">materia.handler module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="materia.quantity.html"
+                        title="next chapter">materia.quantity module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/materia.properties.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="materia.quantity.html" title="materia.quantity module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="materia.handler.html" title="materia.handler module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="materia.html" >materia package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">materia.properties module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.1.
+    </div>
+  </body>
+</html>
