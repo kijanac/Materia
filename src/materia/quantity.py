@@ -374,7 +374,7 @@ class Quantity(collections.abc.Sequence):
     # OTHER
 
     def __round__(self, number):
-        return Quantity(np.round(self.value,number),self.prefactor,**self.dimension)
+        return Quantity(np.round(self.value, number), self.prefactor, **self.dimension)
 
     def __getitem__(self, index):
         return Quantity(self.value[index], self.prefactor, **self.dimension)

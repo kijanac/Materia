@@ -9,11 +9,13 @@ import materia.utils
 
 
 def sea_sets(structure: mtr.Structure):
-    return tuple(materia.Structure(*atoms)
+    return tuple(
+        materia.Structure(*atoms)
         for Z, atoms in itertools.groupby(
             sorted(structure.atoms, key=lambda a: a.Z), lambda a: a.Z
         )
     )
+
 
 # def is_linear(structure, symprec):# -> mtr.Qty:
 #     moments = structure.principal_moments.value / sum(structure.principal_moments.value)

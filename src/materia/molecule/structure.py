@@ -301,7 +301,14 @@ class Structure:
     def inertia_tensor(self) -> mtr.Qty:
         ms = self.atomic_masses
         rs = self.centered_atomic_positions
-        return sum(m*(np.dot(a,a.T)*np.eye(3) - np.outer(a,a)) for m,a in zip(ms.value,rs.value.T))*ms.unit*rs.unit**2
+        return (
+            sum(
+                m * (np.dot(a, a.T) * np.eye(3) - np.outer(a, a))
+                for m, a in zip(ms.value, rs.value.T)
+            )
+            * ms.unit
+            * rs.unit ** 2
+        )
 
     @property
     @memoize
@@ -363,7 +370,9 @@ class Structure:
     @property
     @memoize
     def principal_moments(self) -> mtr.Qty:
-        return scipy.linalg.eigvalsh(self.inertia_tensor.value) * self.inertia_tensor.unit
+        return (
+            scipy.linalg.eigvalsh(self.inertia_tensor.value) * self.inertia_tensor.unit
+        )
 
     @property
     @memoize

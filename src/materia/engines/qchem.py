@@ -58,7 +58,7 @@ class QChemInput:
             _molecule_to_structure_block(molecule=m, charge=c, multiplicity=mult)
             for m, c, mult in zip(self.molecules, self.charges, self.multiplicities)
         )
-        
+
         if len(molecule_block) == 0:
             molecule_block = "  read"
 
@@ -68,7 +68,9 @@ class QChemInput:
         )
 
     def __add__(self, other: mtr.QChemInput) -> str:
-        return QChemInput(string=str(self) + '\n@@@\n\n' + str(other),settings=mtr.Settings())
+        return QChemInput(
+            string=str(self) + "\n@@@\n\n" + str(other), settings=mtr.Settings()
+        )
 
 
 def _molecule_to_structure_block(
@@ -208,7 +210,7 @@ class QChemOutput:
         zs = self.cclib_out.atomnos
 
         atoms = (mtr.Atom(element=Z, position=p) for Z, p in zip(zs, coords))
-        
+
         return mtr.Structure(*atoms)
 
     # def rttddft(self, lines: str):  # FIXME: not sure how to annotate type hint
@@ -912,6 +914,7 @@ class QChemLRTDDFT(QChemBaseTask):
         molecule.electronic_excitations = super().run(molecule, settings)
         return molecule
 
+
 class QChemLRTDDFTPlotNTOs(QChemBaseTask):
     def parse(self, output: str) -> Any:
         return mtr.QChemOutput(filepath=output).electronic_excitations
@@ -933,23 +936,35 @@ class QChemLRTDDFTPlotNTOs(QChemBaseTask):
         return settings
 
     def run(
-        self, molecule: mtr.Molecule, settings: Optional[mtr.Settings] = None, n_x: Optional[int] = 50, n_y: Optional[int] = 50, n_z: Optional[int] = 50, num_nto_pairs: Optional[int] = 3,
+        self,
+        molecule: mtr.Molecule,
+        settings: Optional[mtr.Settings] = None,
+        n_x: Optional[int] = 50,
+        n_y: Optional[int] = 50,
+        n_z: Optional[int] = 50,
+        num_nto_pairs: Optional[int] = 3,
     ) -> mtr.Molecule:
         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
         s = self.defaults(s)
 
         inp = mtr.QChemInput(molecule, settings=s)
-        
-        n_alpha = int(round((sum(molecule.atomic_numbers) + molecule.charge)/2))
 
-        for i in range(s['rem','cis_n_roots']):
+        n_alpha = int(round((sum(molecule.atomic_numbers) + molecule.charge) / 2))
+
+        for i in range(s["rem", "cis_n_roots"]):
             _s = copy.deepcopy(s)
-            _s['rem','scf_guess'] = 'read'
-            _s['rem','skip_cis_rpa'] = True
-            _s['rem','nto_pairs'] = True
-            _s['rem','make_cube_files'] = 'ntos'
-            _s['rem','cubefile_state'] = i+1
-            _s['plots','comment'] = f'\n  {n_x} -10.0 10.0\n  {n_y} -10.0 10.0\n  {n_z} -10.0 10.0\n  {2*num_nto_pairs} 0 0 0\n  ' + ' '.join(f'{n_alpha + i}' for i in range(-num_nto_pairs+1,num_nto_pairs+1))#{n_alpha-2} {n_alpha-1} {n_alpha} {n_alpha+1} {n_alpha+2} {n_alpha+3}')
+            _s["rem", "scf_guess"] = "read"
+            _s["rem", "skip_cis_rpa"] = True
+            _s["rem", "nto_pairs"] = True
+            _s["rem", "make_cube_files"] = "ntos"
+            _s["rem", "cubefile_state"] = i + 1
+            _s["plots", "comment"] = (
+                f"\n  {n_x} -10.0 10.0\n  {n_y} -10.0 10.0\n  {n_z} -10.0 10.0\n  {2*num_nto_pairs} 0 0 0\n  "
+                + " ".join(
+                    f"{n_alpha + i}"
+                    for i in range(-num_nto_pairs + 1, num_nto_pairs + 1)
+                )
+            )  # {n_alpha-2} {n_alpha-1} {n_alpha} {n_alpha+1} {n_alpha+2} {n_alpha+3}')
             inp = inp + mtr.QChemInput(settings=_s)
 
         with self.io() as io:
@@ -1133,6 +1148,7 @@ class QChemOptimize(QChemBaseTask):
         molecule.structure = super().run(molecule, settings)
         return molecule
 
+
 # def f(molecule, alpha, beta, omega):
 #     n_alpha = round((sum(molecule.atomic_numbers) + molecule.charge)/2)
 #     td_settings=mtr.Settings(rem=dict(basis='cc-pVTZ',exchange='gen',cis_n_roots=20,hf_sr=int(round(1000*alpha)),hf_lr=int(round(1000*(alpha+beta))),omega=int(round(1000*omega)),omega2=int(round(1000*omega)),lrc_dft=True,src_dft=2,rpa=True,cis_singlets=True,cis_triplets=False),xc_functional=(('X','HF',alpha),('X','wPBE',beta),('X','PBE',1 - alpha - beta),('C','PBE',1.0)))
@@ -1149,6 +1165,7 @@ class QChemOptimize(QChemBaseTask):
 
 # def repl(m):
 #     return '$molecule\n  read\n$end\n'
+
 
 class QChemPolarizability(QChemBaseTask):
     def parse(self, output: str) -> Any:
