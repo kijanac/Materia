@@ -260,7 +260,7 @@ class Docs(setuptools.Command):
         )
         
         subprocess.run(["make", "-C", "docs", "clean"] + self.builder.split())
-        shutil.move(pathlib.Path('docs/build/html/index.html'),pathlib.Path('docs/index.html'))
+        shutil.move(pathlib.Path('docs/build/html/index.html'),pathlib.Path('index.html'))
         tex,*_ = pathlib.Path("docs/build/latex/").glob("*.tex")
         subprocess.run(["tectonic",tex])
         pdf,*_ = pathlib.Path('docs/build/latex').glob('*.pdf')
