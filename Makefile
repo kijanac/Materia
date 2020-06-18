@@ -37,7 +37,19 @@ help:
 CONDA_PYTHON ?= ${CONDA_BASE}/bin/python
 .PHONY: clean
 clean:
-	$(CONDA_PYTHON) setup.py clean --env=$(CONDA_ENV)
+	$(CONDA_PYTHON) setup.py clean --env=$(CONDA_ENV) --clean-all
+.PHONY: clean-docs
+clean-build:
+	$(CONDA_PYTHON) setup.py clean --env=$(CONDA_ENV) --build
+.PHONY: clean-docs
+clean-cbuild:
+	$(CONDA_PYTHON) setup.py clean --env=$(CONDA_ENV) --conda-build
+.PHONY: clean-docs
+clean-docs:
+	$(CONDA_PYTHON) setup.py clean --env=$(CONDA_ENV) --docs
+.PHONY: clean-test
+clean-test:
+	$(CONDA_PYTHON) setup.py clean --env=$(CONDA_ENV) --test
 
 $(CONDA_BASE)/envs/$(CONDA_ENV): setup.cfg
 	@$(CONDA_PYTHON) setup.py env --env-name=$(CONDA_ENV)
