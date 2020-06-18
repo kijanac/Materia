@@ -12,11 +12,23 @@ from configparser import ConfigParser
 
 
 class Clean(clean):
-    user_options = [("env=", None, "Conda environment to be removed during clean.")]
+    user_options = [
+        ("env=", None, "Conda environment to be removed during clean."),
+        ("clean-all", None, "If true, clean all"),
+        ("build", None, "If true, clean build"),
+        ("conda-build", None, "If true, clean conda-build"),
+        ("docs", None, "If true, clean docs"),
+        ("test", None, "If true, clean test"),
+    ]
 
     def initialize_options(self):
         super().initialize_options()
         self.env = None
+        self.clean_all = False
+        self.build = False
+        self.conda_build = False
+        self.docs = False
+        self.test = False
 
     def remove_paths(self, *paths):
         for p in paths:
@@ -30,18 +42,28 @@ class Clean(clean):
 
     def run(self):
         super().run()
-        self.remove_paths(
-            pathlib.Path("build"),
-            pathlib.Path("conda-build").resolve(),
-            pathlib.Path(".pytest_cache"),
-            pathlib.Path(".coverage"),
-            pathlib.Path("coverage.xml"),
-            pathlib.Path("dist"),
-            *pathlib.Path("docs").glob("*"),
-            *pathlib.Path("src").glob("*.egg-info"),
-            *pathlib.Path(".").glob(".coverage*"),
-            *pathlib.Path(".").rglob("__pycache__"),
+        paths = []
+        if self.clean_all or self.build:
+            paths.extend([pathlib.Path("build"), pathlib.Path("dist")])
+        if self.clean_all or self.conda_build:
+            paths.append(pathlib.Path("conda-build").resolve())
+        if self.clean_all or self.docs:
+            paths.append(pathlib.Path("docs"))
+        if self.clean_all or self.test:
+            paths.extend(
+                [pathlib.Path(".coverage"),pathlib.Path("coverage.xml"), *pathlib.Path(".").glob(".coverage*")]
+            )
+
+        paths.extend(
+            [
+                pathlib.Path(".pytest_cache"),
+                *pathlib.Path("src").glob("*.egg-info"),
+                *pathlib.Path(".").rglob("__pycache__"),
+            ]
         )
+
+        self.remove_paths(*paths)
+
         subprocess.run(["conda", "env", "remove", "-n", self.env])
 
 
@@ -258,13 +280,16 @@ class Docs(setuptools.Command):
                 pathlib.Path(self.template_dir),
             ]
         )
-        
+
         subprocess.run(["make", "-C", "docs", "clean"] + self.builder.split())
-        shutil.move(pathlib.Path('docs/build/html/index.html'),pathlib.Path('index.html'))
-        tex,*_ = pathlib.Path("docs/build/latex/").glob("*.tex")
-        subprocess.run(["tectonic",tex])
-        pdf,*_ = pathlib.Path('docs/build/latex').glob('*.pdf')
-        shutil.move(pdf,pathlib.Path('docs',pdf.name))
+        shutil.move(
+            pathlib.Path("docs/build/html/index.html"), pathlib.Path("index.html")
+        )
+        tex, *_ = pathlib.Path("docs/build/latex/").glob("*.tex")
+        shutil
+        # subprocess.run(["tectonic",tex])
+        # pdf,*_ = pathlib.Path('docs/build/latex').glob('*.pdf')
+        # shutil.move(pdf,pathlib.Path('docs',pdf.name))
 
 
 class Env(setuptools.Command):
