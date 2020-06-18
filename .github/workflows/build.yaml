@@ -24,3 +24,6 @@ jobs:
 
     - name: Run tests on editable install
       run: make test EDIT=1 VERBOSE=1
+   
+    - name: Build documentation
+      run: make docs
