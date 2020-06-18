@@ -73,7 +73,7 @@ class FunctionTask(Task):
     def __init__(
         self,
         f: Callable,
-        handlers: Optional[Iterable[Handler]] = None,
+        handlers: Optional[Iterable[mtr.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
         super().__init__(handlers=handlers, name=name)
@@ -87,7 +87,7 @@ class InputTask(Task):
     def __init__(
         self,
         value: Any,
-        handlers: Optional[Iterable[Handler]] = None,
+        handlers: Optional[Iterable[mtr.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
         super().__init__(1, handlers=handlers, name=name)
@@ -101,7 +101,7 @@ class ShellCommand(Task):
     def __init__(
         self,
         command: str,
-        handlers: Optional[Iterable[Handler]] = None,
+        handlers: Optional[Iterable[mtr.Handler]] = None,
         name: Optional[str] = None,
     ) -> None:
         super().__init__(handlers=handlers, name=name)
@@ -113,7 +113,7 @@ class ShellCommand(Task):
 
 def task(
     f: Callable = None,
-    handlers: Optional[Iterable[Handler]] = None,
+    handlers: Optional[Iterable[mtr.Handler]] = None,
     name: Optional[str] = None,
 ) -> FunctionTask:
     # FIXME: this is incomptabile with mtr.Workflow.run(thread=False) (i.e. with multiprocessing) because FunctionTask cannot be serialized!

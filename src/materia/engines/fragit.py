@@ -33,7 +33,7 @@ class FragIt(Engine):
         # FIXME: shlex.quote should be used but it doesn't work...
         return shlex.split(f"{self.executable} {inp} {arg_str}")
 
-    def execute(self, io_params: materia.IO) -> str:
+    def execute(self, io_params: mtr.IO) -> str:
         with io_params() as io:
             cmd = self.command(io.inp, io.out, io.work_dir)
             with open(io.inp, "r") as inp:

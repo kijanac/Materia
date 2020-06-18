@@ -4,6 +4,7 @@ from typing import Any, Dict, Iterable, List, Optional
 # import copy
 import collections
 import json
+import materia as mtr
 import multiprocessing as mp
 import networkx as nx
 import queue
@@ -15,7 +16,7 @@ __all__ = ["Workflow", "WorkflowResults"]
 
 
 class WorkflowResults:
-    def __init__(self, tasks: Iterable[materia.Task], results: Dict[int, Any]) -> None:
+    def __init__(self, tasks: Iterable[mtr.Task], results: Dict[int, Any]) -> None:
         self.tasks = tasks
         self.results = results
 
@@ -31,7 +32,7 @@ class WorkflowResults:
 
 
 class Workflow:
-    def __init__(self, *tasks: materia.Task) -> None:
+    def __init__(self, *tasks: mtr.Task) -> None:
         self.tasks = tuple(set(self._discover_tasks(*tasks)))
         self.links = collections.defaultdict(list)
 
@@ -41,7 +42,7 @@ class Workflow:
             for k, r in t.named_requirements.items():
                 self.links[i].append((k, self.tasks.index(r)))
 
-    def _discover_tasks(self, *tasks: Iterable[materia.Task]) -> List[materia.Task]:
+    def _discover_tasks(self, *tasks: Iterable[mtr.Task]) -> List[mtr.Task]:
         discovered = list(tasks)
 
         for t in tasks:

@@ -34,7 +34,7 @@ class XTB(Engine):
         return shlex.split(f"{self.executable} {coord} {arg_str}")
 
     def execute(
-        self, coord: str, io: materia.IO, arguments: Optional[Iterable[str]] = None
+        self, coord: str, io: mtr.IO, arguments: Optional[Iterable[str]] = None
     ) -> str:
         with io() as _io:
             cmd = self.command(_io.out, _io.work_dir, mtr.expand(coord), arguments)
