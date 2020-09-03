@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterable, List, Optional
 
-# import copy
 import collections
 import json
 import materia as mtr
@@ -21,9 +20,11 @@ class WorkflowResults:
         self.results = results
 
     def __getitem__(self, key: str) -> Any:
-        return self.results[
-            self.tasks.index(next(t for t in self.tasks if t.name == key))
-        ]
+        for i, t in enumerate(self.tasks):
+            if t.name == key:
+                return self.results[i]
+
+        raise KeyError
 
     def __str__(self) -> str:
         results = {f"{str(self.tasks[k])} ({k})": v for k, v in self.results.items()}
@@ -56,7 +57,11 @@ class Workflow:
         available_cores: int,
         num_consumers: Optional[int] = 1,
         thread: Optional[bool] = True,
+        restart: Optional[WorkflowResults] = None,
     ) -> WorkflowResults:
+        if restart is not None:
+            for k, v in restart.results.items():
+                self.tasks[k] = mtr.InputTask(v)
         if thread:
             tasks = list(self.tasks)
             links = self.links
