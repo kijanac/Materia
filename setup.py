@@ -48,10 +48,21 @@ class Clean(clean):
         if self.clean_all or self.conda_build:
             paths.append(pathlib.Path("conda-build").resolve())
         if self.clean_all or self.docs:
-            paths.extend([pathlib.Path("docs/build"),pathlib.Path("docs/source"),pathlib.Path("docs/Makefile"),pathlib.Path("docs/make.bat")])
+            paths.extend(
+                [
+                    pathlib.Path("docs/build"),
+                    pathlib.Path("docs/source"),
+                    pathlib.Path("docs/Makefile"),
+                    pathlib.Path("docs/make.bat"),
+                ]
+            )
         if self.clean_all or self.test:
             paths.extend(
-                [pathlib.Path(".coverage"),pathlib.Path("coverage.xml"), *pathlib.Path(".").glob(".coverage*")]
+                [
+                    pathlib.Path(".coverage"),
+                    pathlib.Path("coverage.xml"),
+                    *pathlib.Path(".").glob(".coverage*"),
+                ]
             )
 
         paths.extend(
@@ -167,7 +178,9 @@ class DeployConda(setuptools.Command):
                 "--json",
             ]
         )
-        [d,] = json.loads(installed_package_info)[package_name]
+        [d,] = json.loads(
+            installed_package_info
+        )[package_name]
         url = re.match(r"file://(?P<url>.*)", d["url"]).group("url")
         subprocess.run(["anaconda", "upload", url])
 
@@ -283,9 +296,9 @@ class Docs(setuptools.Command):
 
         subprocess.run(["make", "-C", "docs", "clean"] + self.builder.split())
         for p in pathlib.Path("docs/build/html").glob("*.html"):
-            shutil.move(p,pathlib.Path("docs",p.name))
-        #tex, *_ = pathlib.Path("docs/build/latex/").glob("*.tex")
-        #shutil
+            shutil.move(p, pathlib.Path("docs", p.name))
+        # tex, *_ = pathlib.Path("docs/build/latex/").glob("*.tex")
+        # shutil
         # subprocess.run(["tectonic",tex])
         # pdf,*_ = pathlib.Path('docs/build/latex').glob('*.pdf')
         # shutil.move(pdf,pathlib.Path('docs',pdf.name))
