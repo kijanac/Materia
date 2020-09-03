@@ -3,15 +3,17 @@ from typing import Any, Dict, Iterable, Optional, Tuple, Union
 
 import copy
 import materia as mtr
+from ..utils import memoize
 import numpy as np
 import scipy.integrate, scipy.interpolate
 
 # import matplotlib.pyplot as plt
 import warnings
 
+#__all__ = []
 
 class DataSeries:
-    def __init__(self, x: mtr.Qty, y: mtr.Qty) -> None:
+    def __init__(self, x: mtr.Quantity, y: mtr.Quantity) -> None:
         self.x = x
         self.y = y
 
@@ -19,9 +21,33 @@ class DataSeries:
     #     plt.plot(self.x.value, self.y.value)
     #     plt.show()
 
+def broaden(
+        self, fwhm: mtr.Quantity
+    ) -> Callable[Iterable[Union[int, float]], Iterable[Union[int, float]]]:
+        def f(energies: mtr.Quantity) -> Iterable[Union[int, float]]:
+            s = 0
+            # for excitation in self.excitations:
+            #     x = (energies - excitation.energy) / fwhm
+            #     x = np.array([e.value for e in x])
+            #     s += excitation.oscillator_strength * np.exp(-np.log(2) * (2 * x ** 2))
+            # return s
+            for excitation in self.excitations:
+                x = (energies - excitation.energy) / fwhm
+                x = np.array([e.value for e in x])
+                s += excitation.oscillator_strength * np.exp(-0.5 * x ** 2)
+            return s / (np.sqrt(2 * np.pi) * fwhm)
+
+        return f
+
+def broaden(gamma):
+    def _f(omega, gamma, w):
+        return gamma*omega/((w**2 - omega**2)**2 + omega**2*gamma**2)
+    def f(omega):
+        return (fs[None,:]@np.vstack([_f(omega,gamma,w) for w in ws])).squeeze()
+    return f
 
 class DeltaSeries:
-    def __init__(self, x: mtr.Qty, y: mtr.Qty) -> None:
+    def __init__(self, x: mtr.Quantity, y: mtr.Quantity) -> None:
         self.x = x
         self.y = y / x.unit
 
@@ -45,7 +71,7 @@ class DeltaSeries:
 
 class TimeSeries(DataSeries):
     @property
-    def dt(self) -> mtr.Qty:
+    def dt(self) -> mtr.Quantity:
         # FIXME: should we even check for uniform spacing since this method,
         # like most/all methods, is susceptible to floating point errors?
         spacings = np.diff(self.x.value)
@@ -58,11 +84,11 @@ class TimeSeries(DataSeries):
             return dt * self.x.unit
 
     @property
-    def T(self) -> mtr.Qty:
-        return self.x[-1] - self.x[0]  # * self.x.unit
+    def T(self) -> mtr.Quantity:
+        return self.x[-1] - self.x[0]
 
     def damp(self) -> None:  # , final_damp_value):
-        final_damp_value = 1e-4  # Qty(value=1e-4,unit=self.x.unit)
+        final_damp_value = 1e-4  # Quantity(value=1e-4,unit=self.x.unit)
         etasq = -np.log(final_damp_value) / self.T ** 2
 
         damp = np.exp(-(etasq * self.x ** 2).value)
@@ -90,15 +116,11 @@ class TimeSeries(DataSeries):
 
 
 class Spectrum(DataSeries):
-    def __init__(self, x, y):
-        super().__init__(x=x, y=y)
-
     def match(self, match_to, in_place=True, interp_method="cubic_spline"):
         return self.extrapolate(x_extrap_to=match_to.x, in_place=in_place).interpolate(
             x_interp_to=match_to.x, in_place=in_place, method=interp_method
         )
 
-    # simple linear extrapolation
     def extrapolate(self, x_extrap_to, in_place=True):
         if self.x.unit != x_extrap_to.unit:
             raise ValueError(
@@ -120,6 +142,7 @@ class Spectrum(DataSeries):
             new_spectrum.x = x_extrap
             new_spectrum.y = y_extrap
             return new_spectrum
+            #return self.__class__(x=x_extrap,y=y_extrap)
 
     def interpolate(self, x_interp_to, in_place=True, method="cubic_spline"):
         if self.x.unit != x_interp_to.unit:
@@ -138,7 +161,11 @@ class Spectrum(DataSeries):
             self.x, self.y = x_interp, y_interp
             return self
         else:
-            return mtr.Spectrum(x=x_interp, y=y_interp)
+            new_spectrum = copy.deepcopy(self)
+            new_spectrum.x = x_interp
+            new_spectrum.y = y_interp
+            return new_spectrum
+            #return self.__class__(x=x_interp, y=y_interp)
 
     # def plot(self, x=None):
     #     # FIXME: add axes labels, title
@@ -148,27 +175,6 @@ class Spectrum(DataSeries):
     #         plt.plot(self.x, self.y)
     #     plt.xlabel(f"Units: {self.x.unit}")
     #     plt.ylabel(f"Units: {self.y.unit}")
-    #     plt.show()
-
-
-# class ContinuousSpectrum(DataSeries):
-#     def __init__(self, x, y):
-
-
-class ComplexSpectrum(Spectrum):
-    def __init__(self, x, y):
-        super().__init__(x=x, y=y)
-
-    # # FIXME: this code is stupid, figure out better syntax for real vs imag
-    # def plot(self, real, imag, positive_frequencies_only=False):
-    #     if positive_frequencies_only:
-    #         plot_x = self.x[self.x >= 0]
-
-    #     if real:
-    #         plt.plot(plot_x, self.y.real)
-    #     else:
-    #         plt.plot(plot_x, self.y.imag)
-
     #     plt.show()
 
 
@@ -183,35 +189,36 @@ class AbsorptionSpectrum(Spectrum):
 
 
 class ReflectanceSpectrum(Spectrum):
-    def __init__(self, x, y):
-        super().__init__(x=x, y=y)
-
     def reflect_illuminant(self, illuminant):
         new_spectrum = copy.deepcopy(illuminant)
+        new_spectrum.x = self.x
         new_spectrum.y = self.y * illuminant.match(match_to=self, in_place=False).y
         return new_spectrum
 
 
 class TransmittanceSpectrum(Spectrum):
-    def __init__(self, x, y):
-        super().__init__(x=x, y=y)
-
     def transmit_illuminant(self, illuminant):
         new_spectrum = copy.deepcopy(illuminant)
+        new_spectrum.x = self.x
         new_spectrum.y = self.y * illuminant.match(match_to=self, in_place=False).y
         return new_spectrum
 
+    def avt(self):
+        from .data import ASTMG173
+        photopic = PhotopicResponse().match(match_to=self)
+        astmg = ASTMG173().match(match_to=self)
+        num = scipy.integrate.simps(y=(self.y*astmg.y*photopic.y).value, x=self.x.value)
+        denom = scipy.integrate.simps(y=(astmg.y*photopic.y).value, x=astmg.x.value)
+
+        return num/denom
+
 
 class SPDSpectrum(Spectrum):
-    def __init__(self, x, y):
-        super().__init__(x=x, y=y)
-
-        self.XYZ = self.tristimulus()
-        self.X, self.Y, self.Z = self.XYZ
-
-    def tristimulus(self):
+    @property
+    @memoize
+    def XYZ(self) -> Tuple[float,float,float]:
         # FIXME: this is an ugly workaround to avoid circular import - change it!!
-        from .cie_cmfs import (
+        from .data import (
             CIE1931ColorMatchingFunctionX,
             CIE1931ColorMatchingFunctionY,
             CIE1931ColorMatchingFunctionZ,
@@ -225,7 +232,7 @@ class SPDSpectrum(Spectrum):
         Y = scipy.integrate.simps(y=(self.y * ybar.y).value, x=self.x.value)
         Z = scipy.integrate.simps(y=(self.y * zbar.y).value, x=self.x.value)
 
-        return X, Y, Z
+        return X/Y, 1.0, Z/Y
 
     # FIXME: verify correctness with test case
     def von_kries_XYZ(self, source_illuminant, destination_illuminant):
@@ -233,7 +240,7 @@ class SPDSpectrum(Spectrum):
         destination_lms = np.array(destination_illuminant.LMS())
         LMS = np.array(self.LMS())[:, None]
 
-        hpe = self.hunt_pointer_estevez_transform()
+        hpe = hunt_pointer_estevez_transform()
         adapted_LMS = np.diag(destination_lms / source_lms) @ LMS
         adapted_XYZ = np.linalg.inv(hpe) @ adapted_LMS
 
@@ -242,7 +249,8 @@ class SPDSpectrum(Spectrum):
         return adapted_X, adapted_Y, adapted_Z
 
     def UVW(self, white_point=None):
-        return self._XYZ_to_UVW(X=self.X, Y=self.Y, Z=self.Z, white_point=white_point)
+        X,Y,Z = self.XYZ
+        return self._XYZ_to_UVW(X=X, Y=Y, Z=Z, white_point=white_point)
 
     def von_kries_UVW(
         self, source_illuminant, destination_illuminant, white_point=None
@@ -254,7 +262,8 @@ class SPDSpectrum(Spectrum):
 
         return self._XYZ_to_UVW(
             X=X, Y=Y, Z=Z, white_point=white_point
-        )  # FIXME: shouldn't the white_point actually be the desination illuminant's white point?
+        )
+        # FIXME: shouldn't the white_point actually be the desination illuminant's white point?
 
     def _XYZ_to_UVW(self, X, Y, Z, white_point=None):
         if white_point is None:
@@ -263,9 +272,7 @@ class SPDSpectrum(Spectrum):
             W = 0.5 * (-X + 3 * Y + Z)
         else:
             u0, v0 = white_point
-            x, y = self._XYZ_to_xy(X=X, Y=Y, Z=Z)
-
-            u, v = self._xy_to_uv(x=x, y=y)
+            u, v = self.uv
 
             W = 25 * np.power(Y, 1 / 3) - 17
             U = 13 * W * (u - u0)
@@ -273,31 +280,29 @@ class SPDSpectrum(Spectrum):
 
         return U, V, W
 
+    @property
     def LMS(self):
-        hpe = self.hunt_pointer_estevez_transform()
+        hpe = hunt_pointer_estevez_transform()
 
         XYZ = np.array((self.XYZ))[:, None]
         L, M, S = (hpe @ XYZ).squeeze()
 
         return L, M, S
 
-    def xy(self):
-        return self._XYZ_to_xy(X=self.X, Y=self.Y, Z=self.Z)
+    @property
+    def xy(self) -> Tuple[float,float]:
+        X,Y,Z = self.XYZ
+        norm = sum(self.XYZ)
 
-    def _XYZ_to_xy(self, X, Y, Z):
-        sum = X + Y + Z
-
-        x = X / sum
-        y = Y / sum
+        x = X / norm
+        y = Y / norm
 
         return x, y
+        
+    @property
+    def uv(self) -> Tuple[float,float]:
+        x, y = self.xy
 
-    def uv(self):
-        x, y = self.xy()
-
-        return self._xy_to_uv(x=x, y=y)
-
-    def _xy_to_uv(self, x, y):
         denom = -2 * x + 12 * y + 3
 
         u = 4 * x / denom
@@ -307,24 +312,25 @@ class SPDSpectrum(Spectrum):
 
     # color properties
 
-    def CCT_DC(self):
-        u, v = self.uv()
-        uvT = self.planckian_locus_ucs(exact=True)
+    @property
+    def CCT_DC(self) -> Tuple[mtr.Quantity,float]:
+        u, v = self.uv
+        uvT = planckian_locus_ucs(exact=True)
 
-        def error(T):
+        def _error(T):
             uT, vT = uvT(T=T)
             return (uT - u) ** 2 + (vT - v) ** 2
 
         CCT, DC_squared, _, _ = scipy.optimize.fminbound(
-            func=error, x1=1000, x2=15000, full_output=True
+            func=_error, x1=1000, x2=15000, full_output=True
         )
 
-        return CCT, np.sqrt(DC_squared)
+        return CCT*mtr.K, np.sqrt(DC_squared)
 
     def cri(self, strict=True):
         # FIXME: this is an ugly workaround to avoid circular import - change it!!
-        from .cie_illuminants import CIEIlluminantDSeries
-        from .cie_test_color_samples import (
+        from .data import CIEIlluminantDSeries
+        from .data import (
             CIE1995TestColorSample01,
             CIE1995TestColorSample02,
             CIE1995TestColorSample03,
@@ -335,7 +341,7 @@ class SPDSpectrum(Spectrum):
             CIE1995TestColorSample08,
         )
 
-        CCT, DC = self.CCT_DC()
+        CCT, DC = self.CCT_DC
 
         if DC > 5.4e-3:
             if strict:
@@ -347,7 +353,9 @@ class SPDSpectrum(Spectrum):
                     "Distance from UCS Planckian locus too high. Illuminant is insufficiently white for accurate CRI determination."
                 )
 
-        if CCT < 5000:
+        if CCT < 5000*mtr.K:
+            from .data import BlackbodySPD
+            
             reference_illuminant = BlackbodySPD(T=CCT, normalize_to=1)
         else:
             reference_illuminant = CIEIlluminantDSeries(T=CCT, normalize_to=1)
@@ -363,7 +371,7 @@ class SPDSpectrum(Spectrum):
             CIE1995TestColorSample08(),
         )
 
-        u_ref, v_ref = reference_illuminant.uv()
+        u_ref, v_ref = reference_illuminant.uv
 
         R_mean = np.mean(
             tuple(
@@ -374,37 +382,42 @@ class SPDSpectrum(Spectrum):
                 )
                 for sample in samples
             )
-        )  # (TCS01,TCS02,TCS03,TCS04,TCS05,TCS06,TCS07,TCS08)))
+        )
+        # (TCS01,TCS02,TCS03,TCS04,TCS05,TCS06,TCS07,TCS08)))
 
         return R_mean
 
     def R_score(self, test_illuminant, reference_illuminant, sample_reflectance):
-        u_ref, v_ref = reference_illuminant.uv()
+        u_ref, v_ref = reference_illuminant.uv
 
-        reflected_reference_illuminant = sample_reflectance.reflect_illuminant(
-            illuminant=reference_illuminant
-        )
-        u_sample_ref, v_sample_ref = reflected_reference_illuminant.uv()
-        X_sample_ref = reflected_reference_illuminant.X * 100 / reference_illuminant.Y
-        Y_sample_ref = reflected_reference_illuminant.Y * 100 / reference_illuminant.Y
-        Z_sample_ref = reflected_reference_illuminant.Z * 100 / reference_illuminant.Y
+        reflected_reference_illuminant = sample_reflectance.reflect_illuminant(reference_illuminant)
+        u_sample_ref, v_sample_ref = reflected_reference_illuminant.uv
+
+        _, reference_Y, _ = reference_illuminant.XYZ
+        reflected_X, reflected_Y, reflected_Z = reflected_reference_illuminant.XYZ
+
+        X_sample_ref = reflected_X * 100 / reference_Y
+        Y_sample_ref = reflected_Y * 100 / reference_Y
+        Z_sample_ref = reflected_Z * 100 / reference_Y
         U_ref, V_ref, W_ref = self._XYZ_to_UVW(
             X=X_sample_ref, Y=Y_sample_ref, Z=Z_sample_ref, white_point=(u_ref, v_ref)
         )
 
-        reflected_test_illuminant = sample_reflectance.reflect_illuminant(
-            illuminant=test_illuminant
-        )
-        u_sample_test, v_sample_test = reflected_test_illuminant.uv()
+        reflected_test_illuminant = sample_reflectance.reflect_illuminant(illuminant=test_illuminant)
+        u_sample_test, v_sample_test = reflected_test_illuminant.uv
         u_sample_adapted, v_sample_adapted = self.von_kries_uv(
             u=u_sample_test,
             v=v_sample_test,
             source_illuminant=test_illuminant,
             destination_illuminant=reference_illuminant,
         )
-        X_sample_test = reflected_test_illuminant.X * 100 / test_illuminant.Y
-        Y_sample_test = reflected_test_illuminant.Y * 100 / test_illuminant.Y
-        Z_sample_test = reflected_test_illuminant.Z * 100 / test_illuminant.Y
+
+        _, test_Y, _ = test_illuminant.XYZ
+        reflected_test_X, reflected_test_Y, reflected_test_Z = reflected_test_illuminant.XYZ
+
+        X_sample_test = reflected_test_X * 100 / test_Y
+        Y_sample_test = reflected_test_Y * 100 / test_Y
+        Z_sample_test = reflected_test_Z * 100 / test_Y
         U_test, V_test, W_test = self._XYZ_to_UVW(
             X=X_sample_test,
             Y=Y_sample_test,
@@ -423,15 +436,15 @@ class SPDSpectrum(Spectrum):
         return 100 - 4.6 * distance
 
     def von_kries_uv(self, u, v, source_illuminant, destination_illuminant):
-        u_s, v_s = source_illuminant.uv()
+        u_s, v_s = source_illuminant.uv
         c_s = (4 - u_s - 10 * v_s) / v_s
         d_s = (1.708 * v_s + 0.404 - 1.481 * u_s) / v_s
-        Y_s = source_illuminant.Y
+        _,Y_s,_ = source_illuminant.XYZ
 
-        u_d, v_d = destination_illuminant.uv()
+        u_d, v_d = destination_illuminant.uv
         c_d = (4 - u_d - 10 * v_d) / v_d
         d_d = (1.708 * v_d + 0.404 - 1.481 * u_d) / v_d
-        Y_d = destination_illuminant.Y
+        _,Y_d,_ = destination_illuminant.XYZ
 
         c = (4 - u - 10 * v) / v
         d = (1.708 * v + 0.404 - 1.481 * u) / v
@@ -442,98 +455,91 @@ class SPDSpectrum(Spectrum):
 
         return u_adapted, v_adapted
 
-    # other standard quantities
-
-    def planckian_locus_xyz(self, exact=False):
-        if exact:
-            # FIXME: this is an ugly workaround to avoid circular import - change it!!
-            from .blackbody_spd import BlackbodySPD
-
-            return lambda T: BlackbodySPD(T=T).xy()
-        else:
-
-            def x(T):
-                if T >= 1667 and T <= 4000:
-                    return (
-                        -0.2661239e9 / T ** 3
-                        - 0.2343589e6 / T ** 2
-                        + 0.8776956e3 / T
-                        + 0.179910
-                    )
-                elif T > 4000 and T <= 25000:
-                    return (
-                        -3.0258469e9 / T ** 3
-                        + 2.1070379e6 / T ** 2
-                        + 0.2226347e3 / T
-                        + 0.240390
-                    )
-
-            def y(T):
-                xc = x(T)
-                if T >= 1667 and T <= 2222:
-                    return (
-                        -1.1063814 * xc ** 3
-                        - 1.34811020 * xc ** 2
-                        + 2.18555832 * xc
-                        - 0.20219683
-                    )
-                elif T > 2222 and T <= 4000:
-                    return (
-                        -0.9549476 * xc ** 3
-                        - 1.37418593 * xc ** 2
-                        + 2.09137015 * xc
-                        - 0.16748867
-                    )
-                elif T > 4000 and T <= 25000:
-                    return (
-                        3.0817580 * xc ** 3
-                        - 5.87338670 * xc ** 2
-                        + 3.75112997 * xc
-                        - 0.37001483
-                    )
-
-            return lambda T: (x(T=T), y(T=T))
-
-    def planckian_locus_ucs(self, exact=False):
-        if exact:
-            # FIXME: this is an ugly workaround to avoid circular import - change it!!
-            from .blackbody_spd import BlackbodySPD
-
-            return lambda T: BlackbodySPD(T=T).uv()
-        else:
-
-            def u(T):
-                return (0.860117757 + 1.54118254e-4 * T + 1.28641212e-7 * T ** 2) / (
-                    1 + 8.42420235e-4 * T + 7.08145163e-7 * T ** 2
-                )
-
-            def v(T):
-                return (0.317398726 + 4.22806245e-5 * T + 4.20481691e-8 * T ** 2) / (
-                    1 - 2.89741816e-5 * T + 1.61456053e-7 * T ** 2
-                )
-
-            return lambda T: (u(T=T), v(T=T))
-
-    def hunt_pointer_estevez_transform(self):
-        return np.array(
-            [
-                [0.4002400, 0.7076000, -0.0808100],
-                [-0.2263000, 1.1653200, 0.0457000],
-                [0.0000000, 0.0000000, 0.9182200],
-            ]
-        )
-
 
 class RelativeSPDSpectrum(SPDSpectrum):
     def __init__(self, x, y, normalizing_x=560, normalize_to=1):
         [val,] = y[x.value == normalizing_x]
+
         super().__init__(
-            x=x, y=normalize_to * y.value / val * mtr.unitless,
-        )  # norm_factor*y/y.unit)
+            x=x, y=normalize_to * y/val,
+        )
 
-        self.XYZ = self.tristimulus()
-        self.X, self.Y, self.Z = self.XYZ
+def hunt_pointer_estevez_transform() -> np.ndarray:
+    return np.array(
+        [
+            [0.4002400, 0.7076000, -0.0808100],
+            [-0.2263000, 1.1653200, 0.0457000],
+            [0.0000000, 0.0000000, 0.9182200],
+        ]
+    )
 
+def planckian_locus_xyz(exact: Optional[bool]=False) -> Callable[mtr.Quantity,Tuple[float,float]]:
+    if exact:
+        # FIXME: this is an ugly workaround to avoid circular import - change it!!
+        from .data import BlackbodySPD
+
+        return lambda T: BlackbodySPD(T=T).xy
+    else:
+
+        def x(T):
+            if T >= 1667 and T <= 4000:
+                return (
+                    -0.2661239e9 / T ** 3
+                    - 0.2343589e6 / T ** 2
+                    + 0.8776956e3 / T
+                    + 0.179910
+                )
+            elif T > 4000 and T <= 25000:
+                return (
+                    -3.0258469e9 / T ** 3
+                    + 2.1070379e6 / T ** 2
+                    + 0.2226347e3 / T
+                    + 0.240390
+                )
+
+        def y(T):
+            xc = x(T)
+            if T >= 1667 and T <= 2222:
+                return (
+                    -1.1063814 * xc ** 3
+                    - 1.34811020 * xc ** 2
+                    + 2.18555832 * xc
+                    - 0.20219683
+                )
+            elif T > 2222 and T <= 4000:
+                return (
+                    -0.9549476 * xc ** 3
+                    - 1.37418593 * xc ** 2
+                    + 2.09137015 * xc
+                    - 0.16748867
+                )
+            elif T > 4000 and T <= 25000:
+                return (
+                    3.0817580 * xc ** 3
+                    - 5.87338670 * xc ** 2
+                    + 3.75112997 * xc
+                    - 0.37001483
+                )
+
+        return lambda T: (x(T=T), y(T=T))
+
+def planckian_locus_ucs(exact: Optional[bool]=False) -> Callable[mtr.Quantity,Tuple[float,float]]:
+    if exact:
+        # FIXME: this is an ugly workaround to avoid circular import - change it!!
+        from .data import BlackbodySPD
+
+        return lambda T: BlackbodySPD(T=T).uv
+    else:
+        def f(T):
+            u = (0.860117757 + 1.54118254e-4 * T + 1.28641212e-7 * T ** 2) / (
+                1 + 8.42420235e-4 * T + 7.08145163e-7 * T ** 2)
+
+            v = (0.317398726 + 4.22806245e-5 * T + 4.20481691e-8 * T ** 2) / (
+                1 - 2.89741816e-5 * T + 1.61456053e-7 * T ** 2)
+
+            return u,v
+
+        return f
 
 # standard illuminants, default normalized to 100 @ 560 nm
 
@@ -626,6 +632,6 @@ class PhotopicResponse(RelativeSPDSpectrum):
             0.000021,
             0.000015,
         ]
-        y = np.array(V) * materia.unitless
+        y = np.array(V) * mtr.unitless
 
         super().__init__(x=x, y=y, normalize_to=100)
