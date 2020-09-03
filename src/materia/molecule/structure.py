@@ -44,9 +44,19 @@ class Structure:
 
     @property
     def bonds(self) -> Dict[int, int]:
-        obmol = ob.OBMol()
+        obmol = self.to_obmol()
 
         bonds = {k: [] for k in range(self.num_atoms)}
+
+        for bond in ob.OBMolBondIter(obmol):
+            a, b = bond.GetBeginAtomIdx() - 1, bond.GetEndAtomIdx() - 1
+            bonds[a].append(b)
+            bonds[b].append(a)
+
+        return bonds
+
+    def to_obmol(self, explicit_hydrogen: Optional[bool] = True) -> ob.OBMol:
+        obmol = ob.OBMol()
 
         for a in self.atoms:
             obatom = ob.OBAtom()
@@ -57,12 +67,14 @@ class Structure:
         obmol.ConnectTheDots()
         obmol.PerceiveBondOrders()
 
-        for bond in ob.OBMolBondIter(obmol):
-            a, b = bond.GetBeginAtomIdx() - 1, bond.GetEndAtomIdx() - 1
-            bonds[a].append(b)
-            bonds[b].append(a)
+        if not explicit_hydrogen:
+            obmol.DeleteHydrogens()
+            # NOTE: empirically, this appears to renumber the atoms correctly (i.e. it maintains the original order as specified by self.atoms while removing hydrogens & renumbering sequentially) - this is consistent with how to_graph works
+            #non_hydrogens = [i for i, Z in enumerate(self.atomic_numbers) if Z != 1]
+            #renumber = obatoms[np.arange(1,self.num_atoms+1)[non_hydrogens]].tolist()
+            #obmol.RenumberAtoms(renumber)
 
-        return bonds
+        return obmol
 
     def to_graph(self, explicit_hydrogen: Optional[bool] = True) -> nx.Graph:
         g = nx.Graph()
@@ -312,60 +324,31 @@ class Structure:
 
     @property
     @memoize
+    def distance_matrix(self):
+        # NOTE: equation taken from https://arxiv.org/pdf/1804.04310.pdf
+        pp = self.atomic_positions.T@self.atomic_positions
+
+        pp_repeat = np.tile(np.diag(pp.value),(self.num_atoms,1))*pp.unit
+
+        return pp_repeat + pp_repeat.T - 2*pp
+
+    @property
+    @memoize
     def inertia_aligned_atomic_positions(self) -> mtr.Qty:
         # FIXME: examine and clean this one up
         if self.num_atoms == 1:
             # i.e. this is an atomic species
             return np.eye(3)
 
-        principal_moments, principal_directions = scipy.linalg.eigh(
-            self.inertia_tensor.value
-        )
+        inds = np.argsort(self.principal_moments)
+        u,v,_ = self.principal_axes[:,inds].T
+        u,v = u.reshape(3,1),v.reshape(3,1)
 
-        sorted_moments, sorted_directions = zip(
-            *sorted(zip(principal_moments, principal_directions.T), reverse=True)
-        )
-        u, v, _ = sorted_directions
-
-        u /= scipy.linalg.norm(u)
-        v /= scipy.linalg.norm(v)
-        z = np.array([[0, 0, 1]]).T
-        y = np.array([[0, 1, 0]]).T
-        x = np.array([[1, 0, 0]]).T
-        axis = np.cross(u.T, z.T).T
-        c = np.dot(u.T, z)  # cosine of the angle between u and z
-        u1, u2, u3 = np.ravel(axis)
-        K = np.array([[0, -u3, u2], [u3, 0, -u1], [-u2, u1, 0]])
-        s = np.sqrt(1 - c ** 2)
-        Ru = (np.eye(3) + s * K + (1 - c) * (K @ K)).astype("float64")
-        axis = np.cross((Ru @ v).T, y.T).T
-        axis /= scipy.linalg.norm(axis)
-        c = np.dot((Ru @ v).T, y)  # cosine of the angle between Ru@v and y
-        u1, u2, u3 = np.ravel(axis)
-        K = np.array([[0, -u3, u2], [u3, 0, -u1], [-u2, u1, 0]])
-        s = np.sqrt(1 - c ** 2)
-        Rv = (np.eye(3) + s * K + (1 - c) * (K @ K)).astype("float64")
-        R = Rv @ Ru
-
-        print([[x for x in v] for v in R])
-
-        Rp = np.hstack([y, z, x]) @ np.linalg.inv(
-            np.hstack(
-                [u.reshape(3, 1), v.reshape(3, 1), np.cross(u.T, v.T).reshape(3, 1)]
-            )
-        )
-
-        print([[x for x in v] for v in Rp])
-        print(R @ u)
-        print(R @ v)
-        print(Rp @ u)
-        print(Rp @ v)
-        print(R @ R.T)
-        print(Rp @ Rp.T)
-
-        return (
-            R @ self.centered_atomic_positions.value
-        ) * self.centered_atomic_positions.unit
+        Ru = mtr.rotation_matrix_m_to_n(m=u.reshape(3,1),n=np.array([[1, 0, 0]]).T)
+        Rv = mtr.rotation_matrix_m_to_n(m=Ru@v.reshape(3,1),n=np.array([[0, 1, 0]]).T)
+        R = Rv@Ru
+        
+        return R @ self.centered_atomic_positions
 
     @property
     @memoize
@@ -376,9 +359,10 @@ class Structure:
 
     @property
     @memoize
-    def principal_axes(self) -> Tuple[float]:
+    def principal_axes(self) -> Tuple[mtr.Qty]:
         _, axes = scipy.linalg.eigh(self.inertia_tensor.value)
-        return tuple(mtr.normalize(ax) for ax in axes.T)
+        return axes
+        #return tuple(mtr.normalize(ax) for ax in axes.T)
 
     @property
     @memoize
