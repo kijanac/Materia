@@ -62,7 +62,10 @@ class FragItFragment(ExternalTask):
         engine (mtr.FragItEngine): Engine which will be used to fragment structure.
     """
 
-    def run(self, molecule: mtr.Molecule,) -> Tuple[mtr.Molecule]:
+    def run(
+        self,
+        molecule: mtr.Molecule,
+    ) -> Tuple[mtr.Molecule]:
         with self.io() as io:
             molecule.structure.write(io.inp)
 

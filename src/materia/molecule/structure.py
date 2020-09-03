@@ -70,9 +70,9 @@ class Structure:
         if not explicit_hydrogen:
             obmol.DeleteHydrogens()
             # NOTE: empirically, this appears to renumber the atoms correctly (i.e. it maintains the original order as specified by self.atoms while removing hydrogens & renumbering sequentially) - this is consistent with how to_graph works
-            #non_hydrogens = [i for i, Z in enumerate(self.atomic_numbers) if Z != 1]
-            #renumber = obatoms[np.arange(1,self.num_atoms+1)[non_hydrogens]].tolist()
-            #obmol.RenumberAtoms(renumber)
+            # non_hydrogens = [i for i, Z in enumerate(self.atomic_numbers) if Z != 1]
+            # renumber = obatoms[np.arange(1,self.num_atoms+1)[non_hydrogens]].tolist()
+            # obmol.RenumberAtoms(renumber)
 
         return obmol
 
@@ -201,7 +201,7 @@ class Structure:
 
         Args:
             file: Path to file to which the structure will be written. Can be an absolute or a relative path.
-            
+
             overwrite: If False, an error is raised if `filepath` already exists and the structure is not written. Ignored if `file` is a file-like object. Defaults to False.
         """
         open_code = "w" if overwrite else "x"
@@ -326,11 +326,11 @@ class Structure:
     @memoize
     def distance_matrix(self):
         # NOTE: equation taken from https://arxiv.org/pdf/1804.04310.pdf
-        pp = self.atomic_positions.T@self.atomic_positions
+        pp = self.atomic_positions.T @ self.atomic_positions
 
-        pp_repeat = np.tile(np.diag(pp.value),(self.num_atoms,1))*pp.unit
+        pp_repeat = np.tile(np.diag(pp.value), (self.num_atoms, 1)) * pp.unit
 
-        return pp_repeat + pp_repeat.T - 2*pp
+        return pp_repeat + pp_repeat.T - 2 * pp
 
     @property
     @memoize
@@ -341,13 +341,15 @@ class Structure:
             return np.eye(3)
 
         inds = np.argsort(self.principal_moments)
-        u,v,_ = self.principal_axes[:,inds].T
-        u,v = u.reshape(3,1),v.reshape(3,1)
+        u, v, _ = self.principal_axes[:, inds].T
+        u, v = u.reshape(3, 1), v.reshape(3, 1)
 
-        Ru = mtr.rotation_matrix_m_to_n(m=u.reshape(3,1),n=np.array([[1, 0, 0]]).T)
-        Rv = mtr.rotation_matrix_m_to_n(m=Ru@v.reshape(3,1),n=np.array([[0, 1, 0]]).T)
-        R = Rv@Ru
-        
+        Ru = mtr.rotation_matrix_m_to_n(m=u.reshape(3, 1), n=np.array([[1, 0, 0]]).T)
+        Rv = mtr.rotation_matrix_m_to_n(
+            m=Ru @ v.reshape(3, 1), n=np.array([[0, 1, 0]]).T
+        )
+        R = Rv @ Ru
+
         return R @ self.centered_atomic_positions
 
     @property
@@ -362,7 +364,7 @@ class Structure:
     def principal_axes(self) -> Tuple[mtr.Qty]:
         _, axes = scipy.linalg.eigh(self.inertia_tensor.value)
         return axes
-        #return tuple(mtr.normalize(ax) for ax in axes.T)
+        # return tuple(mtr.normalize(ax) for ax in axes.T)
 
     @property
     @memoize
@@ -533,7 +535,10 @@ def _structure_from_identifier(
     # FIXME: assumes the RDKIT distance unit is angstrom - is this correct??
     # NOTE: using conformer.GetPositions sometimes causes a seg fault (RDKit) - use GetAtomPosition instead
     atoms = (
-        mtr.Atom(element=symbol, position=conformer.GetAtomPosition(i) * mtr.angstrom,)
+        mtr.Atom(
+            element=symbol,
+            position=conformer.GetAtomPosition(i) * mtr.angstrom,
+        )
         for i, symbol in enumerate(symbols)
     )
 

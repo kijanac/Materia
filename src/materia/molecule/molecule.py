@@ -9,11 +9,11 @@ __all__ = ["Molecule"]
 
 
 def first(flist, default=None):
-    """ Try each function in `flist` until one does not throw an exception, and
+    """Try each function in `flist` until one does not throw an exception, and
     return the return value of that function. If all functions throw exceptions,
-    return `default` 
+    return `default`
 
-    Args: 
+    Args:
         flist - list of functions to try
         default - value to return if all functions fail
 
@@ -41,7 +41,7 @@ class Molecule:
         super().__setattr__("properties", {})
         if isinstance(structure, mtr.Structure):
             self.structure = structure
-        else:# isinstance(structure, str):
+        else:  # isinstance(structure, str):
             self.structure = first(
                 [
                     # NOTE: casting to string allows for structure to be a pathlib.Path

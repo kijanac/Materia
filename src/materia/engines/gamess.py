@@ -183,7 +183,12 @@ class GAMESSStructure:
             " $data\n\nc1\n"
             + "\n".join(
                 f"{a.atomic_symbol.lower()}{i+1} {float(a.Z)} "
-                + "  ".join(str(p) for p in a.position.reshape(3,))
+                + "  ".join(
+                    str(p)
+                    for p in a.position.reshape(
+                        3,
+                    )
+                )
                 for i, a in enumerate(self.structure.atoms)
             )
             + "\n $end"

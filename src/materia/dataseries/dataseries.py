@@ -10,7 +10,8 @@ import scipy.integrate, scipy.interpolate
 # import matplotlib.pyplot as plt
 import warnings
 
-#__all__ = []
+# __all__ = []
+
 
 class DataSeries:
     def __init__(self, x: mtr.Quantity, y: mtr.Quantity) -> None:
@@ -21,30 +22,35 @@ class DataSeries:
     #     plt.plot(self.x.value, self.y.value)
     #     plt.show()
 
-def broaden(
-        self, fwhm: mtr.Quantity
-    ) -> Callable[Iterable[Union[int, float]], Iterable[Union[int, float]]]:
-        def f(energies: mtr.Quantity) -> Iterable[Union[int, float]]:
-            s = 0
-            # for excitation in self.excitations:
-            #     x = (energies - excitation.energy) / fwhm
-            #     x = np.array([e.value for e in x])
-            #     s += excitation.oscillator_strength * np.exp(-np.log(2) * (2 * x ** 2))
-            # return s
-            for excitation in self.excitations:
-                x = (energies - excitation.energy) / fwhm
-                x = np.array([e.value for e in x])
-                s += excitation.oscillator_strength * np.exp(-0.5 * x ** 2)
-            return s / (np.sqrt(2 * np.pi) * fwhm)
 
-        return f
+def broaden(
+    self, fwhm: mtr.Quantity
+) -> Callable[Iterable[Union[int, float]], Iterable[Union[int, float]]]:
+    def f(energies: mtr.Quantity) -> Iterable[Union[int, float]]:
+        s = 0
+        # for excitation in self.excitations:
+        #     x = (energies - excitation.energy) / fwhm
+        #     x = np.array([e.value for e in x])
+        #     s += excitation.oscillator_strength * np.exp(-np.log(2) * (2 * x ** 2))
+        # return s
+        for excitation in self.excitations:
+            x = (energies - excitation.energy) / fwhm
+            x = np.array([e.value for e in x])
+            s += excitation.oscillator_strength * np.exp(-0.5 * x ** 2)
+        return s / (np.sqrt(2 * np.pi) * fwhm)
+
+    return f
+
 
 def broaden(gamma):
     def _f(omega, gamma, w):
-        return gamma*omega/((w**2 - omega**2)**2 + omega**2*gamma**2)
+        return gamma * omega / ((w ** 2 - omega ** 2) ** 2 + omega ** 2 * gamma ** 2)
+
     def f(omega):
-        return (fs[None,:]@np.vstack([_f(omega,gamma,w) for w in ws])).squeeze()
+        return (fs[None, :] @ np.vstack([_f(omega, gamma, w) for w in ws])).squeeze()
+
     return f
+
 
 class DeltaSeries:
     def __init__(self, x: mtr.Quantity, y: mtr.Quantity) -> None:
@@ -142,7 +148,7 @@ class Spectrum(DataSeries):
             new_spectrum.x = x_extrap
             new_spectrum.y = y_extrap
             return new_spectrum
-            #return self.__class__(x=x_extrap,y=y_extrap)
+            # return self.__class__(x=x_extrap,y=y_extrap)
 
     def interpolate(self, x_interp_to, in_place=True, method="cubic_spline"):
         if self.x.unit != x_interp_to.unit:
@@ -165,7 +171,7 @@ class Spectrum(DataSeries):
             new_spectrum.x = x_interp
             new_spectrum.y = y_interp
             return new_spectrum
-            #return self.__class__(x=x_interp, y=y_interp)
+            # return self.__class__(x=x_interp, y=y_interp)
 
     # def plot(self, x=None):
     #     # FIXME: add axes labels, title
@@ -205,18 +211,21 @@ class TransmittanceSpectrum(Spectrum):
 
     def avt(self):
         from .data import ASTMG173
+
         photopic = PhotopicResponse().match(match_to=self)
         astmg = ASTMG173().match(match_to=self)
-        num = scipy.integrate.simps(y=(self.y*astmg.y*photopic.y).value, x=self.x.value)
-        denom = scipy.integrate.simps(y=(astmg.y*photopic.y).value, x=astmg.x.value)
+        num = scipy.integrate.simps(
+            y=(self.y * astmg.y * photopic.y).value, x=self.x.value
+        )
+        denom = scipy.integrate.simps(y=(astmg.y * photopic.y).value, x=astmg.x.value)
 
-        return num/denom
+        return num / denom
 
 
 class SPDSpectrum(Spectrum):
     @property
     @memoize
-    def XYZ(self) -> Tuple[float,float,float]:
+    def XYZ(self) -> Tuple[float, float, float]:
         # FIXME: this is an ugly workaround to avoid circular import - change it!!
         from .data import (
             CIE1931ColorMatchingFunctionX,
@@ -232,7 +241,7 @@ class SPDSpectrum(Spectrum):
         Y = scipy.integrate.simps(y=(self.y * ybar.y).value, x=self.x.value)
         Z = scipy.integrate.simps(y=(self.y * zbar.y).value, x=self.x.value)
 
-        return X/Y, 1.0, Z/Y
+        return X / Y, 1.0, Z / Y
 
     # FIXME: verify correctness with test case
     def von_kries_XYZ(self, source_illuminant, destination_illuminant):
@@ -249,7 +258,7 @@ class SPDSpectrum(Spectrum):
         return adapted_X, adapted_Y, adapted_Z
 
     def UVW(self, white_point=None):
-        X,Y,Z = self.XYZ
+        X, Y, Z = self.XYZ
         return self._XYZ_to_UVW(X=X, Y=Y, Z=Z, white_point=white_point)
 
     def von_kries_UVW(
@@ -260,9 +269,7 @@ class SPDSpectrum(Spectrum):
             destination_illuminant=destination_illuminant,
         )
 
-        return self._XYZ_to_UVW(
-            X=X, Y=Y, Z=Z, white_point=white_point
-        )
+        return self._XYZ_to_UVW(X=X, Y=Y, Z=Z, white_point=white_point)
         # FIXME: shouldn't the white_point actually be the desination illuminant's white point?
 
     def _XYZ_to_UVW(self, X, Y, Z, white_point=None):
@@ -290,17 +297,17 @@ class SPDSpectrum(Spectrum):
         return L, M, S
 
     @property
-    def xy(self) -> Tuple[float,float]:
-        X,Y,Z = self.XYZ
+    def xy(self) -> Tuple[float, float]:
+        X, Y, Z = self.XYZ
         norm = sum(self.XYZ)
 
         x = X / norm
         y = Y / norm
 
         return x, y
-        
+
     @property
-    def uv(self) -> Tuple[float,float]:
+    def uv(self) -> Tuple[float, float]:
         x, y = self.xy
 
         denom = -2 * x + 12 * y + 3
@@ -313,7 +320,7 @@ class SPDSpectrum(Spectrum):
     # color properties
 
     @property
-    def CCT_DC(self) -> Tuple[mtr.Quantity,float]:
+    def CCT_DC(self) -> Tuple[mtr.Quantity, float]:
         u, v = self.uv
         uvT = planckian_locus_ucs(exact=True)
 
@@ -325,7 +332,7 @@ class SPDSpectrum(Spectrum):
             func=_error, x1=1000, x2=15000, full_output=True
         )
 
-        return CCT*mtr.K, np.sqrt(DC_squared)
+        return CCT * mtr.K, np.sqrt(DC_squared)
 
     def cri(self, strict=True):
         # FIXME: this is an ugly workaround to avoid circular import - change it!!
@@ -353,9 +360,9 @@ class SPDSpectrum(Spectrum):
                     "Distance from UCS Planckian locus too high. Illuminant is insufficiently white for accurate CRI determination."
                 )
 
-        if CCT < 5000*mtr.K:
+        if CCT < 5000 * mtr.K:
             from .data import BlackbodySPD
-            
+
             reference_illuminant = BlackbodySPD(T=CCT, normalize_to=1)
         else:
             reference_illuminant = CIEIlluminantDSeries(T=CCT, normalize_to=1)
@@ -390,7 +397,9 @@ class SPDSpectrum(Spectrum):
     def R_score(self, test_illuminant, reference_illuminant, sample_reflectance):
         u_ref, v_ref = reference_illuminant.uv
 
-        reflected_reference_illuminant = sample_reflectance.reflect_illuminant(reference_illuminant)
+        reflected_reference_illuminant = sample_reflectance.reflect_illuminant(
+            reference_illuminant
+        )
         u_sample_ref, v_sample_ref = reflected_reference_illuminant.uv
 
         _, reference_Y, _ = reference_illuminant.XYZ
@@ -403,7 +412,9 @@ class SPDSpectrum(Spectrum):
             X=X_sample_ref, Y=Y_sample_ref, Z=Z_sample_ref, white_point=(u_ref, v_ref)
         )
 
-        reflected_test_illuminant = sample_reflectance.reflect_illuminant(illuminant=test_illuminant)
+        reflected_test_illuminant = sample_reflectance.reflect_illuminant(
+            illuminant=test_illuminant
+        )
         u_sample_test, v_sample_test = reflected_test_illuminant.uv
         u_sample_adapted, v_sample_adapted = self.von_kries_uv(
             u=u_sample_test,
@@ -413,7 +424,11 @@ class SPDSpectrum(Spectrum):
         )
 
         _, test_Y, _ = test_illuminant.XYZ
-        reflected_test_X, reflected_test_Y, reflected_test_Z = reflected_test_illuminant.XYZ
+        (
+            reflected_test_X,
+            reflected_test_Y,
+            reflected_test_Z,
+        ) = reflected_test_illuminant.XYZ
 
         X_sample_test = reflected_test_X * 100 / test_Y
         Y_sample_test = reflected_test_Y * 100 / test_Y
@@ -439,12 +454,12 @@ class SPDSpectrum(Spectrum):
         u_s, v_s = source_illuminant.uv
         c_s = (4 - u_s - 10 * v_s) / v_s
         d_s = (1.708 * v_s + 0.404 - 1.481 * u_s) / v_s
-        _,Y_s,_ = source_illuminant.XYZ
+        _, Y_s, _ = source_illuminant.XYZ
 
         u_d, v_d = destination_illuminant.uv
         c_d = (4 - u_d - 10 * v_d) / v_d
         d_d = (1.708 * v_d + 0.404 - 1.481 * u_d) / v_d
-        _,Y_d,_ = destination_illuminant.XYZ
+        _, Y_d, _ = destination_illuminant.XYZ
 
         c = (4 - u - 10 * v) / v
         d = (1.708 * v + 0.404 - 1.481 * u) / v
@@ -458,11 +473,15 @@ class SPDSpectrum(Spectrum):
 
 class RelativeSPDSpectrum(SPDSpectrum):
     def __init__(self, x, y, normalizing_x=560, normalize_to=1):
-        [val,] = y[x.value == normalizing_x]
+        [
+            val,
+        ] = y[x.value == normalizing_x]
 
         super().__init__(
-            x=x, y=normalize_to * y/val,
+            x=x,
+            y=normalize_to * y / val,
         )
+
 
 def hunt_pointer_estevez_transform() -> np.ndarray:
     return np.array(
@@ -473,7 +492,10 @@ def hunt_pointer_estevez_transform() -> np.ndarray:
         ]
     )
 
-def planckian_locus_xyz(exact: Optional[bool]=False) -> Callable[mtr.Quantity,Tuple[float,float]]:
+
+def planckian_locus_xyz(
+    exact: Optional[bool] = False,
+) -> Callable[mtr.Quantity, Tuple[float, float]]:
     if exact:
         # FIXME: this is an ugly workaround to avoid circular import - change it!!
         from .data import BlackbodySPD
@@ -523,23 +545,30 @@ def planckian_locus_xyz(exact: Optional[bool]=False) -> Callable[mtr.Quantity,Tu
 
         return lambda T: (x(T=T), y(T=T))
 
-def planckian_locus_ucs(exact: Optional[bool]=False) -> Callable[mtr.Quantity,Tuple[float,float]]:
+
+def planckian_locus_ucs(
+    exact: Optional[bool] = False,
+) -> Callable[mtr.Quantity, Tuple[float, float]]:
     if exact:
         # FIXME: this is an ugly workaround to avoid circular import - change it!!
         from .data import BlackbodySPD
 
         return lambda T: BlackbodySPD(T=T).uv
     else:
+
         def f(T):
             u = (0.860117757 + 1.54118254e-4 * T + 1.28641212e-7 * T ** 2) / (
-                1 + 8.42420235e-4 * T + 7.08145163e-7 * T ** 2)
+                1 + 8.42420235e-4 * T + 7.08145163e-7 * T ** 2
+            )
 
             v = (0.317398726 + 4.22806245e-5 * T + 4.20481691e-8 * T ** 2) / (
-                1 - 2.89741816e-5 * T + 1.61456053e-7 * T ** 2)
+                1 - 2.89741816e-5 * T + 1.61456053e-7 * T ** 2
+            )
 
-            return u,v
+            return u, v
 
         return f
+
 
 # standard illuminants, default normalized to 100 @ 560 nm
 

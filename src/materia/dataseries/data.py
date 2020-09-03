@@ -6,19 +6,29 @@ import numpy as np
 
 from .dataseries import ReflectanceSpectrum, RelativeSPDSpectrum, SPDSpectrum, Spectrum
 
-__all__ = ["ASTMG173","BlackbodySPD","CIE1931ColorMatchingFunctionX",
+__all__ = [
+    "ASTMG173",
+    "BlackbodySPD",
+    "CIE1931ColorMatchingFunctionX",
     "CIE1931ColorMatchingFunctionY",
-    "CIE1931ColorMatchingFunctionZ","CIE1995TestColorSample01",
+    "CIE1931ColorMatchingFunctionZ",
+    "CIE1995TestColorSample01",
     "CIE1995TestColorSample02",
     "CIE1995TestColorSample03",
     "CIE1995TestColorSample04",
     "CIE1995TestColorSample05",
     "CIE1995TestColorSample06",
     "CIE1995TestColorSample07",
-    "CIE1995TestColorSample08","CIEIlluminantA",
+    "CIE1995TestColorSample08",
+    "CIEIlluminantA",
     "CIEIlluminantD65",
     "CIEIlluminantDSeries",
-    "CIEIlluminantF4","SimmonsDSeriesPCA0", "SimmonsDSeriesPCA1", "SimmonsDSeriesPCA2"]
+    "CIEIlluminantF4",
+    "SimmonsDSeriesPCA0",
+    "SimmonsDSeriesPCA1",
+    "SimmonsDSeriesPCA2",
+]
+
 
 class ASTMG173(SPDSpectrum):
     def __init__(self) -> None:
@@ -2048,6 +2058,7 @@ class ASTMG173(SPDSpectrum):
 
         super().__init__(x=x, y=y)
 
+
 class BlackbodySPD(RelativeSPDSpectrum):
     def __init__(self, T, normalize_to=100):
         if not isinstance(T, mtr.Quantity):
@@ -2061,6 +2072,7 @@ class BlackbodySPD(RelativeSPDSpectrum):
         y = x ** (-5) / (np.exp((c2 / (x * T)).value) - 1)
 
         super().__init__(x=x, y=y, normalize_to=normalize_to)
+
 
 class CIE1931ColorMatchingFunctionX(Spectrum):
     def __init__(self):
@@ -2336,6 +2348,7 @@ class CIE1931ColorMatchingFunctionZ(Spectrum):
         ] * mtr.unitless
 
         super().__init__(x=x, y=zbar)
+
 
 class CIE1995TestColorSample01(ReflectanceSpectrum):
     def __init__(self):
@@ -3192,8 +3205,9 @@ class CIE1995TestColorSample08(ReflectanceSpectrum):
 
         super().__init__(x=x, y=y)
 
+
 class CIEIlluminantA(RelativeSPDSpectrum):
-    def __init__(self, normalize_to: Optional[float]=100) -> None:
+    def __init__(self, normalize_to: Optional[float] = 100) -> None:
         # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(300, 780, 97) * mtr.nm
 
@@ -3301,7 +3315,7 @@ class CIEIlluminantA(RelativeSPDSpectrum):
 
 
 class CIEIlluminantD65(RelativeSPDSpectrum):
-    def __init__(self, normalize_to: Optional[float]=100) -> None:
+    def __init__(self, normalize_to: Optional[float] = 100) -> None:
         # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(300, 830, 107) * mtr.nm
         y = [
@@ -3418,7 +3432,7 @@ class CIEIlluminantD65(RelativeSPDSpectrum):
 
 
 class CIEIlluminantDSeries(RelativeSPDSpectrum):
-    def __init__(self, T, normalize_to: Optional[float]=100) -> None:
+    def __init__(self, T, normalize_to: Optional[float] = 100) -> None:
         # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         wavs = np.linspace(300, 830, 107) * mtr.nm
 
@@ -3448,7 +3462,7 @@ class CIEIlluminantDSeries(RelativeSPDSpectrum):
 
 
 class CIEIlluminantF4(RelativeSPDSpectrum):
-    def __init__(self, normalize_to: Optional[float]=100) -> None:
+    def __init__(self, normalize_to: Optional[float] = 100) -> None:
         # data taken from https://web.archive.org/web/20100612203959/http://www.cis.rit.edu/mcsl/online/CIE/Fluorescents.xls
         x = np.linspace(380, 780, 81) * mtr.nm
         y = [
@@ -3536,6 +3550,7 @@ class CIEIlluminantF4(RelativeSPDSpectrum):
         ] * mtr.unitless
 
         super().__init__(x=x, y=y, normalize_to=normalize_to)
+
 
 class SimmonsDSeriesPCA0(SPDSpectrum):
     def __init__(self):

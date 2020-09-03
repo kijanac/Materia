@@ -90,7 +90,12 @@ def _molecule_to_structure_block(
         + "\n".join(
             (
                 f"  {a.atomic_symbol}  "
-                + "  ".join(str(p) for p in a.position.reshape(3,))
+                + "  ".join(
+                    str(p)
+                    for p in a.position.reshape(
+                        3,
+                    )
+                )
                 + (f" {mm_parameters[a]}" if a in mm_parameters else "")
                 + (
                     " "
@@ -623,7 +628,10 @@ class QChemAIMD(QChemBaseTask):
             return "".join(f.readlines())
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+        if ("rem", "exchange") not in settings and (
+            "rem",
+            "method",
+        ) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
             settings["rem", "basis"] = "3-21G"
@@ -761,13 +769,16 @@ class QChemKoopmanError(Task):
         anion.multiplicity = anion.multiplicity % 2 + 1
 
         neutral_sp.requires(
-            molecule=molecule, settings=input_settings,
+            molecule=molecule,
+            settings=input_settings,
         )
         cation_sp.requires(
-            molecule=cation, settings=input_settings,
+            molecule=cation,
+            settings=input_settings,
         )
         anion_sp.requires(
-            molecule=anion, settings=input_settings,
+            molecule=anion,
+            settings=input_settings,
         )
 
         wf = Workflow(neutral_sp, cation_sp, anion_sp)
@@ -893,7 +904,10 @@ class QChemLRTDDFT(QChemBaseTask):
         return mtr.QChemOutput(filepath=output).electronic_excitations
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+        if ("rem", "exchange") not in settings and (
+            "rem",
+            "method",
+        ) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
             settings["rem", "basis"] = "3-21G"
@@ -920,7 +934,10 @@ class QChemLRTDDFTPlotNTOs(QChemBaseTask):
         return mtr.QChemOutput(filepath=output).electronic_excitations
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+        if ("rem", "exchange") not in settings and (
+            "rem",
+            "method",
+        ) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
             settings["rem", "basis"] = "3-21G"
@@ -1133,7 +1150,10 @@ class QChemOptimize(QChemBaseTask):
         return QChemOutput(output).structure
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+        if ("rem", "exchange") not in settings and (
+            "rem",
+            "method",
+        ) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
             settings["rem", "basis"] = "3-21G"
@@ -1179,7 +1199,10 @@ class QChemPolarizability(QChemBaseTask):
         return mtr.Polarizability(polarizability)
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+        if ("rem", "exchange") not in settings and (
+            "rem",
+            "method",
+        ) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
             settings["rem", "basis"] = "3-21G"
@@ -1232,7 +1255,10 @@ class QChemVolume(QChemBaseTask):
         )
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+        if ("rem", "exchange") not in settings and (
+            "rem",
+            "method",
+        ) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
             settings["rem", "basis"] = "STO-3G"
@@ -1340,7 +1366,10 @@ class QChemSinglePoint(QChemBaseTask):
         return energy
 
     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
+        if ("rem", "exchange") not in settings and (
+            "rem",
+            "method",
+        ) not in settings:
             settings["rem", "exchange"] = "HF"
         if ("rem", "basis") not in settings:
             settings["rem", "basis"] = "3-21G"
