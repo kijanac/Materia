@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Union
 
 import materia as mtr
 import pickle
@@ -37,14 +37,15 @@ def first(flist, default=None):
 
 
 class Molecule:
-    def __init__(self, structure) -> None:
+    def __init__(self, structure: Union[mtr.Structure, str, pathlib.Path]) -> None:
         super().__setattr__("properties", {})
         if isinstance(structure, mtr.Structure):
             self.structure = structure
-        elif isinstance(structure, str):
+        else:# isinstance(structure, str):
             self.structure = first(
                 [
-                    lambda: mtr.Structure.read(structure),
+                    # NOTE: casting to string allows for structure to be a pathlib.Path
+                    lambda: mtr.Structure.read(str(structure)),
                     lambda: mtr.Structure.generate(smiles=structure),
                     lambda: mtr.Structure.retrieve(name=structure),
                 ]
