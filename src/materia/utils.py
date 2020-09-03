@@ -263,9 +263,9 @@ def memoize(func):
     return memoized
 
 
-def mkdir_safe(dir: str) -> None:
+def mkdir_safe(directory: str) -> None:
     with contextlib.suppress(FileExistsError):
-        os.makedirs(dir)
+        os.makedirs(directory)
 
 
 def nontrivial_vector(R, seed: Optional[int] = None):
