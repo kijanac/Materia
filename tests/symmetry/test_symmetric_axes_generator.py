@@ -34,11 +34,26 @@ def test_validate_axes():
 
 
 def test_generate_axes_C1():
-    Br = mtr.Atom(element="Br", position=(-1.66620, -0.55610, 0.10630) * mtr.angstrom,)
-    Cl = mtr.Atom(element="Cl", position=(1.34390, -0.95560, 0.11960) * mtr.angstrom,)
-    F = mtr.Atom(element="F", position=(0.25470, 1.36560, 0.16920) * mtr.angstrom,)
-    C = mtr.Atom(element="C", position=(0.06750, 0.14600, -0.39500) * mtr.angstrom,)
-    H = mtr.Atom(element="H", position=(0.08600, 0.25060, -1.48270) * mtr.angstrom,)
+    Br = mtr.Atom(
+        element="Br",
+        position=(-1.66620, -0.55610, 0.10630) * mtr.angstrom,
+    )
+    Cl = mtr.Atom(
+        element="Cl",
+        position=(1.34390, -0.95560, 0.11960) * mtr.angstrom,
+    )
+    F = mtr.Atom(
+        element="F",
+        position=(0.25470, 1.36560, 0.16920) * mtr.angstrom,
+    )
+    C = mtr.Atom(
+        element="C",
+        position=(0.06750, 0.14600, -0.39500) * mtr.angstrom,
+    )
+    H = mtr.Atom(
+        element="H",
+        position=(0.08600, 0.25060, -1.48270) * mtr.angstrom,
+    )
     structure = mtr.Structure(Br, Cl, F, C, H)
 
     check_axes = np.eye(3)
@@ -55,14 +70,38 @@ def test_generate_axes_C1():
 
 
 def test_generate_axes_Ci():
-    Cl1 = mtr.Atom(element="Cl", position=(-2.11390, 0.46300, -0.36270) * mtr.angstrom,)
-    Cl2 = mtr.Atom(element="Cl", position=(2.11380, -0.46300, -0.36270) * mtr.angstrom,)
-    F1 = mtr.Atom(element="F", position=(-0.56080, -1.24900, 0.73640) * mtr.angstrom,)
-    F2 = mtr.Atom(element="F", position=(0.56070, 1.24890, 0.73640) * mtr.angstrom,)
-    C1 = mtr.Atom(element="C", position=(-0.59860, -0.46500, -0.37370) * mtr.angstrom,)
-    C2 = mtr.Atom(element="C", position=(0.59860, 0.46500, -0.37370) * mtr.angstrom,)
-    H1 = mtr.Atom(element="H", position=(-0.60740, -1.11770, -1.25170) * mtr.angstrom,)
-    H2 = mtr.Atom(element="H", position=(0.60740, 1.11770, -1.25160) * mtr.angstrom,)
+    Cl1 = mtr.Atom(
+        element="Cl",
+        position=(-2.11390, 0.46300, -0.36270) * mtr.angstrom,
+    )
+    Cl2 = mtr.Atom(
+        element="Cl",
+        position=(2.11380, -0.46300, -0.36270) * mtr.angstrom,
+    )
+    F1 = mtr.Atom(
+        element="F",
+        position=(-0.56080, -1.24900, 0.73640) * mtr.angstrom,
+    )
+    F2 = mtr.Atom(
+        element="F",
+        position=(0.56070, 1.24890, 0.73640) * mtr.angstrom,
+    )
+    C1 = mtr.Atom(
+        element="C",
+        position=(-0.59860, -0.46500, -0.37370) * mtr.angstrom,
+    )
+    C2 = mtr.Atom(
+        element="C",
+        position=(0.59860, 0.46500, -0.37370) * mtr.angstrom,
+    )
+    H1 = mtr.Atom(
+        element="H",
+        position=(-0.60740, -1.11770, -1.25170) * mtr.angstrom,
+    )
+    H2 = mtr.Atom(
+        element="H",
+        position=(0.60740, 1.11770, -1.25160) * mtr.angstrom,
+    )
     structure = mtr.Structure(Cl1, Cl2, F1, F2, C1, C2, H1, H2)
 
     check_axes = np.eye(3)

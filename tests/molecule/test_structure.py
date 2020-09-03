@@ -16,7 +16,10 @@ class StructureTestClass(mtr.Structure):
 
 def test_structure_he():
     he = StructureTestClass(
-        mtr.Atom(element="He", position=(0.000, 0.000, 0.000) * mtr.angstrom,)
+        mtr.Atom(
+            element="He",
+            position=(0.000, 0.000, 0.000) * mtr.angstrom,
+        )
     )
 
     check_result_center_of_mass = np.array([[0.0, 0.0, 0.0]]).T * mtr.angstrom
@@ -32,9 +35,18 @@ def test_structure_he():
 
 
 def test_structure_h2o():
-    h1 = mtr.Atom(element="H", position=(0.757, 0.586, 0.000) * mtr.angstrom,)
-    h2 = mtr.Atom(element="H", position=(-0.757, 0.586, 0.000) * mtr.angstrom,)
-    o = mtr.Atom(element="O", position=(0.000, 0.000, 0.000) * mtr.angstrom,)
+    h1 = mtr.Atom(
+        element="H",
+        position=(0.757, 0.586, 0.000) * mtr.angstrom,
+    )
+    h2 = mtr.Atom(
+        element="H",
+        position=(-0.757, 0.586, 0.000) * mtr.angstrom,
+    )
+    o = mtr.Atom(
+        element="O",
+        position=(0.000, 0.000, 0.000) * mtr.angstrom,
+    )
     h2o = StructureTestClass(h1, h2, o)
 
     check_result_center_of_mass = (
@@ -43,7 +55,11 @@ def test_structure_h2o():
 
     check_result_inertia_tensor = (
         np.array(
-            [[0.61481483, 0.0, 0.0], [0.0, 1.15526678, 0.0], [0.0, 0.0, 1.77008161],]
+            [
+                [0.61481483, 0.0, 0.0],
+                [0.0, 1.15526678, 0.0],
+                [0.0, 0.0, 1.77008161],
+            ]
         )
         * mtr.amu
         * mtr.angstrom ** 2
@@ -90,7 +106,9 @@ def test_structure_retrieve_smiles():
     methane = Compound(atoms=(C, H1, H2, H3, H4))
 
     mock_pcp_get_cids = mock.MagicMock(
-        side_effect=lambda identifier, identifier_type: [1,]
+        side_effect=lambda identifier, identifier_type: [
+            1,
+        ]
     )
     mock_pcp_from_cid = mock.MagicMock(
         side_effect=lambda cid, record_type="3d": methane

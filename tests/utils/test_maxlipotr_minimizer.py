@@ -62,6 +62,7 @@ def test_maxlipotr_optimize_ackley():
 
     assert test_result == check_result
 
+
 # FIXME: this test fails occasionaly due to a very incorrect answer for no discernible reason
 # def test_maxlipotr_optimize_beale():
 #     def beale(x, y):
