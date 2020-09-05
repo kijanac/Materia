@@ -42,6 +42,15 @@ class ExcitationSpectrum:
     def __init__(self, excitations: Iterable[Excitation]) -> None:
         self.excitations = excitations
 
+    @property
+    def energies(self) -> materia.Quantity:
+        energy_unit = self.excitations[0].energy.unit
+        return [e.energy.value for e in self.excitations]*energy_unit
+
+    @property
+    def oscillator_strengths(self) -> materia.Quantity:
+        return np.array([e.oscillator_strength for e in self.excitations])
+
     def to_gaussian(self) -> str:
         return "\n".join(
             f"Excited State {i+1} {1 if exc.symmetry == 'Singlet' else 2} {exc.energy.convert(mtr.eV).value}\n"
@@ -159,7 +168,7 @@ class Orbitals:
 
 
 class Polarizability:
-    def __init__(self, polarizability_tensor, applied_field=None):
+    def __init__(self, polarizability_tensor, applied_field=None) -> None:
         self.pol_tensor = polarizability_tensor
         self.applied_field = None
 
@@ -170,7 +179,7 @@ class Polarizability:
 
     @property
     @memoize
-    def anisotropy(self):
+    def anisotropy(self) -> materia.Quantity:
         # FIXME: verify accuracy of this method
         return (
             np.sqrt(
@@ -184,7 +193,7 @@ class Polarizability:
 
     @property
     @memoize
-    def eigenvalues(self):
+    def eigenvalues(self) -> materia.Quantity:
         return np.linalg.eigvals(a=self.pol_tensor.value) * self.pol_tensor.unit
 
 
