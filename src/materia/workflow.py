@@ -6,6 +6,7 @@ import json
 import materia as mtr
 import multiprocessing as mp
 import networkx as nx
+import pickle
 import queue
 import threading
 
@@ -31,10 +32,14 @@ class WorkflowResults:
         # FIXME: figure out how to sort by self.results' keys and not results' keys (i.e. by node numbers not task names?)
         return json.dumps(results, sort_keys=True, indent=2, default=str)
 
+    def save(self, filepath) -> None:
+        with open(filepath, "wb") as f:
+            pickle.dump(self,filepath)
+
 
 class Workflow:
     def __init__(self, *tasks: mtr.Task) -> None:
-        self.tasks = tuple(set(self._discover_tasks(*tasks)))
+        self.tasks = list(set(self._discover_tasks(*tasks)))
         self.links = collections.defaultdict(list)
 
         for i, t in enumerate(self.tasks):
