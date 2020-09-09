@@ -20,6 +20,10 @@ __all__ = [
     "Task",
 ]
 
+def _reconstruct(cls, d):
+    obj = cls.__new__(cls)
+    obj.__dict__ = d
+    return obj
 
 class Task:
     def __init__(
@@ -39,6 +43,9 @@ class Task:
 
         self.requirements = []
         self.named_requirements = {}
+
+    def __reduce__(self):
+        return (_reconstruct,(self.__class__,self.__dict__))
 
     def requires(self, *args: Task, **kwargs: Task) -> None:
         self.requirements += [a if isinstance(a, Task) else InputTask(a) for a in args]
