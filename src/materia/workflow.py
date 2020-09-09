@@ -14,7 +14,6 @@ from .actions import ActionSignal
 
 __all__ = ["Workflow", "WorkflowResults"]
 
-
 class WorkflowResults:
     def __init__(self, tasks: Iterable[mtr.Task], results: Dict[int, Any]) -> None:
         self.tasks = tasks
@@ -197,10 +196,17 @@ def _produce(
             action.run(node=node, tasks=tasks, links=links, done=done)
 
         tracker.remove(node)
-        available_cores += tasks[node].num_cores
-        available_cores = _queue_tasks(
-            tasks, links, task_queue, done, tracker, available_cores
-        )
+        try:
+            # FIXME: this doesn't seem safe since -= is not atomic! should use with available_cores.get_lock() but this only applies for processes not threads?
+            available_cores.value += tasks[node].num_cores
+            available_cores.value = _queue_tasks(
+                tasks, links, task_queue, done, tracker, available_cores
+            ).value
+        except AttributeError:
+            available_cores += tasks[node].num_cores
+            available_cores = _queue_tasks(
+                tasks, links, task_queue, done, tracker, available_cores
+            )
 
 
 def _consume(
@@ -223,11 +229,14 @@ def _consume(
 
             # NOTE: this is safe because the node assigned to a task never changes while the workflow runs
             task = tasks[node]
-            # NOTE: this is safe because 1.) the dependencies of each task can only be changed by tasks which precede it, i.e. by the time a task is running, no actions can alter its dependencies, and 2.) only one consumer will write to results[node] at a time because only one consumer is running a particular task at a time
-            result = task.run(
-                *(results[v] for k, v in links[node] if k is None),
-                **{k: results[v] for k, v in links[node] if k is not None},
-            )
+            if node in links:
+                # NOTE: this is safe because 1.) the dependencies of each task can only be changed by tasks which precede it, i.e. by the time a task is running, no actions can alter its dependencies, and 2.) only one consumer will write to results[node] at a time because only one consumer is running a particular task at a time
+                result = task.run(
+                    *(results[v] for k, v in links[node] if k is None),
+                    **{k: results[v] for k, v in links[node] if k is not None},
+                )
+            else:
+                result = task.run()
 
             try:
                 for h in task.handlers:
@@ -257,11 +266,17 @@ def _queue_tasks(
 ) -> None:
     dag = _build_dag(tasks, links)
     for node in dag.nodes:
-        if (
-            _task_is_ready(node, done, dag, tracker)
-            and available_cores >= tasks[node].num_cores
-        ):
-            available_cores -= tasks[node].num_cores
+        try:
+            can_queue = _task_is_ready(node, done, dag, tracker) and available_cores.value >= tasks[node].num_cores
+        except AttributeError:
+            can_queue = _task_is_ready(node, done, dag, tracker) and available_cores >= tasks[node].num_cores
+        if can_queue:
+            try:
+                # FIXME: this doesn't seem safe since -= is not atomic! should use with available_cores.get_lock() but this only applies for processes not threads?
+                available_cores.value -= tasks[node].num_cores
+            except AttributeError:
+                available_cores -= tasks[node].num_cores
+
             tracker.append(node)
             task_queue.put(node)
 
