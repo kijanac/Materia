@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Any, Iterable, Optional, Union
 
 import collections
-import copy
 import numpy as np
 
 
@@ -176,7 +175,8 @@ class Quantity(collections.abc.Sequence):
         if self.dimension != convert_to.dimension:
             raise ValueError("Cannot convert quantities with different dimensions.")
         if self.unit != convert_to.unit:
-            # NOTE: can't write this as 'self.value *= ...' without causing numpy unsafe casting error in some cases
+            # NOTE: can't write this as 'self.value *= ...' without
+            # causing numpy unsafe casting error in some cases
             return Quantity(
                 value=self.magnitude / convert_to.prefactor,
                 prefactor=convert_to.prefactor,
@@ -295,7 +295,7 @@ class Quantity(collections.abc.Sequence):
         )
 
     @_precast
-    def __rtruediv__(self, other: Union[Unit, int, float]) -> Quantity:
+    def __rtruediv__(self, other: Union[Quantity, int, float]) -> Quantity:
         return Quantity(
             other.value / self.value,
             other.prefactor / self.prefactor,
@@ -303,7 +303,7 @@ class Quantity(collections.abc.Sequence):
         )
 
     @_precast
-    def __itruediv__(self, other: Union[Unit, int, float]) -> Quantity:
+    def __itruediv__(self, other: Union[Quantity, int, float]) -> Quantity:
         self.value /= other.value
         self.prefactor /= other.prefactor
         self.dimension /= other.dimension
@@ -328,7 +328,8 @@ class Quantity(collections.abc.Sequence):
     def __eq__(
         self, other: Union[Quantity, int, float, Iterable[int], Iterable[float]]
     ) -> bool:
-        # np.array_equal works on any array_like and also single values, which should cover all reasonable types for self.value
+        # np.array_equal works on any array_like and also single values,
+        # which should cover all reasonable types for self.value
         return (
             np.array_equal(self.value, other.value)
             and self.prefactor == other.prefactor
