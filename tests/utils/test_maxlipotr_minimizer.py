@@ -1,28 +1,7 @@
 import materia as mtr
 import numpy as np
-import pytest
 
-
-# def test_gss_bracket_delta_01():
-#     s = mtr.GoldenSectionSearch(objective_function=lambda x: (x - 2) ** 2)
-
-#     assert s._find_gss_bracket(delta=0.01) == (1.0933645185324488, 2.8844097435211147)
-
-
-# def test_gss_bracket_delta_02():
-#     s = mtr.GoldenSectionSearch(objective_function=lambda x: (x - 2) ** 2)
-
-#     assert s._find_gss_bracket(delta=0.02) == (1.414507310946184, 3.751352829189824)
-
-
-# def test_gss_optimize_delta_01_tol_0001():
-#     s = mtr.GoldenSectionSearch(objective_function=lambda x: (x - 2) ** 2)
-
-#     test_result = tuple(s.run(delta=0.01, tolerance=0.0001).values())
-#     print(test_result)
-#     check_result = (6.17113206775526e-10, 25, 1.9999751582366412, 20, True)
-
-#     assert test_result == check_result
+# import pytest
 
 
 def test_maxlipotr_optimize_min_0_max_5_numevals_20():
@@ -63,7 +42,8 @@ def test_maxlipotr_optimize_ackley():
     assert test_result == check_result
 
 
-# FIXME: this test fails occasionaly due to a very incorrect answer for no discernible reason
+# FIXME: this test fails occasionaly due to a
+# very incorrect answer for no discernible reason
 # def test_maxlipotr_optimize_beale():
 #     def beale(x, y):
 #         return (

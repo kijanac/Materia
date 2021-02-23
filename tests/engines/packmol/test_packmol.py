@@ -1,6 +1,7 @@
 import inspect
 import materia
-import unittest.mock as mock
+
+# import unittest.mock as mock
 
 
 def test_packmol_input_one_structure_no_instructions():
@@ -16,8 +17,7 @@ def test_packmol_input_one_structure_no_instructions():
         == inspect.cleandoc(
             """tolerance 1.0
                                output packed.xyz
-                               filetype xyz
-                               
+                               filetype xyz\n\n
                                structure /path/to/structure.xyz
                                  number 300
                                end structure"""

@@ -1,7 +1,6 @@
 import numpy as np
 
 import materia as mtr
-from materia.symmetry import SpglibSymmetryFinder
 
 
 class StructureTestClass(mtr.Structure):
