@@ -3,7 +3,6 @@ from typing import Iterable, Optional, Tuple
 
 import materia as mtr
 import pathlib
-import re
 import shlex
 import subprocess
 
@@ -62,7 +61,7 @@ class FragItFragment(ExternalTask):
         engine (mtr.FragItEngine): Engine which will be used to fragment structure.
     """
 
-    def run(
+    def compute(
         self,
         molecule: mtr.Molecule,
     ) -> Tuple[mtr.Molecule]:

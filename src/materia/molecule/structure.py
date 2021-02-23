@@ -2,14 +2,15 @@ from __future__ import annotations
 from typing import Dict, IO, Optional, Tuple, Union
 
 import contextlib
-import itertools
 import numpy as np
 import materia as mtr
 from materia.utils import memoize
 import networkx as nx
 import openbabel as ob
 import pubchempy as pcp
-import rdkit, rdkit.Chem, rdkit.Chem.AllChem
+import rdkit
+import rdkit.Chem
+import rdkit.Chem.AllChem
 import scipy.linalg
 import tempfile
 
@@ -26,7 +27,8 @@ class Structure:
         Read structure from a file.
 
         Args:
-            filepath: Path to file from which the structure will be read. Can be an absolute or a relative path.
+            filepath: Path to file from which the structure will be read.
+            Can be an absolute or a relative path.
 
         Returns:
             materia.Structure: Structure object based on file contents.
@@ -69,10 +71,10 @@ class Structure:
 
         if not explicit_hydrogen:
             obmol.DeleteHydrogens()
-            # NOTE: empirically, this appears to renumber the atoms correctly (i.e. it maintains the original order as specified by self.atoms while removing hydrogens & renumbering sequentially) - this is consistent with how to_graph works
-            # non_hydrogens = [i for i, Z in enumerate(self.atomic_numbers) if Z != 1]
-            # renumber = obatoms[np.arange(1,self.num_atoms+1)[non_hydrogens]].tolist()
-            # obmol.RenumberAtoms(renumber)
+            # NOTE: empirically, this appears to renumber the atoms correctly
+            # (i.e. it maintains the original order as specified by self.atoms while
+            # removing hydrogens & renumbering sequentially)
+            # this is consistent with how to_graph works
 
         return obmol
 
@@ -145,10 +147,12 @@ class Structure:
             )
         except StopIteration:
             raise ValueError(
-                "Identifier (name, SMILES, InChi, or InChiKey) must be provided to retrieve structure."
+                "Provide name, SMILES, InChi, or InChiKey to retrieve structure."
             )
         try:
-            # this just picks the first returned compound; if there are multiple, we are assuming that the first such compound is the "most relevant" in some sense
+            # this just picks the first returned compound
+            # if there are multiple, we are assuming that the
+            # first such compound is the "most relevant" in some sense
             cid, *_ = pcp.get_cids(identifier, identifier_type)
             if cid == 0:
                 raise ValueError
@@ -160,7 +164,8 @@ class Structure:
                 compound=pcp.Compound.from_cid(cid, record_type="3d")
             )
         except pcp.NotFoundError:
-            # no 3d structure from pubchem; there must be a 2d structure since a cid was found
+            # no 3d structure from pubchem
+            # there must be a 2d structure since a cid was found
             [property_dict] = pcp.get_properties(
                 properties="IsomericSMILES", identifier=cid, namespace="cid"
             )
@@ -185,7 +190,7 @@ class Structure:
             )
         except StopIteration:
             raise ValueError(
-                "Identifier (name, SMILES, InChi, or InChiKey) must be provided to generate structure."
+                "Provide name, SMILES, InChi, or InChiKey to generate structure."
             )
 
         if identifier_type == "smiles":
@@ -196,13 +201,21 @@ class Structure:
             raise ValueError(f"Structure generation for {identifier} failed.")
 
     def write(self, file: Union[str, IO], overwrite: Optional[bool] = False) -> None:
-        """
-        Write structure to a file.
+        """Write structure to a file.
 
-        Args:
-            file: Path to file to which the structure will be written. Can be an absolute or a relative path.
+        Parameters
+        ----------
+        file : Union[str, IO]
+            Path to file to which the structure will be written.
+            Can be an absolute or a relative path.
+        overwrite : Optional[bool], optional
+            If true, overwrite `filepath` if it already exists.
+            Ignored if `file` is a file-like object, by default False
 
-            overwrite: If False, an error is raised if `filepath` already exists and the structure is not written. Ignored if `file` is a file-like object. Defaults to False.
+        Raises
+        ------
+        ValueError
+            Raised if file extension is not recognized
         """
         open_code = "w" if overwrite else "x"
         with open(mtr.expand(file), open_code) if isinstance(
@@ -308,6 +321,9 @@ class Structure:
     def centered_atomic_positions(self) -> mtr.Qty:
         return self.atomic_positions - self.center_of_mass
 
+    def element_substructure(self, Z: int) -> mtr.Structure:
+        return Structure(*(atom for atom in self.atoms if atom.Z == Z))
+
     @property
     @memoize
     def inertia_tensor(self) -> mtr.Qty:
@@ -338,16 +354,14 @@ class Structure:
         # FIXME: examine and clean this one up
         if self.num_atoms == 1:
             # i.e. this is an atomic species
-            return np.eye(3)
+            return self.centered_atomic_positions
 
         inds = np.argsort(self.principal_moments)
         u, v, _ = self.principal_axes[:, inds].T
         u, v = u.reshape(3, 1), v.reshape(3, 1)
 
-        Ru = mtr.rotation_matrix_m_to_n(m=u.reshape(3, 1), n=np.array([[1, 0, 0]]).T)
-        Rv = mtr.rotation_matrix_m_to_n(
-            m=Ru @ v.reshape(3, 1), n=np.array([[0, 1, 0]]).T
-        )
+        Ru = mtr.rotation_matrix(m=u.reshape(3, 1), n=np.array([[1, 0, 0]]).T)
+        Rv = mtr.rotation_matrix(m=Ru @ v.reshape(3, 1), n=np.array([[0, 1, 0]]).T)
         R = Rv @ Ru
 
         return R @ self.centered_atomic_positions
@@ -361,24 +375,9 @@ class Structure:
 
     @property
     @memoize
-    def principal_axes(self) -> Tuple[mtr.Qty]:
+    def principal_axes(self) -> np.ndarray:
         _, axes = scipy.linalg.eigh(self.inertia_tensor.value)
         return axes
-        # return tuple(mtr.normalize(ax) for ax in axes.T)
-
-    @property
-    @memoize
-    def is_linear(self) -> bool:
-        (m1, m2, m3) = self.principal_moments.value / sum(self.principal_moments.value)
-        return (
-            (m1 == 0 and m2 == m3) or (m2 == 0 and m1 == m3) or (m3 == 0 and m1 == m2)
-        )
-
-    @property
-    @memoize
-    def is_planar(self) -> mtr.Qty:
-        (m1, m2, m3) = self.principal_moments.value / sum(self.principal_moments.value)
-        return (m1 + m2 == m3) or (m1 + m2 == m3) or (m1 + m2 == m3)
 
     @property
     @memoize
@@ -415,8 +414,8 @@ class Structure:
         Parameters
         ----------
         xyz : XYZ
-            XYZ object containing the atomic species and atomic_positions of the molecule
-            whose maximally symmetric spanning set is to be computed.
+            XYZ object containing the atomic species and atomic_positions of
+            the molecule whose maximally symmetric spanning set is to be computed.
 
         Returns
         -------
@@ -515,15 +514,20 @@ def _structure_from_identifier(
     if rdkit.Chem.AllChem.MMFFHasAllMoleculeParams(mol=mol):
         mmff_props = rdkit.Chem.AllChem.MMFFGetMoleculeProperties(mol=mol)
         rdkit.Chem.AllChem.MMFFSanitizeMolecule(mol=mol)
-        energy = lambda conformer: rdkit.Chem.AllChem.MMFFGetMoleculeForceField(
-            mol=conformer.GetOwningMol(),
-            pyMMFFMolProperties=mmff_props,
-            confId=conformer.GetId(),
-        ).CalcEnergy()
+
+        def energy(conformer):
+            return rdkit.Chem.AllChem.MMFFGetMoleculeForceField(
+                mol=conformer.GetOwningMol(),
+                pyMMFFMolProperties=mmff_props,
+                confId=conformer.GetId(),
+            ).CalcEnergy()
+
     else:
-        energy = lambda conformer: rdkit.Chem.AllChem.UFFGetMoleculeForceField(
-            mol=conformer.GetOwningMol(), confId=conformer.GetId()
-        ).CalcEnergy()
+
+        def energy(conformer):
+            return rdkit.Chem.AllChem.UFFGetMoleculeForceField(
+                mol=conformer.GetOwningMol(), confId=conformer.GetId()
+            ).CalcEnergy()
 
     energies = {conformer: energy(conformer) for conformer in mol.GetConformers()}
 
@@ -533,7 +537,8 @@ def _structure_from_identifier(
     symbols = (a.GetSymbol() for a in conformer.GetOwningMol().GetAtoms())
 
     # FIXME: assumes the RDKIT distance unit is angstrom - is this correct??
-    # NOTE: using conformer.GetPositions sometimes causes a seg fault (RDKit) - use GetAtomPosition instead
+    # NOTE: using conformer.GetPositions sometimes causes
+    # a seg fault (RDKit) - use GetAtomPosition instead
     atoms = (
         mtr.Atom(
             element=symbol,

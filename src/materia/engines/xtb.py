@@ -75,7 +75,7 @@ class XTBOptimize(ExternalTask):
 
         return mtr.Structure.read(f"{pathlib.Path(output).parent}/{structure_file}")
 
-    def run(self, molecule: mtr.Molecule) -> mtr.Molecule:
+    def compute(self, molecule: mtr.Molecule) -> mtr.Molecule:
         with self.io() as io:
             with molecule.structure.tempfile(suffix=".xyz", dir=io.work_dir) as f:
                 self.engine.execute(f.name, self.io, arguments=["--opt"])

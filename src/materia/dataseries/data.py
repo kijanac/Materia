@@ -33,7 +33,9 @@ __all__ = [
 class ASTMG173(SPDSpectrum):
     def __init__(self) -> None:
         # wavelengths in nms, global tilt spectrum in watts per square-meter per nm
-        # taken directly from https://rredc.nrel.gov/solar//spectra/am1.5/ASTMG173/ASTMG173.html, accessed at 16:52 EST 17 Feb. 2019
+        # taken directly from
+        # https://rredc.nrel.gov/solar//spectra/am1.5/ASTMG173/ASTMG173.html,
+        # accessed at 16:52 EST 17 Feb. 2019
 
         x = (
             np.hstack(
@@ -2068,7 +2070,8 @@ class BlackbodySPD(RelativeSPDSpectrum):
 
         c2 = (mtr.h * mtr.c / mtr.kB).convert(mtr.nm * mtr.K)
 
-        # NOTE: wrong overall prefactor, but that's okay since it will be normalized in super().__init__
+        # NOTE: wrong overall prefactor, but that's
+        # okay since it will be normalized in super().__init__
         y = x ** (-5) / (np.exp((c2 / (x * T)).value) - 1)
 
         super().__init__(x=x, y=y, normalize_to=normalize_to)
@@ -2076,7 +2079,8 @@ class BlackbodySPD(RelativeSPDSpectrum):
 
 class CIE1931ColorMatchingFunctionX(Spectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(380, 780, 81) * mtr.nm
 
         xbar = [
@@ -2168,7 +2172,8 @@ class CIE1931ColorMatchingFunctionX(Spectrum):
 
 class CIE1931ColorMatchingFunctionY(Spectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(380, 780, 81) * mtr.nm
 
         ybar = [
@@ -2260,7 +2265,8 @@ class CIE1931ColorMatchingFunctionY(Spectrum):
 
 class CIE1931ColorMatchingFunctionZ(Spectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(380, 780, 81) * mtr.nm
 
         zbar = [
@@ -2352,7 +2358,8 @@ class CIE1931ColorMatchingFunctionZ(Spectrum):
 
 class CIE1995TestColorSample01(ReflectanceSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
+        # data taken from
+        # https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
         x = np.linspace(360, 830, 95) * mtr.nm
 
         tcs01 = [
@@ -2459,7 +2466,8 @@ class CIE1995TestColorSample01(ReflectanceSpectrum):
 
 class CIE1995TestColorSample02(ReflectanceSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
+        # data taken from
+        # https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
         x = mtr.np.linspace(360, 830, 95) * mtr.nm
 
         tcs02 = [
@@ -2566,7 +2574,8 @@ class CIE1995TestColorSample02(ReflectanceSpectrum):
 
 class CIE1995TestColorSample03(ReflectanceSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
+        # data taken from
+        # https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
         x = np.linspace(360, 830, 95) * mtr.nm
 
         tcs03 = [
@@ -2673,7 +2682,8 @@ class CIE1995TestColorSample03(ReflectanceSpectrum):
 
 class CIE1995TestColorSample04(ReflectanceSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
+        # data taken from
+        # https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
         x = np.linspace(360, 830, 95) * mtr.nm
 
         tcs04 = [
@@ -2780,7 +2790,8 @@ class CIE1995TestColorSample04(ReflectanceSpectrum):
 
 class CIE1995TestColorSample05(ReflectanceSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
+        # data taken from
+        # https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
         x = np.linspace(360, 830, 95) * mtr.nm
 
         tcs05 = [
@@ -2887,7 +2898,8 @@ class CIE1995TestColorSample05(ReflectanceSpectrum):
 
 class CIE1995TestColorSample06(ReflectanceSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
+        # data taken from
+        # https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
         x = np.linspace(360, 830, 95) * mtr.nm
 
         tcs06 = [
@@ -2994,7 +3006,8 @@ class CIE1995TestColorSample06(ReflectanceSpectrum):
 
 class CIE1995TestColorSample07(ReflectanceSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
+        # data taken from
+        # https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
         x = np.linspace(360, 830, 95) * mtr.nm
 
         tcs07 = [
@@ -3101,7 +3114,8 @@ class CIE1995TestColorSample07(ReflectanceSpectrum):
 
 class CIE1995TestColorSample08(ReflectanceSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
+        # data taken from
+        # https://web.archive.org/web/20090211042805/http://photometry.kriss.re.kr/wiki/img_auth.php/4/47/CIE_TCS.csv
         x = np.linspace(360, 830, 95) * mtr.nm
 
         tcs08 = [
@@ -3208,7 +3222,8 @@ class CIE1995TestColorSample08(ReflectanceSpectrum):
 
 class CIEIlluminantA(RelativeSPDSpectrum):
     def __init__(self, normalize_to: Optional[float] = 100) -> None:
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(300, 780, 97) * mtr.nm
 
         y = [
@@ -3316,7 +3331,8 @@ class CIEIlluminantA(RelativeSPDSpectrum):
 
 class CIEIlluminantD65(RelativeSPDSpectrum):
     def __init__(self, normalize_to: Optional[float] = 100) -> None:
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(300, 830, 107) * mtr.nm
         y = [
             0.034100,
@@ -3433,7 +3449,8 @@ class CIEIlluminantD65(RelativeSPDSpectrum):
 
 class CIEIlluminantDSeries(RelativeSPDSpectrum):
     def __init__(self, T, normalize_to: Optional[float] = 100) -> None:
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         wavs = np.linspace(300, 830, 107) * mtr.nm
 
         # equations taken from http://www.brucelindbloom.com/Eqn_T_to_xy.html
@@ -3448,7 +3465,8 @@ class CIEIlluminantDSeries(RelativeSPDSpectrum):
 
         y = -3.000 * x ** 2 + 2.870 * x - 0.275
 
-        # equations taken from http://www.brucelindbloom.com/index.html?Eqn_DIlluminant.html
+        # equations taken from
+        # http://www.brucelindbloom.com/index.html?Eqn_DIlluminant.html
         M = 0.0241 + 0.2562 * x - 0.7341 * y
         M1 = (-1.3515 - 1.7703 * x + 5.9114 * y) / M
         M2 = (0.0300 - 31.4424 * x + 30.0717 * y) / M
@@ -3463,7 +3481,8 @@ class CIEIlluminantDSeries(RelativeSPDSpectrum):
 
 class CIEIlluminantF4(RelativeSPDSpectrum):
     def __init__(self, normalize_to: Optional[float] = 100) -> None:
-        # data taken from https://web.archive.org/web/20100612203959/http://www.cis.rit.edu/mcsl/online/CIE/Fluorescents.xls
+        # data taken from
+        # https://web.archive.org/web/20100612203959/http://www.cis.rit.edu/mcsl/online/CIE/Fluorescents.xls
         x = np.linspace(380, 780, 81) * mtr.nm
         y = [
             0.57,
@@ -3554,7 +3573,8 @@ class CIEIlluminantF4(RelativeSPDSpectrum):
 
 class SimmonsDSeriesPCA0(SPDSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(300, 830, 107) * mtr.nm
 
         y = [
@@ -3672,7 +3692,8 @@ class SimmonsDSeriesPCA0(SPDSpectrum):
 
 class SimmonsDSeriesPCA1(SPDSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(300, 830, 107) * mtr.nm
 
         y = [
@@ -3790,7 +3811,8 @@ class SimmonsDSeriesPCA1(SPDSpectrum):
 
 class SimmonsDSeriesPCA2(SPDSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(300, 830, 107) * mtr.nm
 
         y = [

@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import itertools
 import numpy as np
-import scipy.linalg
+
+
+__all__ = ["PointGroup", "GroupElement", "GroupRepresentation"]
 
 
 class PointGroup:
@@ -49,7 +53,7 @@ class PointGroup:
         return ctable
 
     def regular_representation(self):
-        return Representation(map=lambda g: g.regular_representation, group=self)
+        return GroupRepresentation(map=lambda g: g.regular_representation, group=self)
 
     def binary_operation(self, label1, label2):
         return self.products[(label1, label2)]
@@ -66,8 +70,8 @@ class PointGroup:
         return tuple(cls[0] for cls in self.conjugacy_classes)
 
     def __iter__(self):
-        for l in self.labels:
-            yield GroupElement(label=l, group=self)
+        for label in self.labels:
+            yield GroupElement(label=label, group=self)
 
     def __eq__(self, other):
         return hasattr(other, "products") and self.products == other.products
@@ -101,10 +105,10 @@ class GroupElement:
 
     def _permutation_matrix(self, permutation_dict):
         n = len(permutation_dict)
-        I = np.eye(n, dtype=int)
+        iden = np.eye(n, dtype=int)
         return np.hstack(
             [
-                I[:, col_ind].reshape(n, -1)
+                iden[:, col_ind].reshape(n, -1)
                 for _, col_ind in sorted(permutation_dict.items())
             ]
         )
@@ -134,7 +138,7 @@ class GroupElement:
         return hash((self.label, self.group))
 
 
-class Representation:
+class GroupRepresentation:
     def __init__(self, map, group):
         self.__call__ = map
         self.group = group
@@ -147,28 +151,30 @@ class Representation:
     def dimension(self):
         try:
             (shape,) = tuple(set(rho.shape for rho in self))
-        except ValueError:  # thrown from tuple unpacking into a single variable
+        except ValueError:
+            # thrown from tuple unpacking into a single variable
             raise ValueError("Representation matrices have different shapes.")
 
         try:
             (dimension,) = tuple(set(shape))
-        except ValueError:  # thrown from tuple unpacking into a single variable
+        except ValueError:
+            # thrown from tuple unpacking into a single variable
             raise ValueError("Representation matrices are not square.")
 
         return dimension
 
     def reduce(self):
-        # algorithm based on: http://sheaves.github.io/Group-Ring-Regular-Representation/
+        # algorithm based on:
+        # http://sheaves.github.io/Group-Ring-Regular-Representation/
         H = self._commuting_matrix()
         _, P = np.linalg.eigh(H)
-        blockified_reps = tuple(
-            self._transform_rep(rho=rho, P=P) for rho in self
-        )  # (self.representations[g] for g in list(self.representations.keys())[0].group.conjugacy_representatives))
-        for reduced_reps in self.extract_blocks(*blockified_reps):
-            map = lambda g: dict(zip((gp.label for gp in self.group), reduced_reps))[
-                g.label
-            ]
-            rep = Representation(map=map, group=self.group)
+        blockified_reps = tuple(self._transform_rep(rho=rho, P=P) for rho in self)
+        for reduced in self.extract_blocks(*blockified_reps):
+
+            def f(g):
+                return dict(zip((gp.label for gp in self.group), reduced))[g.label]
+
+            rep = GroupRepresentation(map=f, group=self.group)
             if rep.is_irreducible:
                 yield rep
             else:
@@ -187,7 +193,8 @@ class Representation:
             return next(
                 (H for H in H_function_generator if not self._is_scalar_matrix(H=H))
             )
-        except StopIteration:  # all H matrices are scalar matrices (so this is an irrep)
+        except StopIteration:
+            # all H matrices are scalar matrices (so this is an irrep)
             return np.eye(self.dimension)
 
     def H_function(self, H):
@@ -272,7 +279,8 @@ class Representation:
     #                          [g,0,0,h,0,0,i-a,-d,-g],[0,g,0,0,h,0,-b,i-e,-h],
     #                          [0,0,g,0,0,h,-c,-f,0]])
     #     else:
-    #         raise ValueError('Cannot construct T-matrix for matrix with dimension greater than 3.')
+    #         raise ValueError("""Cannot construct T-matrix for
+    #                              matrix with dimension greater than 3.""")
 
 
 class C1(PointGroup):
@@ -295,16 +303,16 @@ class C2(PointGroup):
         self.products = {(0, 0): 0, (0, 1): 1, (1, 0): 1, (1, 1): 0}
 
 
-class C2(PointGroup):
-    def __init__(self):
-        self.products = {
-            (0, 0): 0,
-            (0, 1): 1,
-            (1, 0): 1,
-            (0, 2): 2,
-            (2, 0): 2,
-            (1, 1): 2,
-            (1, 2): 0,
-            (2, 1): 0,
-            (2, 2): 1,
-        }
+# class C2(PointGroup):
+#     def __init__(self):
+#         self.products = {
+#             (0, 0): 0,
+#             (0, 1): 1,
+#             (1, 0): 1,
+#             (0, 2): 2,
+#             (2, 0): 2,
+#             (1, 1): 2,
+#             (1, 2): 0,
+#             (2, 1): 0,
+#             (2, 2): 1,
+#         }

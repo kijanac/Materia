@@ -14,7 +14,7 @@ class Dimension(collections.abc.MutableMapping):
         L: Optional[int] = 0,
         T: Optional[int] = 0,
         M: Optional[int] = 0,
-        I: Optional[int] = 0,
+        A: Optional[int] = 0,
         K: Optional[int] = 0,
         N: Optional[int] = 0,
         J: Optional[int] = 0,
@@ -24,7 +24,7 @@ class Dimension(collections.abc.MutableMapping):
             "L": L,
             "T": T,
             "M": M,
-            "I": I,
+            "A": A,
             "K": K,
             "N": N,
             "J": J,
@@ -149,7 +149,7 @@ class Quantity(collections.abc.Sequence):
         L: Optional[int] = 0,
         M: Optional[int] = 0,
         T: Optional[int] = 0,
-        I: Optional[int] = 0,
+        A: Optional[int] = 0,
         K: Optional[int] = 0,
         N: Optional[int] = 0,
         J: Optional[int] = 0,
@@ -157,7 +157,7 @@ class Quantity(collections.abc.Sequence):
 
         self.value = np.array(value)
         self.prefactor = prefactor
-        self.dimension = Dimension(L=L, M=M, T=T, I=I, K=K, N=N, J=J)
+        self.dimension = Dimension(L=L, M=M, T=T, A=A, K=K, N=N, J=J)
 
     @property
     def magnitude(self):
@@ -393,7 +393,7 @@ class Quantity(collections.abc.Sequence):
             .replace("L", "m")
             .replace("M", "kg")
             .replace("T", "s")
-            .replace("I", "A")
+            .replace("A", "A")
             .replace("\u03B8", "K")
             .replace("N", "mol")
             .replace("J", "cd")

@@ -68,7 +68,7 @@ class Openbabel(Engine):
 #         self.work_dir = work_dir
 #         self.keep_logs = keep_logs
 
-#     def run(self, structure: Union[str, mtr.Structure]) -> str:
+#     def compute(self, structure: Union[str, mtr.Structure]) -> str:
 #         with mtr.work_dir(self.work_dir) as wd:
 #             arguments = [f"-o{self.filetype}"]
 
@@ -186,8 +186,8 @@ class Openbabel(Engine):
 #             name=name,
 #         )
 
-#     def run(self, structure: Union[str, mtr.Structure]) -> str:
-#         super().run(structure=structure)
+#     def compute(self, structure: Union[str, mtr.Structure]) -> str:
+#         super().compute(structure=structure)
 
 #         with open(
 #             f"{mtr.expand(self.output_name,dir=self.work_dir)}.smi", "r"

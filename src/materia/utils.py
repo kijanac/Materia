@@ -1,67 +1,36 @@
 from __future__ import annotations
-from typing import Any, Callable, Iterable, Optional, Tuple, Union
+from typing import Iterable, Optional
 
 import collections
 import contextlib
 import copy
 import functools
 import itertools
-import math
 import networkx as nx
 import numpy as np
 import os
 import pathlib
 import tempfile
-import rdkit, rdkit.Chem, rdkit.Chem.AllChem
-import scipy.interpolate, scipy.linalg, scipy.spatial
+import rdkit
+import rdkit.Chem
+import rdkit.Chem.AllChem
+import scipy.interpolate
+import scipy.spatial
 
 
 __all__ = [
-    "closest_trio",
     "expand",
     "extrapolate",
     "interpolate",
     "IO",
-    "lcm",
-    "linearly_independent",
     "memoize",
     "mkdir_safe",
     "NestedDictionary",
-    "nontrivial_vector",
-    "normalize",
-    "orthogonal_complement",
-    "periodicity",
-    "perpendicular_vector",
-    "rotation_matrix",
-    "rotation_matrix_m_to_n",
-    "sample_spherical_triangle",
     "Settings",
-    "spherical_excess",
     "temporary_seed",
     "work_dir",
     "xyz2mol",
 ]
-
-
-def closest_trio(points):
-    """
-    Finds the three closest points from a given list of points.
-
-    Parameters
-    ----------
-    points : numpy.ndarray
-        3xNp Numpy array whose columns represent points on the unit sphere, where Np is the number of points.
-
-    Returns
-    -------
-    numpy.ndarray:
-        3x3 Numpy array whose columns are the three closest points from the given list of points.
-    """
-    tree = scipy.spatial.KDTree(points.T)
-    pair = points.T[min(zip(*tree.query(points.T, k=2)), key=lambda t: t[0][1])[1]].T
-    return points.T[
-        min(zip(*tree.query(pair[:, 0, None].T, k=3)), key=lambda t: t[0][1])[1]
-    ].T
 
 
 def expand(path: str, dir: Optional[str] = None) -> str:
@@ -118,7 +87,8 @@ def interpolate_linear_spline(x, y, x_interp_to):
 
 def interpolate_sprague(x, y, x_interp_to):
     # FIXME: this implementation of Sprague interpolation is broken somehow!
-    # data taken from https://link.springer.com/content/pdf/10.1007/978-3-642-27851-8_366-1.pdf
+    # data taken from
+    # https://link.springer.com/content/pdf/10.1007/978-3-642-27851-8_366-1.pdf
     # FIXME: we have to convert spec to wavelength spec with nanometer units first
     interp_coeffs = np.array(
         [
@@ -206,40 +176,6 @@ class IO:
                 self.temp, self.work_dir = old_temp, old_work_dir
 
 
-def lcm(numbers: Iterable[int]) -> int:
-    a, *b = numbers
-    if len(b) > 1:
-        return lcm(numbers=(a, lcm(numbers=b)))
-    else:
-        [b] = b
-        return a * b // math.gcd(a, b)
-
-
-def linearly_independent(vectors, indep=None):
-    # vectors is kxNv array where Nv is number of vectors
-    # indep is kxNi array where Ni is number of linearly independent vectors
-
-    if indep is None:
-        indep = np.array([])
-
-    k, *_ = vectors.shape  # dimension of vectors
-    *_, n = indep.shape  # number of independent vectors
-
-    if n == k:
-        return indep
-    else:
-        array_generator = (np.vstack([*indep.T, v]) for v in vectors.T)
-        try:
-            indep = next(
-                a
-                for a in array_generator
-                if scipy.linalg.null_space(a).shape[-1] == k - n - 1
-            ).T
-            return linearly_independent(vectors=vectors, indep=indep)
-        except StopIteration:
-            return indep
-
-
 class _Cache(collections.OrderedDict):
     def last_result(self, n=1):
         return tuple(self.values())[-n]
@@ -266,204 +202,6 @@ def memoize(func):
 def mkdir_safe(directory: str) -> None:
     with contextlib.suppress(FileExistsError):
         os.makedirs(directory)
-
-
-def nontrivial_vector(R, seed: Optional[int] = None):
-    """
-    Generates a vector which is acted upon nontrivially (i.e. is sent to a linearly independent vector) by the given rotation matrix.
-
-    Parameters
-    ----------
-    R: numpy.ndarray
-        3x3 numpy array representing a rotation matrix.
-
-    Returns
-    -------
-    numpy.ndarray:
-        3x1 numpy array representing a vector which is acted upon nontrivially by R.
-    """
-    if (
-        np.allclose(R, np.eye(R.shape[0]))
-        or np.allclose(R, -np.eye(R.shape[0]))
-        or np.allclose(R, np.zeros(R.shape[0]))
-    ):
-        return None
-
-    # get the eigenvectors with real (i.e. 1 or -1) eigenvalues, since these are mapped to colinear vectors by R
-    # each column of evecs is an eigenvector of R
-    evals, evecs = scipy.linalg.eig(R)
-
-    # FIXME: why np.real(evec) instead of simply evec?
-    real_eigenbasis = np.real(evecs.T[np.isclose(np.imag(evals), 0)].T)
-
-    # form the linear combination of the "trivial" eigenvectors
-    # get random coefficients between 1 and 2 so that 0 is never chosen
-    # the result is guaranteed to be mapped to a linearly independent vector
-    # by R because the "trivial" eigenvectors do not all have the same eigenvalues #all have different eigenvalues
-    # this is true because R is not proportional to the identity matrix
-    with temporary_seed(seed=seed):
-        coeffs = np.random.uniform(low=1, high=2, size=(real_eigenbasis.shape[1], 1))
-
-    return normalize(v=real_eigenbasis @ coeffs)
-
-
-def normalize(v):
-    norm = scipy.linalg.norm(v)
-
-    return v / norm if norm > 0 else v
-
-
-def orthogonal_complement(v, l):
-    return normalize(v - np.dot(v.T, l) * l)
-
-
-def periodicity(matrix) -> int:
-    # if A is periodic, then its eigenvalues are roots of unity, and its periodicity is the lcm of the periodicities of these roots of unity
-    # kth roots of unity form the vertices of a regular k-gon with internal angles 2*pi/k
-    # the angle between two such vertices z1=a+jb and z2=c+jd is given by cos(theta) = a*c + b*d = Re(z1*conj(z2))
-    # choose z2 = z1**2 (clearly z2 is still a root of unity); then z1*conj(z2) = exp(2*pi*j/k)*exp(-4*pi*j/k) = exp(-2*pi*j/k)
-    # then Re(z1*conj(z2)) = Re(exp(-2*pi*j/k)) = cos(2*pi*j/k) = Re(z1)
-    # so 2*pi*j/k = arccos(Re(z1)) -> j/k = arccos(Re(z1))/(2*pi), and k = lcm(k/j1, k/j2,...)
-    evals = scipy.linalg.eigvals(matrix)
-    angles = (max(min(z.real, 1), -1) for z in evals if not np.isclose(z, 1))
-    # if z is close to 1, then it contributes a period of 1, which doesn't impact the lcm and therefore the final period
-    periods = (int((2 * np.pi / np.arccos(angle)).round()) for angle in angles)
-
-    try:
-        return lcm(numbers=periods)
-    except ValueError:
-        # `periods` must not have any values in it, so all evals must have been close to 1
-        return 1
-
-
-def perpendicular_vector(a, b=None):
-    """
-    Generates a unit vector which is perpendicular to one or two given nonzero vector(s).
-
-    Parameters
-    ----------
-    a: numpy.ndarray
-        3x1 Numpy array representing a nonzero vector.
-    b: numpy.ndarray
-        3x1 Numpy array representing a nonzero vector.
-
-    Returns
-    -------
-    numpy.ndarray:
-        3x1 Numpy array representing a unit vector which is perpendicular to a (and b, if applicable).
-    """
-    if b is None:
-        m = np.zeros(a.shape)
-
-        # storing in variable for reuse
-        ravel_a = np.ravel(a)
-
-        # index of the first nonzero element of a
-        i = (ravel_a != 0).argmax()
-        # first index of a which is not i
-        j = next(ind for ind in range(len(ravel_a)) if ind != i)
-        # unravel indices for 3x1 arrays m and a
-        i, j = (
-            np.unravel_index(i, a.shape),
-            np.unravel_index(j, a.shape),
-        )
-
-        # make m = np.array([[-ay,ax,0]]).T so np.dot(m.T,a) = -ax*ay + ax*ay = 0
-        m[j] = a[i]
-        m[i] = -a[j]
-    else:
-        m = np.cross(a.T, b.T).T
-
-    return normalize(v=m)
-
-
-def rotation_matrix(axis, cos_theta):
-    """
-    Generates a matrix which rotates a vector a given angle about a given axis.
-
-    Parameters
-    ----------
-    axis: numpy.ndarray
-        3x1 Numpy array representing the vector whose direction is the axis of rotation.
-    cos_theta: float
-        Cosine of angle of rotation about the axis of rotation.
-
-    Returns
-    -------
-    numpy.ndarray:
-        3x3 Numpy array representing the rotation matrix which rotates a vector by the given angle about the given axis.
-    """
-    u1, u2, u3 = np.ravel(normalize(v=axis))
-
-    K = np.array([[0, -u3, u2], [u3, 0, -u1], [-u2, u1, 0]])
-
-    sin_theta = np.sqrt(1 - cos_theta ** 2)
-
-    return (np.eye(3) + sin_theta * K + (1 - cos_theta) * (K @ K)).astype("float64")
-
-
-def rotation_matrix_m_to_n(m, n):
-    """
-    Generates a matrix which rotates one given vector to another.
-
-    Parameters
-    ----------
-    m: numpy.ndarray
-        3x1 Numpy array representing the vector to be rotated.
-    n: numpy.ndarray
-        3x1 Numpy array representing the vector after rotation, i.e. the target vector.
-
-    Returns
-    -------
-    numpy.ndarray:
-        3x3 Numpy array representing the rotation matrix which maps m to n.
-    """
-    # make rotation axis, which is perpendicular to both m and n
-    # no need to normalize, since rotation_matrix will do that for us
-    u = np.cross(m.T, n.T).T
-
-    # cosine of the angle between m and n
-    c = np.dot(normalize(v=m).T, normalize(v=n))
-
-    return rotation_matrix(axis=u, cos_theta=c)
-
-
-def sample_spherical_triangle(A, B, C, sin_alpha, sin_beta, sin_gamma, seed=None):
-    # see https://www.graphics.cornell.edu/pubs/1995/Arv95c.pdf
-    # a, b, and c are cross products of normal vectors, so their magnitudes
-    # are the sine of the angles between these normal vectors; these angles
-    # are also the angles between planes and therefore the great arcs which
-    # define the legs of the triangle; therefore, these angles are also
-    # the internal angles of the triangle
-    eps = np.finfo(float).eps  # machine precision
-
-    with temporary_seed(seed=seed):
-        fraction, cos_theta = np.random.uniform(low=eps, high=1, size=2)
-
-    cos_alpha, cos_beta, cos_gamma = np.sqrt(
-        (1 - sin_alpha ** 2, 1 - sin_beta ** 2, 1 - sin_gamma ** 2)
-    )
-
-    area = fraction * spherical_excess(
-        cos_alpha=cos_alpha, cos_beta=cos_beta, cos_gamma=cos_gamma
-    )
-    cos_area, sin_area = np.cos(area), np.sin(area)
-
-    s = sin_area * cos_alpha - cos_area * sin_alpha  # sin(area - alpha)
-    t = cos_area * cos_alpha + sin_area * sin_alpha  # cos(area - alpha)
-    u = t - cos_alpha
-    v = s + (cos_gamma + cos_beta * cos_alpha) / sin_beta  # spherical law of cosines
-
-    q = ((v * t - u * s) * cos_alpha - v) / ((v * s + u * t) * sin_alpha)
-    C_prime = q * A + np.sqrt(1 - q ** 2) * orthogonal_complement(v=C, l=A)
-
-    z = 1 - cos_theta * (1 - np.dot(C_prime.T, B))
-    return z * B + np.sqrt(1 - z ** 2) * orthogonal_complement(v=C_prime, l=B)
-
-
-def spherical_excess(cos_alpha: float, cos_beta: float, cos_gamma: float) -> float:
-    # Girard's formula for spherical excess
-    return np.arccos((cos_alpha, cos_beta, cos_gamma)).sum() - np.pi
 
 
 @contextlib.contextmanager
@@ -527,7 +265,8 @@ class NestedDictionary(collections.abc.MutableMapping):
 
         branch = self.d
         for k in most_keys:
-            # FIXME: does this really need to be here? if we're deleting the item, we shouldn't ever need to make branches on the way to the item...
+            # FIXME: does this really need to be here? if we're deleting the item,
+            # we shouldn't ever need to make branches on the way to the item...
             if k not in branch:
                 branch[k] = {}
             branch = branch[k]
@@ -535,7 +274,7 @@ class NestedDictionary(collections.abc.MutableMapping):
         del branch[last_key]
 
     def __iter__(self, d=None, prepath=()):
-        if d == None:
+        if d is None:
             d = self.d
         for k, v in d.items():
             if hasattr(v, "items"):
@@ -565,7 +304,8 @@ class Settings(NestedDictionary):
 ##
 # Written by Jan H. Jensen based on this paper Yeonjoon Kim and Woo Youn Kim
 # "Universal Structure Conversion Method for Organic Molecules: From Atomic Connectivity
-# to Three-Dimensional Geometry" Bull. Korean Chem. Soc. 2015, Vol. 36, 1769-1777 DOI: 10.1002/bkcs.10334
+# to Three-Dimensional Geometry" Bull. Korean Chem. Soc. 2015,
+# Vol. 36, 1769-1777 DOI: 10.1002/bkcs.10334
 #
 
 
@@ -818,9 +558,9 @@ def _clean_charges(mol: rdkit.Chem.rdchem.Mol) -> rdkit.Chem.rdchem.Mol:
 
     rxn_smarts = [
         "[#6,#7:1]1=[#6,#7:2][#6,#7:3]=[#6,#7:4][CX3-,NX3-:5][#6,#7:6]1=[#6,#7:7]>>\
-                   [#6,#7:1]1=[#6,#7:2][#6,#7:3]=[#6,#7:4][-0,-0:5]=[#6,#7:6]1[#6-,#7-:7]",
+        [#6,#7:1]1=[#6,#7:2][#6,#7:3]=[#6,#7:4][-0,-0:5]=[#6,#7:6]1[#6-,#7-:7]",
         "[#6,#7:1]1=[#6,#7:2][#6,#7:3](=[#6,#7:4])[#6,#7:5]=[#6,#7:6][CX3-,NX3-:7]1>>\
-                   [#6,#7:1]1=[#6,#7:2][#6,#7:3]([#6-,#7-:4])=[#6,#7:5][#6,#7:6]=[-0,-0:7]1",
+        [#6,#7:1]1=[#6,#7:2][#6,#7:3]([#6-,#7-:4])=[#6,#7:5][#6,#7:6]=[-0,-0:7]1",
     ]
 
     fragments = rdkit.Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)
@@ -829,7 +569,7 @@ def _clean_charges(mol: rdkit.Chem.rdchem.Mol) -> rdkit.Chem.rdchem.Mol:
         for smarts in rxn_smarts:
             patt = rdkit.Chem.MolFromSmarts(smarts.split(">>")[0])
             while fragment.HasSubstructMatch(patt):
-                rxn = AllChem.ReactionFromSmarts(smarts)
+                rxn = rdkit.Chem.AllChem.ReactionFromSmarts(smarts)
                 ps = rxn.RunReactants((fragment,))
                 fragment = ps[0][0]
                 rdkit.Chem.SanitizeMol(fragment)
@@ -849,13 +589,13 @@ def _bond_order_to_mol(
 ):
     # based on code written by Paolo Toscani
 
-    l = len(BO_matrix)
+    l1 = len(BO_matrix)
     l2 = len(atomic_numbers)
     BO_valences = list(BO_matrix.sum(axis=1))
 
-    if l != l2:
+    if l1 != l2:
         raise RuntimeError(
-            "sizes of adjMat ({0:d}) and atomic_numbers " "{1:d} differ".format(l, l2)
+            "sizes of adjMat ({0:d}) and atomic_numbers " "{1:d} differ".format(l1, l2)
         )
 
     rwMol = rdkit.Chem.RWMol(mol)
@@ -866,8 +606,8 @@ def _bond_order_to_mol(
         3: rdkit.Chem.BondType.TRIPLE,
     }
 
-    for i in range(l):
-        for j in range(i + 1, l):
+    for i in range(l1):
+        for j in range(i + 1, l1):
             bo = int(round(BO_matrix[i, j]))
             if bo == 0:
                 continue

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import ast
 import cclib
@@ -13,6 +13,7 @@ import scipy.spatial
 import shlex
 import subprocess
 
+from materia.utils import memoize
 from materia.workflow import Workflow
 from .engine import Engine
 from ..tasks import ExternalTask, Task
@@ -35,7 +36,10 @@ class QChemInput:
         self.settings = settings
         self.charges = charges or [m.charge for m in self.molecules]
         self.multiplicities = multiplicities or [m.multiplicity for m in self.molecules]
-        # FIXME: seems more rigorously correct to determine the total charge and multiplicity from combined structures rather than just adding individual charges & multiplicities
+        # FIXME: seems more rigorously correct to
+        # determine the total charge and multiplicity
+        # from combined structures rather than just
+        # adding individual charges & multiplicities
         self.total_charge = total_charge or sum(self.charges)
         self.total_multiplicity = total_multiplicity or self.total_charge % 2 + 1
         self.string = string
@@ -111,7 +115,9 @@ def _molecule_to_structure_block(
     )
 
 
-def _block_to_str(block_name: str, block_params) -> str:
+def _block_to_str(
+    block_name: str, block_params: Union[List[Any], Dict[str, Any]]
+) -> str:
     if block_name == "xc_functional":
         return _xc_functional_str(*block_params)
     else:
@@ -119,8 +125,8 @@ def _block_to_str(block_name: str, block_params) -> str:
 
 
 def _block_str(
-    block_name, **block_params
-) -> str:  # FIXME: not sure exactly how to annotate type hint for **block_params
+    block_name: str, **block_params: Union[List[Any], Dict[str, Any]]
+) -> str:
     longest_key_length = max(len(k) for k in block_params)
     return (
         f"${block_name}\n"
@@ -136,7 +142,7 @@ def _xc_functional_str(*functional_tuples: Tuple[str, str, str]) -> str:
     component_types, component_names, component_coefficients = zip(*functional_tuples)
     longest_component_name = max(len(cn) for cn in component_names)
 
-    s = f"$xc_functional\n"
+    s = "$xc_functional\n"
     for ct, cn, cc in zip(component_types, component_names, component_coefficients):
         if ct == "K":
             s += "  K " + " " * (longest_component_name + 1) + f" {cc}\n"
@@ -160,12 +166,21 @@ class QChemOutput:
         self.cclib_out = cclib.io.ccread(self.filepath)
 
     @property
+    @memoize
+    def cclib_out(self):
+        return cclib.io.ccread(self.filepath)
+
+    @property
     def footer(
         self,
     ) -> Dict[mtr.Quantity, mtr.Quantity, Tuple[int, str, int, int, int, int, str]]:
         with open(self.filepath, "r") as f:
             lines = "".join(f.readlines())
-        s = r"\s*Total\s*job\s*time\s*:\s*(\d*\.\d*)\s*s\s*\(\s*wall\s*\)\s*,\s*(\d*\.\d*)\s*s\s*\(\s*cpu\s*\)\s*(\w*)\s*(\w*)\s*(\d*)\s*(\d*)\s*:\s*(\d*)\s*:\s*(\d*)\s*(\d*)\s*"
+        s = r"""\s*Total\s*job\s*time\s*:\s*(\d*\.\d*)
+                \s*s\s*\(\s*wall\s*\)\s*,\s*(\d*\.\d*)
+                \s*s\s*\(\s*cpu\s*\)\s*(\w*)\s*(\w*)
+                \s*(\d*)\s*(\d*)\s*:\s*(\d*)\s*:\s*
+                (\d*)\s*(\d*)\s*"""
         pattern = re.compile(s)
         (
             walltime,
@@ -218,77 +233,6 @@ class QChemOutput:
 
         return mtr.Structure(*atoms)
 
-    # def rttddft(self, lines: str):  # FIXME: not sure how to annotate type hint
-    #     s = r"ITER:\s*(\d*)\s*T:\s*(\d*\.\d*)\(fs\)\s*dt\s*(\d*\.\d*)\(fs\)\s*Hr/Ps:\s*(\d*\.\d*)\s*-\s*Lpsd/Rem\.:\s*(\d*\.\d*),\s*([^\s]*)\s*\(min\)\s*Tr\.Dev:\s*(\d*\.\d*)\s*Hrm:\s*(\d*\.\d*)\s*Enrgy:\s*(-?\d*\.\d*)\s*Entr:\s*(-?\d*.\d*)\s*Fld\s*(\d*)\s*NFk:\s*(\d*)\s*Mu\s*(-?\d*\.\d*e?-?\d*)\s*(-?\d*\.\d*e?-?\d*)\s*(-?\d*\.\d*e?-?\d*)"
-    #     pattern = re.compile(s)
-
-    #     iterations = []
-    #     Ts = []
-    #     dts = []
-    #     hours_per_ps = []
-    #     lapsed = []  # FIXME: what is this?
-    #     remaining = []  # FIXME: what is this?
-    #     trace_deviations = []  # FIXME: what is this?
-    #     hrms = []  # FIXME: what is this?
-    #     energies = []
-    #     entrs = []  # FIXME: what is this?
-    #     field = []  # FIXME: what is this? field on or off, always a boolean?
-    #     number_fock = []
-    #     mu_xs = []
-    #     mu_ys = []
-    #     mu_zs = []
-
-    #     for (
-    #         iter,
-    #         T,
-    #         dt,
-    #         hps,
-    #         lpsd,
-    #         rem,
-    #         tr_dev,
-    #         hrm,
-    #         energy,
-    #         entr,
-    #         fld,
-    #         nfk,
-    #         mu_x,
-    #         mu_y,
-    #         mu_z,
-    #     ) in pattern.findall(lines):
-    #         iterations.append(int(iter))
-    #         Ts.append(float(T))
-    #         dts.append(float(dt))
-    #         hours_per_ps.append(float(hps))
-    #         lapsed.append(float(lpsd))
-    #         remaining.append(float(rem))
-    #         trace_deviations.append(float(tr_dev))
-    #         hrms.append(float(hrm))
-    #         energies.append(float(energy))
-    #         entrs.append(float(entr))
-    #         field.append(int(fld))
-    #         number_fock.append(int(nfk))
-    #         mu_xs.append(float(mu_x))
-    #         mu_ys.append(float(mu_y))
-    #         mu_zs.append(float(mu_z))
-
-    #     return {
-    #         "iterations": iterations,
-    #         "T": np.array(Ts) * mtr.fs,
-    #         "dt": np.array(dts) * mtr.fs,
-    #         "hours_per_picosecond": np.array(hours_per_ps) * mtr.hr / mtr.ps,
-    #         "lapsed": np.array(lapsed) * mtr.minute,
-    #         "remaining": np.array(remaining) * mtr.minute,
-    #         "trace_deviations": trace_deviations,
-    #         "hrm": hrms,
-    #         "energies": np.array(energies) * mtr.hartree,
-    #         "entr": entrs,
-    #         "field": field,
-    #         "number_fock": number_fock,
-    #         "mu_x": np.array(mu_xs) * mtr.au_dipole_moment,
-    #         "mu_y": np.array(mu_ys) * mtr.au_dipole_moment,
-    #         "mu_z": np.array(mu_zs) * mtr.au_dipole_moment,
-    #     }
-
     @property
     def electronic_excitations(self) -> mtr.ExcitationSpectrum:
         engs = self.cclib_out.etenergies / mtr.cm
@@ -306,79 +250,9 @@ class QChemOutput:
         )
         return mtr.ExcitationSpectrum(excitations)
 
-    # def orbital_energies(self, lines: str) -> Tuple[Tuple[mtr.Quantity]]:
-    #     energy_symmetry_pattern = re.compile(
-    #         r"((?:-?\d*\.\d*\s*)*(?:\d*\s*[a-zA-Z]*\d*\s*)*)"
-    #     )
-    #     energy_pattern = re.compile(r"(-?\d*\.\d*)")
-    #     symmetry_pattern = re.compile(r"(\d*\s*[a-zA-Z]+\d*)")
-
-    #     s = r"\s*Orbital\s*Energies\s*\((a\.u\.)\)\s*and\s*Symmetries"
-    #     pattern = re.compile(s)
-    #     (energy_unit_str,) = pattern.search(lines).groups()
-    #     if energy_unit_str == "a.u.":
-    #         energy_unit = mtr.hartree
-    #     else:
-    #         raise ValueError("Cannot parse energy unit in Orbital Energies section.")
-
-    #     s = (
-    #         r"\s*Alpha\s*MOs.*?"
-    #         r"\s*--\s*Occupied\s*--\s*((?:(?:-?\d*\.\d*\s*)*(?:\d*\s*[a-zA-Z]*\d*\s*)*)*)"
-    #         r"\s*--\s*Virtual\s*--\s*((?:(?:-?\d*\.\d*)*\s*(?:\d*\s*[a-zA-Z]*\d*)*\s*)*)"
-    #     )
-    #     pattern_alpha = re.compile(s)
-    #     alpha_orbitals_occupied, alpha_orbitals_virtual = pattern_alpha.search(
-    #         lines
-    #     ).groups()
-
-    #     alpha_orbital_occupied_energies = tuple(
-    #         float(x) * energy_unit
-    #         for split in energy_symmetry_pattern.findall(alpha_orbitals_occupied)
-    #         for x in energy_pattern.findall(split)
-    #         if split != ""
-    #     )
-    #     alpha_orbital_virtual_energies = tuple(
-    #         float(x) * energy_unit
-    #         for split in energy_symmetry_pattern.findall(alpha_orbitals_virtual)
-    #         for x in energy_pattern.findall(split)
-    #         if split != ""
-    #     )
-    #     # alpha_orbital_occupied_symmetries = tuple(x for split in energy_symmetry_pattern.findall(alpha_orbitals_occupied) for x in symmetry_pattern.findall(split) if split != '')
-
-    #     s = (
-    #         r"\s*Beta\s*MOs.*?"
-    #         r"\s*--\s*Occupied\s*--\s*((?:(?:-?\d*\.\d*\s*)*(?:\d*\s*[a-zA-Z]*\d*\s*)*)*)"
-    #         r"\s*--\s*Virtual\s*--\s*((?:(?:-?\d*\.\d*)*\s*(?:\d*\s*[a-zA-Z]*\d*)*\s*)*)"
-    #     )
-    #     pattern_beta = re.compile(s)
-    #     beta_orbitals_occupied, beta_orbitals_virtual = pattern_beta.search(
-    #         lines
-    #     ).groups()
-
-    #     beta_orbital_occupied_energies = tuple(
-    #         float(x) * energy_unit
-    #         for split in energy_symmetry_pattern.findall(beta_orbitals_occupied)
-    #         for x in energy_pattern.findall(split)
-    #         if split != ""
-    #     )
-    #     beta_orbital_virtual_energies = tuple(
-    #         float(x) * energy_unit
-    #         for split in energy_symmetry_pattern.findall(beta_orbitals_virtual)
-    #         for x in energy_pattern.findall(split)
-    #         if split != ""
-    #     )
-    #     # beta_orbital_occupied_symmetries = tuple(x for split in energy_symmetry_pattern.findall(beta_orbitals_occupied) for x in symmetry_pattern.findall(split) if split != '')
-
-    #     return (
-    #         alpha_orbital_occupied_energies,
-    #         beta_orbital_occupied_energies,
-    #         alpha_orbital_virtual_energies,
-    #         beta_orbital_virtual_energies,
-    #     )
-
     @property
     def total_energy(self) -> mtr.Quantity:
-        return cclib.io.ccread(output).scfenergies * mtr.eV
+        return self.cclib_out.scfenergies * mtr.eV
 
 
 # ------------------------ ENGINE -------------------------- #
@@ -387,9 +261,9 @@ class QChemOutput:
 class QChem(Engine):
     def __init__(
         self,
+        executable: Optional[str] = "qchem",
         scratch_dir: Optional[str] = None,
         qcenv: Optional[str] = None,
-        executable: Optional[str] = "qchem",
         num_processors: Optional[int] = None,
         num_threads: Optional[int] = None,
         arguments: Optional[Iterable[str]] = None,
@@ -520,14 +394,6 @@ class QChem(Engine):
     ) -> QChemLRTDDFT:
         return QChemLRTDDFT(engine=self, io=io, handlers=handlers, name=name)
 
-    def lrtddft_plot_ntos(
-        self,
-        io: mtr.IO,
-        handlers: Optional[Iterable[mtr.Handler]] = None,
-        name: Optional[str] = None,
-    ) -> QChemLRTDDFTPlotNTOs:
-        return QChemLRTDDFTPlotNTOs(engine=self, io=io, handlers=handlers, name=name)
-
     def minimize_koopman_error(
         self,
         io: mtr.IO,
@@ -598,7 +464,7 @@ class QChemBaseTask(ExternalTask):
     def parse(self, output: str) -> Any:
         raise NotImplementedError
 
-    def run(
+    def compute(
         self,
         molecule: mtr.Molecule,
         settings: Optional[mtr.Settings] = None,
@@ -617,7 +483,7 @@ class QChemBaseTask(ExternalTask):
 
 
 # class ExecuteQChem(QChemBaseTask):
-#     def run(self) -> Any:
+#     def compute(self) -> Any:
 #         with self.io() as io:
 #             self.engine.execute(io.inp, io.out)
 
@@ -681,12 +547,13 @@ class QChemAIMD(QChemBaseTask):
 
 #         return settings
 
-#     def run(
+#     def compute(
 #         self, *fragments: mtr.Molecule, settings: Optional[mtr.Settings] = None,
 #     ) -> Any:
 #         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
 
-#         # FIXME: this is essentially a hotpatch to handle fragments - come up with something more elegant/sensible ASAP
+#         # FIXME: this is essentially a hotpatch to handle fragments
+#         # come up with something more elegant/sensible ASAP
 #         inp = mtr.QChemInput(*fragments, settings=self.defaults(s),)
 
 #         with self.io() as io:
@@ -728,7 +595,6 @@ class QChemKoopmanError(Task):
         name: Optional[str] = None,
     ) -> None:
         super().__init__(
-            (engine.num_threads or 1) * (engine.num_processors or 1),
             handlers=handlers,
             name=name,
         )
@@ -747,11 +613,10 @@ class QChemKoopmanError(Task):
 
         return settings
 
-    def run(
+    def compute(
         self,
         molecule: mtr.Molecule,
         settings: Optional[mtr.Settings] = None,
-        num_consumers: Optional[int] = 1,
     ) -> mtr.Quantity:
         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
         input_settings = self.defaults(s)
@@ -783,7 +648,7 @@ class QChemKoopmanError(Task):
 
         wf = Workflow(neutral_sp, cation_sp, anion_sp)
 
-        out = wf.run(available_cores=self.num_cores, num_consumers=num_consumers)
+        out = wf.compute()
 
         neutral, homo, lumo = out["neutral"]
         cation = out["cation"]
@@ -829,7 +694,7 @@ class QChemKoopmanError(Task):
 
 #         return settings
 
-#     def run(
+#     def compute(
 #         self,
 #         *fragments: mtr.Structure,
 #         active_fragment: int,
@@ -885,7 +750,7 @@ class QChemKoopmanError(Task):
 
 #         wf = Workflow(gs, cation, anion)
 
-#         out = wf.run(available_cores=self.num_cores, num_consumers=num_consumers)
+#         out = wf.compute(available_cores=self.num_cores, num_consumers=num_consumers)
 
 #         energy, homo, lumo = out["gs"]
 #         cation = out["cation"]
@@ -922,67 +787,21 @@ class QChemLRTDDFT(QChemBaseTask):
 
         return settings
 
-    def run(
-        self, molecule: mtr.Molecule, settings: Optional[mtr.Settings] = None
-    ) -> mtr.Molecule:
-        molecule.electronic_excitations = super().run(molecule, settings)
-        return molecule
-
-
-class QChemLRTDDFTPlotNTOs(QChemBaseTask):
-    def parse(self, output: str) -> Any:
-        return mtr.QChemOutput(filepath=output).electronic_excitations
-
-    def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-        if ("rem", "exchange") not in settings and (
-            "rem",
-            "method",
-        ) not in settings:
-            settings["rem", "exchange"] = "HF"
-        if ("rem", "basis") not in settings:
-            settings["rem", "basis"] = "3-21G"
-        if ("rem", "cis_n_roots") not in settings:
-            settings["rem", "cis_n_roots"] = 1
-        if ("rem", "cis_singlets") not in settings:
-            settings["rem", "cis_singlets"] = True
-        if ("rem", "cis_triplets") not in settings:
-            settings["rem", "cis_triplets"] = False
-        if ("rem", "rpa") not in settings:
-            settings["rem", "rpa"] = True
-
-        return settings
-
-    def run(
+    def compute(
         self,
         molecule: mtr.Molecule,
         settings: Optional[mtr.Settings] = None,
+        num_nto_pairs: Optional[int] = 0,
         n_x: Optional[int] = 50,
         n_y: Optional[int] = 50,
         n_z: Optional[int] = 50,
-        num_nto_pairs: Optional[int] = 3,
     ) -> mtr.Molecule:
         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
-        s = self.defaults(s)
 
-        inp = mtr.QChemInput(molecule, settings=s)
+        inp = mtr.QChemInput(molecule, settings=self.defaults(s))
 
-        n_alpha = int(round((sum(molecule.atomic_numbers) + molecule.charge) / 2))
-
-        for i in range(s["rem", "cis_n_roots"]):
-            _s = copy.deepcopy(s)
-            _s["rem", "scf_guess"] = "read"
-            _s["rem", "skip_cis_rpa"] = True
-            _s["rem", "nto_pairs"] = True
-            _s["rem", "make_cube_files"] = "ntos"
-            _s["rem", "cubefile_state"] = i + 1
-            _s["plots", "comment"] = (
-                f"\n  {n_x} -10.0 10.0\n  {n_y} -10.0 10.0\n  {n_z} -10.0 10.0\n  {2*num_nto_pairs} 0 0 0\n  "
-                + " ".join(
-                    f"{n_alpha + i}"
-                    for i in range(-num_nto_pairs + 1, num_nto_pairs + 1)
-                )
-            )  # {n_alpha-2} {n_alpha-1} {n_alpha} {n_alpha+1} {n_alpha+2} {n_alpha+3}')
-            inp = inp + mtr.QChemInput(settings=_s)
+        if num_nto_pairs > 0:
+            inp += _nto_pairs(molecule, s, num_nto_pairs, n_x, n_y, n_z)
 
         with self.io() as io:
             inp.write(io.inp)
@@ -1003,7 +822,6 @@ class QChemMinimizeKoopmanError(Task):
         name: Optional[str] = None,
     ) -> None:
         super().__init__(
-            (engine.num_threads or 1) * (engine.num_processors or 1),
             handlers=handlers,
             name=name,
         )
@@ -1024,7 +842,7 @@ class QChemMinimizeKoopmanError(Task):
 
         return settings
 
-    def run(
+    def compute(
         self,
         molecule: mtr.Molecule,
         settings: Optional[mtr.Settings] = None,
@@ -1034,8 +852,8 @@ class QChemMinimizeKoopmanError(Task):
     ) -> Tuple[float, float, mtr.Quantity]:
         def _objective(omega: float, _alpha: float) -> float:
             beta = 1 / epsilon - _alpha
-
-            s = self.defaults(settings)
+            s = mtr.Settings() if settings is None else copy.deepcopy(settings)
+            s = self.defaults(s)
             s["rem", "hf_sr"] = int(round(1000 * _alpha))
             s["rem", "hf_lr"] = int(1000 / epsilon)
             s["xc_functional"] = (
@@ -1054,18 +872,18 @@ class QChemMinimizeKoopmanError(Task):
             anion_io = mtr.IO("anion.in", "anion.out", wd)
 
             ke = self.engine.koopman_error(gs_io, cation_io, anion_io)
-            # FIXME: not sure the best way to handle num_consumers here...
-            return ke.run(molecule, s, num_consumers=3).value
+
+            return ke.compute(molecule, s).value
 
         with self.io() as io:
             if alpha is None:
-                [omega, alpha], J = mtr.MaxLIPOTR(_objective).run(
+                [omega, alpha], J = mtr.MaxLIPOTR(_objective).compute(
                     x_min=[1e-3, 0], x_max=[1, 1 / epsilon], num_evals=num_evals
                 )
             else:
                 [omega], J = mtr.MaxLIPOTR(
                     functools.partial(_objective, _alpha=alpha)
-                ).run(x_min=1e-3, x_max=1, num_evals=num_evals)
+                ).compute(x_min=1e-3, x_max=1, num_evals=num_evals)
 
         return omega, alpha, J * mtr.eV
 
@@ -1100,7 +918,7 @@ class QChemMinimizeKoopmanError(Task):
 
 #         return settings
 
-#     def run(
+#     def compute(
 #         self,
 #         *fragments: mtr.Structure,
 #         active_fragment: int,
@@ -1133,16 +951,20 @@ class QChemMinimizeKoopmanError(Task):
 #                 cation_io = mtr.IO("cation.in", "cation.out", wd)
 #                 anion_io = mtr.IO("anion.in", "anion.out", wd)
 
-#                 ke = mtr.QChemKoopmanErrorLPSCF(self.engine, gs_io, cation_io, anion_io)
+#                 ke = mtr.QChemKoopmanErrorLPSCF(
+#                                       self.engine,
+#                                       gs_io,
+#                                       cation_io,
+#                                       anion_io)
 #                 # FIXME: not sure the best way to handle num_consumers here...
-#                 return ke.run(
+#                 return ke.compute(
 #                     *fragments,
 #                     active_fragment=active_fragment,
 #                     settings=settings,
 #                     num_consumers=3,
 #                 )
 
-#             return mtr.MaxLIPOTR(f).run(x_min=1e-3, x_max=1, num_evals=num_evals)
+#             return mtr.MaxLIPOTR(f).compute(x_min=1e-3, x_max=1, num_evals=num_evals)
 
 
 class QChemOptimize(QChemBaseTask):
@@ -1162,29 +984,11 @@ class QChemOptimize(QChemBaseTask):
 
         return settings
 
-    def run(
+    def compute(
         self, molecule: mtr.Molecule, settings: Optional[mtr.Settings] = None
     ) -> mtr.Molecule:
-        molecule.structure = super().run(molecule, settings)
+        molecule.structure = super().compute(molecule, settings)
         return molecule
-
-
-# def f(molecule, alpha, beta, omega):
-#     n_alpha = round((sum(molecule.atomic_numbers) + molecule.charge)/2)
-#     td_settings=mtr.Settings(rem=dict(basis='cc-pVTZ',exchange='gen',cis_n_roots=20,hf_sr=int(round(1000*alpha)),hf_lr=int(round(1000*(alpha+beta))),omega=int(round(1000*omega)),omega2=int(round(1000*omega)),lrc_dft=True,src_dft=2,rpa=True,cis_singlets=True,cis_triplets=False),xc_functional=(('X','HF',alpha),('X','wPBE',beta),('X','PBE',1 - alpha - beta),('C','PBE',1.0)))
-
-#     inps = [copy.deepcopy(td_settings) for _ in range(1,td_settings['rem','cis_n_roots']+1)]
-#     for i,inp in enumerate(inps):
-#         inp['rem','scf_guess'] = 'read'
-#         inp['rem','skip_cis_rpa'] = True
-#         inp['rem','nto_pairs'] = True
-#         inp['rem','make_cube_files'] = 'ntos'
-#         inp['rem','cubefile_state'] = i+1
-#         inp['plots','comment'] = f'\n  200 -10.0 10.0\n  200 -10.0 10.0\n  200 -10.0 10.0\n  6 0 0 0\n  {n_alpha-2} {n_alpha-1} {n_alpha} {n_alpha+1} {n_alpha+2} {n_alpha+3}'
-#     return '\n@@@\n\n'.join(str(mtr.QChemInput(settings=inp)) for inp in inps)
-
-# def repl(m):
-#     return '$molecule\n  read\n$end\n'
 
 
 class QChemPolarizability(QChemBaseTask):
@@ -1211,12 +1015,12 @@ class QChemPolarizability(QChemBaseTask):
 
         return settings
 
-    def run(
+    def compute(
         self, molecule: mtr.Molecule, settings: Optional[mtr.Settings] = None
     ) -> mtr.Molecule:
         # NOTE: bug workaround for parallel polarizability calculation in Q-Chem 5.2.1
         os.environ["QCINFILEBASE"] = "0"
-        molecule.polarizability = super().run(molecule, settings)
+        molecule.polarizability = super().compute(molecule, settings)
         return molecule
 
 
@@ -1231,13 +1035,14 @@ class QChemVolume(QChemBaseTask):
 
         points = []
 
-        for l in lines[pqr_start + 1 : pqr_end]:
-            _, _, _, _, _, _, x, y, z, _, _ = l.strip().split()
+        for line in lines[pqr_start + 1 : pqr_end]:
+            _, _, _, _, _, _, x, y, z, _, _ = line.strip().split()
             points.append([float(x), float(y), float(z)])
 
         points = np.array(points)
 
-        # adapted from https://stackoverflow.com/questions/24733185/volume-of-convex-hull-with-qhull-from-scipy
+        # adapted from
+        # https://stackoverflow.com/questions/24733185/volume-of-convex-hull-with-qhull-from-scipy
 
         ch = scipy.spatial.ConvexHull(points)
         simplices = np.column_stack(
@@ -1245,12 +1050,10 @@ class QChemVolume(QChemBaseTask):
         )
         tets = ch.points[simplices]
 
-        # FIXME: move this to utils under geometry grouping in the future
-        def tetrahedron_volume(a, b, c, d):
-            return np.abs(np.einsum("ij,ij->i", a - d, np.cross(b - d, c - d))) / 6
-
         return (
-            np.sum(tetrahedron_volume(tets[:, 0], tets[:, 1], tets[:, 2], tets[:, 3]))
+            np.sum(
+                mtr.tetrahedron_volume(tets[:, 0], tets[:, 1], tets[:, 2], tets[:, 3])
+            )
             * mtr.angstrom ** 3
         )
 
@@ -1281,10 +1084,10 @@ class QChemVolume(QChemBaseTask):
 
         return settings
 
-    def run(
+    def compute(
         self, molecule: mtr.Molecule, settings: Optional[mtr.Settings] = None
     ) -> mtr.Molecule:
-        molecule.volume = super().run(molecule, settings)
+        molecule.volume = super().compute(molecule, settings)
         return molecule
 
 
@@ -1326,7 +1129,7 @@ class QChemVolume(QChemBaseTask):
 #             settings["rem", "rttddft"] = 1
 #         self.tdscf_settings = tdscf_settings or mtr.Settings()
 
-#     def run(self):
+#     def compute(self):
 #         tdscf_input_path = mtr.expand(os.path.join(self.work_directory, "TDSCF.prm"))
 #         keys = tuple(str(next(iter(k))) for k in self.tdscf_settings)
 #         max_length = max(len(k) for k in keys)
@@ -1415,116 +1218,36 @@ class QChemSinglePointFrontier(QChemBaseTask):
         return settings
 
 
-# class WriteQChemInput(Task):
-#     def __init__(
-#         self,
-#         io: mtr.IO,
-#         handlers: Optional[Iterable[mtr.Handler]] = None,
-#         name: str = None,
-#     ) -> None:
-#         super().__init__(handlers=handlers, name=name)
-#         self.io = io
+def _nto_pairs(
+    molecule: mtr.Molecule,
+    settings: mtr.Settings,
+    num_nto_pairs: int,
+    n_x: int,
+    n_y: int,
+    n_z: int,
+) -> mtr.QChemInput:
+    # number of alpha electrons
+    n_alpha = int(round((sum(molecule.atomic_numbers) + molecule.charge) / 2))
 
-#     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-#         return settings
+    inp = mtr.QChemInput(settings=mtr.Settings())
 
-#     def run(
-#         self,
-#         structure: Union[mtr.QChemStructure, mtr. , mtr.Structure],
-#         settings: Optional[mtr.Settings] = None,
-#     ) -> None:
-#         s = mtr.Settings() if settings is None else copy.deepcopy(settings)
-#         # FIXME: this is essentially a hotpatch to handle fragments - come up with something more elegant/sensible ASAP
-#         inp = mtr.QChemInput(
-#             molecule=structure
-#             if isinstance(structure, mtr.Structure)
-#             or isinstance(structure, mtr.QChemStructure)
-#             else mtr.QChemFragments(structures=structure),
-#             settings=self.defaults(s),
-#         )
+    for i in range(settings["rem", "cis_n_roots"]):
+        s = copy.deepcopy(settings)
+        s["rem", "scf_guess"] = "read"
+        s["rem", "skip_cis_rpa"] = True
+        s["rem", "nto_pairs"] = True
+        s["rem", "make_cube_files"] = "ntos"
+        s["rem", "cubefile_state"] = i + 1
+        s["plots", "comment"] = (
+            f"\n  {n_x} -10.0 10.0\n"
+            + f"  {n_y} -10.0 10.0\n"
+            + f"  {n_z} -10.0 10.0\n"
+            + f"  {2*num_nto_pairs} 0 0 0\n  "
+            + " ".join(
+                f"{n_alpha + i}" for i in range(-num_nto_pairs + 1, num_nto_pairs + 1)
+            )
+        )
 
-#         with self.io() as io:
-#             inp.write(io.inp)
+        inp += mtr.QChemInput(settings=s)
 
-
-# class WriteQChemInputGeometryRelaxation(WriteQChemInput):
-#     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-#         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
-#             settings["rem", "exchange"] = "HF"
-#         if ("rem", "basis") not in settings:
-#             settings["rem", "basis"] = "3-21G"
-#         if ("rem", "jobtype") not in settings:
-#             settings["rem", "jobtype"] = "opt"
-
-#         return settings
-
-
-# class WriteQChemInputLRTDDFT(WriteQChemInput):
-#     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-#         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
-#             settings["rem", "exchange"] = "HF"
-#         if ("rem", "basis") not in settings:
-#             settings["rem", "basis"] = "3-21G"
-#         if ("rem", "cis_n_roots") not in settings:
-#             settings["rem", "cis_n_roots"] = 1
-#         if ("rem", "cis_singlets") not in settings:
-#             settings["rem", "cis_singlets"] = True
-#         if ("rem", "cis_triplets") not in settings:
-#             settings["rem", "cis_triplets"] = False
-#         if ("rem", "rpa") not in settings:
-#             settings["rem", "rpa"] = False
-
-#         return settings
-
-
-# class WriteQChemInputPolarizability(WriteQChemInput):
-#     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-#         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
-#             settings["rem", "exchange"] = "HF"
-#         if ("rem", "basis") not in settings:
-#             settings["rem", "basis"] = "3-21G"
-#         if ("rem", "jobtype") not in settings:
-#             settings["rem", "jobtype"] = "polarizability"
-
-#         return settings
-
-
-# class WriteQChemInputSinglePoint(WriteQChemInput):
-#     def defaults(self, settings: mtr.Settings) -> mtr.Settings:
-#         if ("rem", "exchange") not in settings and ("rem", "method",) not in settings:
-#             settings["rem", "exchange"] = "HF"
-#         if ("rem", "basis") not in settings:
-#             settings["rem", "basis"] = "3-21G"
-
-#         return settings
-
-
-# class WriteQChemTDSCF(Task):
-#     def __init__(
-#         self,
-#         settings: Optional[mtr.Settings] = None,
-#         work_directory: str = ".",
-#         handlers: Optional[Iterable[mtr.Handler]] = None,
-#         name: str = None,
-#     ):
-#         super().__init__(handlers=handlers, name=name)
-#         self.work_directory = mtr.expand(work_directory)
-#         settings = settings
-
-#         try:
-#             os.makedirs(mtr.expand(work_directory))
-#         except FileExistsError:
-#             pass
-
-#     def run(self) -> None:
-#         input_path = mtr.expand(os.path.join(self.work_directory, "TDSCF.prm"))
-
-#         keys = tuple(str(next(iter(k))) for k in settings)
-#         max_length = max(len(k) for k in keys)
-
-#         with open(mtr.expand(input_path), "w") as f:
-#             f.write(
-#                 "\n".join(
-#                     k + " " * (max_length - len(k) + 1) + str(settings[k]) for k in keys
-#                 )
-#             )
+    return inp

@@ -1,6 +1,5 @@
 from __future__ import annotations
 import materia
-import scipy.constants
 from typing import Union
 
 __all__ = ["Atom"]
@@ -12,7 +11,8 @@ class Atom:
     Parameters
     ----------
     atomic_symbol : string
-        Atomic symbol denoting element to which this atom belongs, e.g. H for hydrogen, Na for sodium, etc.
+        Atomic symbol denoting element to which this atom belongs,
+        e.g. H for hydrogen, Na for sodium, etc.
     position : materia.Qty
         Quantity specifying the position of this atom in space.
 
