@@ -17,7 +17,7 @@ def test_packmol_input_one_structure_no_instructions():
         == inspect.cleandoc(
             """tolerance 1.0
                                output packed.xyz
-                               filetype xyz\n\n
+                               filetype xyz\n
                                structure /path/to/structure.xyz
                                  number 300
                                end structure"""

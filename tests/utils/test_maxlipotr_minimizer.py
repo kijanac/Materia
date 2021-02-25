@@ -7,7 +7,7 @@ import numpy as np
 def test_maxlipotr_optimize_min_0_max_5_numevals_20():
     s = mtr.MaxLIPOTR(objective_function=lambda x: (x - 2) ** 2)
 
-    assert s.run(x_min=0, x_max=5, num_evals=20) == ([2.0], 0.0)
+    assert s.compute(x_min=0, x_max=5, num_evals=20) == ([2.0], 0.0)
 
 
 def test_maxlipotr_optimize_rastrigin():
@@ -19,7 +19,7 @@ def test_maxlipotr_optimize_rastrigin():
 
     s = mtr.MaxLIPOTR(objective_function=rastigrin)
 
-    test_result = tuple(s.run(x_min=-5.12, x_max=5.12, num_evals=10))
+    test_result = tuple(s.compute(x_min=-5.12, x_max=5.12, num_evals=10))
     check_result = ([0.0], 75.99791446043284)
 
     assert test_result == check_result
@@ -36,7 +36,7 @@ def test_maxlipotr_optimize_ackley():
 
     s = mtr.MaxLIPOTR(objective_function=ackley)
 
-    test_result = tuple(s.run(x_min=[-5, -5], x_max=[5, 5], num_evals=10))
+    test_result = tuple(s.compute(x_min=[-5, -5], x_max=[5, 5], num_evals=10))
     check_result = ([0.0, 0.0], 0.0)
 
     assert test_result == check_result
@@ -54,7 +54,7 @@ def test_maxlipotr_optimize_ackley():
 
 #     s = mtr.MaxLIPOTR(objective_function=beale)
 
-#     test_result = tuple(s.run(x_min=[-4.5, -4.5], x_max=[4.5, 4.5], num_evals=300))
+#     test_result = s.compute(x_min=[-4.5, -4.5], x_max=[4.5, 4.5], num_evals=300)
 #     check_result = ([2.9999999999998272, 0.5000000000001019], 4.880287250592691e-25)
 
 #     assert pytest.approx(test_result[0][0]) == pytest.approx(check_result[0][0])
