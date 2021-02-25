@@ -47,7 +47,7 @@ day = d = (24 * hour).to_unit()
 
 
 # CURRENT
-ampere = amp = mtr.Quantity(I=1)
+ampere = amp = mtr.Quantity(A=1)
 
 # TEMPERATURE
 kelvin = K = mtr.Quantity(K=1)
