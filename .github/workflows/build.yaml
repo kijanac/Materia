@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test:
@@ -12,18 +12,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+  
+    - uses: actions/checkout@v2
+      with:
+        repository: kijanac/manage-py
+        path: manage
 
     - name: Update conda
       run: conda update -n base -c defaults conda
 
     - name: Make conda environment and install dependencies
-      run: make setup VERBOSE=1
+      run: $(conda info --base)/bin/python3 manage/manage.py setup -n dev
 
     - name: Install package (editable)
-      run: make install EDIT=1 VERBOSE=1
+      run: conda run -n dev python manage/manage.py install
+
+    - name: Lint code
+      run: conda run -n dev python manage/manage.py lint
 
     - name: Run tests on editable install
-      run: make test EDIT=1 VERBOSE=1
-   
-    - name: Build documentation
-      run: make docs
+      run: conda run -n dev python manage/manage.py test

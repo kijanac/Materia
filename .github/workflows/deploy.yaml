@@ -1,9 +1,7 @@
 name: Deploy
 
 on:
-  create:
-    branches-ignore:
-    - '*'
+  push:
     tags:
     - 'v*'
 
@@ -14,20 +12,28 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - uses: actions/checkout@v2
+      with:
+        repository: kijanac/manage-py
+        path: manage
+
     - name: Update conda
       run: conda update -n base -c defaults conda
 
     - name: Make conda environment and install dependencies
-      run: make setup VERBOSE=1
+      run: $(conda info --base)/bin/python3 manage/manage.py setup -n dev
 
     - name: Install package (editable)
-      run: make install EDIT=1 VERBOSE=1
+      run: conda run -n dev python manage/manage.py install
+
+    - name: Lint code
+      run: conda run -n dev python manage/manage.py lint
 
     - name: Run tests on editable install
-      run: make test EDIT=1 VERBOSE=1
+      run: conda run -n dev python manage/manage.py test -t ${{ secrets.CODECOV_TOKEN }}
 
-    - name: Build sdist and wheel
-      run: make build VERBOSE=1
+    - name: Build sdist, wheel, and conda package
+      run: conda run -n dev python manage/manage.py build -c -l conda-forge
 
     - name: Deploy to PyPI and Anaconda
-      run: make deploy PYPI_TOKEN=${{ secrets.PYPI_TOKEN }} ANACONDA_USERNAME=${{ secrets.ANACONDA_USERNAME }} ANACONDA_PASSWORD=${{ secrets.ANACONDA_PASSWORD}} CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }} VERBOSE=1
+      run: conda run -n dev python manage/manage.py publish ${{ secrets.PYPI_TOKEN }} ${{ secrets.CONDA_TOKEN }}
