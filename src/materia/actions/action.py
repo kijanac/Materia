@@ -11,7 +11,8 @@ class Action(abc.ABC):
 
 class ActionSignal(Exception):
     def __init__(self, message=None, result=None, actions=None):
-        # result and actions have default values only so they can come after message which has a default value
+        # result and actions have default values only
+        # so they can come after message which has a default value
         super().__init__(message)
         self.result = result
         self.actions = actions

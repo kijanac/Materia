@@ -1,5 +1,4 @@
 import abc
-import functools
 
 import materia as mtr
 
@@ -22,7 +21,8 @@ class Handler(abc.ABC):
     @abc.abstractmethod
     def handle(self, result, task):
         # input: result of task to be checked and the task object itself
-        # output: Actions object containing actions to be performed in order to repair task
+        # output: Actions object containing actions
+        # to be performed in order to repair task
         return []
 
 
@@ -88,7 +88,9 @@ class Handler(abc.ABC):
 #             Rerun(),
 #         ]
 
-# # FIXME: implement a handler - the following error can be fixed by setting sym_ignore to true
+
+# # FIXME: implement a handler
+# # the following error can be fixed by setting sym_ignore to true
 
 # # ***ERROR*** Coordinates do not transform within specified threshold of.10000D-04
 

@@ -25,14 +25,14 @@ def test_dimension_mul():
     length = mtr.Dimension(L=1)
     time = mtr.Dimension(T=1)
 
-    assert (length * time)._d == dict(L=1, T=1, M=0, I=0, K=0, N=0, J=0)
+    assert (length * time)._d == dict(L=1, T=1, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_rmul():
     length = mtr.Dimension(L=1)
     time = mtr.Dimension(T=1)
 
-    assert (time.__rmul__(length))._d == dict(L=1, T=1, M=0, I=0, K=0, N=0, J=0)
+    assert (time.__rmul__(length))._d == dict(L=1, T=1, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_imul():
@@ -40,21 +40,21 @@ def test_dimension_imul():
     time = mtr.Dimension(T=1)
     length *= time
 
-    assert length._d == dict(L=1, T=1, M=0, I=0, K=0, N=0, J=0)
+    assert length._d == dict(L=1, T=1, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_truediv():
     length = mtr.Dimension(L=1)
     time = mtr.Dimension(T=1)
 
-    assert (length / time)._d == dict(L=1, T=-1, M=0, I=0, K=0, N=0, J=0)
+    assert (length / time)._d == dict(L=1, T=-1, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_rtruediv():
     length = mtr.Dimension(L=1)
     time = mtr.Dimension(T=1)
 
-    assert (time.__rtruediv__(length))._d == dict(L=1, T=-1, M=0, I=0, K=0, N=0, J=0)
+    assert (time.__rtruediv__(length))._d == dict(L=1, T=-1, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_itruediv():
@@ -62,45 +62,45 @@ def test_dimension_itruediv():
     time = mtr.Dimension(T=1)
     length /= time
 
-    assert length._d == dict(L=1, T=-1, M=0, I=0, K=0, N=0, J=0)
+    assert length._d == dict(L=1, T=-1, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_pow():
     length = mtr.Dimension(L=1)
 
-    assert (length ** 2)._d == dict(L=2, T=0, M=0, I=0, K=0, N=0, J=0)
+    assert (length ** 2)._d == dict(L=2, T=0, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_pow_negative():
     length = mtr.Dimension(L=1)
 
-    assert (length ** (-2))._d == dict(L=-2, T=0, M=0, I=0, K=0, N=0, J=0)
+    assert (length ** (-2))._d == dict(L=-2, T=0, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_pow_zero():
     length = mtr.Dimension(L=1)
 
-    assert (length ** 0)._d == dict(L=0, T=0, M=0, I=0, K=0, N=0, J=0)
+    assert (length ** 0)._d == dict(L=0, T=0, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_ipow():
     length = mtr.Dimension(L=1)
     length **= 2
-    assert length._d == dict(L=2, T=0, M=0, I=0, K=0, N=0, J=0)
+    assert length._d == dict(L=2, T=0, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_ipow_negative():
     length = mtr.Dimension(L=1)
     length **= -2
 
-    assert length._d == dict(L=-2, T=0, M=0, I=0, K=0, N=0, J=0)
+    assert length._d == dict(L=-2, T=0, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_ipow_zero():
     length = mtr.Dimension(L=1)
     length **= 0
 
-    assert length._d == dict(L=0, T=0, M=0, I=0, K=0, N=0, J=0)
+    assert length._d == dict(L=0, T=0, M=0, A=0, K=0, N=0, J=0)
 
 
 def test_dimension_eq_length():

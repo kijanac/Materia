@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Iterable, Optional, Tuple, Union
 
 import materia as mtr
 
@@ -127,7 +127,6 @@ class GAMESSDampGS:
         if self.equate_symmetric_points:
             raise NotImplementedError
         else:
-            keywords = (self._process(k, v) for k, v in vars(self).items())
             return " $dampgs\n" + " \n".join(self.instructions) + "\n $end\n"
 
 

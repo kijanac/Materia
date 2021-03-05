@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Iterable, Optional
 
+import materia as mtr
 from .engine import Engine
 
 __all__ = ["GPAW", "GPAWOutput"]
@@ -17,7 +18,8 @@ class GPAWOutput:
     def __init__(self, filepath: str) -> None:
         """
         Args:
-            filepath: Path to file from which output will be read. Can be an absolute or a relative path.
+            filepath: Path to file from which output will be read.
+            Can be an absolute or a relative path.
         """
         raise NotImplementedError
         # FIXME: implement

@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Any, Iterable, Optional, Tuple, Union
 
 import materia as mtr
+import re
 import subprocess
 
 from .engine import Engine
@@ -26,7 +27,8 @@ class MultiwfnInput:
         Write Multiwfn input to a file.
 
         Args:
-            filepath: Path to file to which the input will be written. Can be an absolute or a relative path.
+            filepath: Path to file to which the input will be written.
+            Can be an absolute or a relative path.
         """
         with open(mtr.expand(filepath), "w") as f:
             f.write(str(self))
@@ -46,7 +48,9 @@ class MultiwfnOutput:
 
         # read off the volume in atomic units (i.e. cubic Bohr)
         volume_pattern = re.compile(
-            r"\s*Molecular\s*volume\s*:\s*\d*\.\d*\s*Bohr\^3,\s*\(\s*(\d*\.\d*)\s*Angstrom\^3\s*,\s*\d*\.\d*\s*cm\^3\/mol\)\s*"
+            r"""\s*Molecular\s*volume\s*:\s*\d*\.\d*\s*Bohr\^3,
+                \s*\(\s*(\d*\.\d*)\s*Angstrom\^3\s*,\s*\d*\.
+                \d*\s*cm\^3\/mol\)\s*"""
         )
         # Molecular volume:    0.000 Bohr^3, (    0.000 Angstrom^3,    0.000 cm^3/mol)
         # the last match is the molecular volume (Multiwfn likes to spit out
@@ -80,7 +84,8 @@ class Multiwfn(Engine):
 
             with open(io.out, "w") as out:
                 # For Multiwfn 3.6
-                # FIXME: printf is system-specific - is there any other way to pipe in input_lines?
+                # FIXME: printf is system-specific -
+                # is there any other way to pipe in input_lines?
                 pipe_command_string = subprocess.Popen(
                     args=["printf", input_lines],
                     stdout=subprocess.PIPE,
@@ -122,7 +127,7 @@ class MultiwfnBaseTask(ExternalTask):
     def parse(self, output: str) -> Any:
         raise NotImplementedError
 
-    def run(self, filepath: str) -> Any:
+    def compute(self, filepath: str) -> Any:
         inp = mtr.MultiwfnInput(mtr.expand(filepath), *self.commands(), -10)
 
         with self.io() as io:
@@ -153,7 +158,7 @@ class MultiwfnNTO(MultiwfnBaseTask):
         # FIXME: is there some useful output to return?
         return None
 
-    def run(self, filepath: str, excitation_filepath: str) -> Any:
+    def compute(self, filepath: str, excitation_filepath: str) -> Any:
         with self.io() as io:
             inp = mtr.MultiwfnInput(
                 mtr.expand(filepath),
@@ -226,7 +231,7 @@ class MultiwfnVolume(MultiwfnBaseTask):
 #         self.input_path = input_path
 #         self.engine = engine
 
-#     def run(self) -> None:
+#     def compute(self) -> None:
 #         self.engine.execute(input_path=self.input_path)
 
 
@@ -235,7 +240,10 @@ class MultiwfnVolume(MultiwfnBaseTask):
 # with open(excitation_filepath, "w") as f:
 #     f.write(excitations.to_gaussian())
 
-# inp = mtr.MultiwfnInput(mtr.expand(filepath), *self.commands(excitation_filepath), -10)
+# inp = mtr.MultiwfnInput(
+#                   mtr.expand(filepath),
+#                   *self.commands(excitation_filepath),
+#                   -10)
 # inp.write(io.inp)
 
 
@@ -243,7 +251,9 @@ class MultiwfnVolume(MultiwfnBaseTask):
 #     def __init__(
 #         self,
 #         input_name: str,
-#         in_filepath: str,  # FIXME: awful name for this variable, fix here and analogous issues throughout this file
+#         in_filepath: str,
+#         # FIXME: awful name for this variable,
+#         # fix here and analogous issues throughout this file
 #         commands: Iterable[str],
 #         work_directory: str = ".",
 #         handlers: Iterable[Handler] = None,
@@ -259,5 +269,5 @@ class MultiwfnVolume(MultiwfnBaseTask):
 #         except FileExistsError:
 #             pass
 
-#     def run(self):
+#     def compute(self):
 #         mtr.MultiwfnInput(self.in_filepath, *self.commands).write(self.input_path)

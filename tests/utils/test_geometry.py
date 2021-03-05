@@ -13,17 +13,13 @@ def geometry_perpendicular_vector():
     ).all()
 
 
-def test_geometry_rotation_matrix_m_to_n():
+def test_geometry_rotation_matrix():
     assert (
-        mtr.rotation_matrix_m_to_n(
-            m=np.array([[1.0, 0, 0]]).T, n=np.array([[1.0, 0, 0]]).T
-        )
+        mtr.rotation_matrix(m=np.array([[1.0, 0, 0]]).T, n=np.array([[1.0, 0, 0]]).T)
         == np.eye(3)
     ).all()
     assert (
-        mtr.rotation_matrix_m_to_n(
-            m=np.array([[1.0, 0, 0]]).T, n=np.array([[0, 1.0, 0]]).T
-        )
+        mtr.rotation_matrix(m=np.array([[1.0, 0, 0]]).T, n=np.array([[0, 1.0, 0]]).T)
         == np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
     ).all()
 
@@ -42,7 +38,9 @@ def test_geometry_nontrivial_vector():
     assert not (xy_plane_reflection @ v == v).all()
 
 
-def test_geometry_closest_trio():
-    # FIXME: expand
+def test_geometry_nearest_points():
     points = np.array([[1, 0, 0], [0, 0, 0], [1e-4, 0, 0], [1e-3, 0, 0]]).T
-    assert (mtr.closest_trio(points=points) == points[:, 1:]).all()
+    assert (mtr.nearest_points(points, 2) == points[:, 1:3]).all()
+    assert (mtr.nearest_points(points, 3) == points[:, 1:]).all()
+    print(mtr.nearest_points(points, 4))
+    assert (mtr.nearest_points(points, 4) == points[:, [2, 1, 3, 0]]).all()

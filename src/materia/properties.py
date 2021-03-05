@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Callable, Iterable, Optional, Union
 
 import numpy as np
-import scipy.linalg, scipy.spatial
 
 import materia as mtr
 from materia.utils import memoize
@@ -43,23 +42,24 @@ class ExcitationSpectrum:
         self.excitations = excitations
 
     @property
-    def energies(self) -> materia.Quantity:
+    def energies(self) -> mtr.Quantity:
         energy_unit = self.excitations[0].energy.unit
-        return [e.energy.value for e in self.excitations]*energy_unit
+        return [e.energy.value for e in self.excitations] * energy_unit
 
     @property
-    def oscillator_strengths(self) -> materia.Quantity:
+    def oscillator_strengths(self) -> mtr.Quantity:
         return np.array([e.oscillator_strength for e in self.excitations])
 
     def to_gaussian(self) -> str:
-        return "\n".join(
-            f"Excited State {i+1} {1 if exc.symmetry == 'Singlet' else 2} {exc.energy.convert(mtr.eV).value}\n"
-            + "".join(
+        s = ""
+        for i, exc in enumerate(self.excitations):
+            sym = 1 if exc.symmetry == "Singlet" else 2
+            s += f"Excited State {i+1} {sym} {exc.energy.convert(mtr.eV).value}\n"
+            s += "".join(
                 f"    {e} -> {h}    {coeff}\n"
                 for (e, _), (h, _), coeff in exc.contributions
             )
-            for i, exc in enumerate(self.excitations)
-        )
+        return s
 
     # def plot_stick_spectrum(self):
     #     linecoll = matplotlib.collections.LineCollection(
@@ -76,11 +76,6 @@ class ExcitationSpectrum:
     ) -> Callable[Iterable[Union[int, float]], Iterable[Union[int, float]]]:
         def f(energies: mtr.Quantity) -> Iterable[Union[int, float]]:
             s = 0
-            # for excitation in self.excitations:
-            #     x = (energies - excitation.energy) / fwhm
-            #     x = np.array([e.value for e in x])
-            #     s += excitation.oscillator_strength * np.exp(-np.log(2) * (2 * x ** 2))
-            # return s
             for excitation in self.excitations:
                 x = (energies - excitation.energy) / fwhm
                 x = np.array([e.value for e in x])
@@ -127,13 +122,13 @@ class ExcitationSpectrum:
     #     return (
     #         3
     #         * np.pi
-    #         * materia.mole.prefactor
-    #         * materia.fundamental_charge.prefactor ** 2
+    #         * mtr.mole.prefactor
+    #         * mtr.fundamental_charge.prefactor ** 2
     #         * self.strengths
     #         / (
     #             2e3
     #             * np.log(10)
-    #             * materia.electron_mass.prefactor
+    #             * mtr.electron_mass.prefactor
     #             * np.array([eng.value for eng in self.energies])
     #         )
     #     )
@@ -179,7 +174,7 @@ class Polarizability:
 
     @property
     @memoize
-    def anisotropy(self) -> materia.Quantity:
+    def anisotropy(self) -> mtr.Quantity:
         # FIXME: verify accuracy of this method
         return (
             np.sqrt(
@@ -193,7 +188,7 @@ class Polarizability:
 
     @property
     @memoize
-    def eigenvalues(self) -> materia.Quantity:
+    def eigenvalues(self) -> mtr.Quantity:
         return np.linalg.eigvals(a=self.pol_tensor.value) * self.pol_tensor.unit
 
 
@@ -207,10 +202,6 @@ class TDDipole:  # (TimeSeries):
     def __init__(self, time, tddipole, applied_field=None):
         super().__init__(time=time, series=tddipole)
         self.tddipole = mtr.TimeSeries(x=time, y=tddipole)
-        # # tddipole_norm.value should be 1xNt matrix where Nt is number of time steps
-        # # tddipole_dir should be 3xNt matrix where Nt is number of time steps and each column is a unit direction vector
-        # super().__init__()
-        # self.tddipole_moment
 
     @property
     @memoize

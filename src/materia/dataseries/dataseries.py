@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import Any, Dict, Iterable, Optional, Tuple, Union
+from typing import Callable, Iterable, Optional, Tuple, Union
 
 import copy
 import materia as mtr
 from ..utils import memoize
 import numpy as np
-import scipy.integrate, scipy.interpolate
+import scipy.integrate
+import scipy.interpolate
 
 # import matplotlib.pyplot as plt
 import warnings
@@ -23,16 +24,11 @@ class DataSeries:
     #     plt.show()
 
 
-def broaden(
+def broaden_gaussian(
     self, fwhm: mtr.Quantity
 ) -> Callable[Iterable[Union[int, float]], Iterable[Union[int, float]]]:
     def f(energies: mtr.Quantity) -> Iterable[Union[int, float]]:
         s = 0
-        # for excitation in self.excitations:
-        #     x = (energies - excitation.energy) / fwhm
-        #     x = np.array([e.value for e in x])
-        #     s += excitation.oscillator_strength * np.exp(-np.log(2) * (2 * x ** 2))
-        # return s
         for excitation in self.excitations:
             x = (energies - excitation.energy) / fwhm
             x = np.array([e.value for e in x])
@@ -42,11 +38,11 @@ def broaden(
     return f
 
 
-def broaden(gamma):
+def broaden_lorentzian(gamma):
     def _f(omega, gamma, w):
         return gamma * omega / ((w ** 2 - omega ** 2) ** 2 + omega ** 2 * gamma ** 2)
 
-    def f(omega):
+    def f(omega, fs, ws):
         return (fs[None, :] @ np.vstack([_f(omega, gamma, w) for w in ws])).squeeze()
 
     return f
@@ -84,7 +80,8 @@ class TimeSeries(DataSeries):
         dt, *_ = spacings
         if not np.allclose(spacings, dt):
             raise ValueError(
-                "Time array does not have a unique spacing. Consider interpolating to a uniformly spaced time array first."
+                "Time array does not have a unique spacing.\
+                Consider interpolating to a uniformly spaced time array first."
             )
         else:
             return dt * self.x.unit
@@ -114,11 +111,6 @@ class TimeSeries(DataSeries):
             mtr.Spectrum(x=fft_freq, y=fft_real),
             mtr.Spectrum(x=fft_freq, y=fft_imag),
         )
-        # self.x,convert_from=self.x_store_unit,convert_to='second')
-        # frequencies = scipy.fftpack.fftfreq(n=pad_len,d=self.dt())
-        # self.x = self.converter.convert(quantity=self.x,convert_from='second',convert_to=self.x_store_unit)
-
-        # return ComplexSpectrum(x_vals=2*np.pi*frequencies,x_unit='radian_per_second',y=fft,y_unit=self.y_store_unit)
 
 
 class Spectrum(DataSeries):
@@ -270,7 +262,8 @@ class SPDSpectrum(Spectrum):
         )
 
         return self._XYZ_to_UVW(X=X, Y=Y, Z=Z, white_point=white_point)
-        # FIXME: shouldn't the white_point actually be the desination illuminant's white point?
+        # FIXME: shouldn't the white_point actually be
+        # the desination illuminant's white point?
 
     def _XYZ_to_UVW(self, X, Y, Z, white_point=None):
         if white_point is None:
@@ -353,11 +346,15 @@ class SPDSpectrum(Spectrum):
         if DC > 5.4e-3:
             if strict:
                 raise ValueError(
-                    "Distance from UCS Planckian locus too high. Illuminant is insufficiently white for accurate CRI determination."
+                    """Distance from UCS Planckian locus too high.
+                        Illuminant is insufficiently white for accurate
+                        CRI determination."""
                 )
             else:
                 warnings.warn(
-                    "Distance from UCS Planckian locus too high. Illuminant is insufficiently white for accurate CRI determination."
+                    """Distance from UCS Planckian locus too high.
+                        Illuminant is insufficiently white for accurate
+                        CRI determination."""
                 )
 
         if CCT < 5000 * mtr.K:
@@ -439,7 +436,8 @@ class SPDSpectrum(Spectrum):
             Z=Z_sample_test,
             white_point=(u_ref, v_ref),
         )
-        # FIXME: using the next three lines improves the answer for high temp blackbodies but they seem wrong...
+        # FIXME: using the next three lines improves the answer for
+        # high temp blackbodies but they seem wrong...
         # W_test = 25*np.power(Y_sample_test,1/3) - 17
         # U_test = 13*W_test*(u_sample_adapted - u_ref)
         # V_test = 13*W_test*(v_sample_adapted - v_ref)
@@ -575,7 +573,8 @@ def planckian_locus_ucs(
 
 class PhotopicResponse(RelativeSPDSpectrum):
     def __init__(self):
-        # data taken from https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
+        # data taken from
+        # https://web.archive.org/web/20170131100357/http://files.cie.co.at/204.xls
         x = np.linspace(380, 780, 81) * mtr.nm
 
         V = [

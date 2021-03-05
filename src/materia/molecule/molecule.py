@@ -2,8 +2,10 @@ from __future__ import annotations
 from typing import Any, Union
 
 import materia as mtr
+import pathlib
 import pickle
-import rdkit, rdkit.Chem
+import rdkit
+import rdkit.Chem
 
 __all__ = ["Molecule"]
 
@@ -27,10 +29,10 @@ def first(flist, default=None):
     """
     # from https://stackoverflow.com/a/13874877
 
-    for f in flist:
+    for f, exception in flist:
         try:
             return f()
-        except:
+        except exception:
             continue
     else:
         return default
@@ -54,18 +56,16 @@ class Molecule:
         self.charge = rdkit.Chem.GetFormalCharge(self.structure.to_rdkit())
         self.multiplicity = (sum(self.structure.atomic_numbers) + self.charge) % 2 + 1
 
-    def _from_file(self, structure):
-        try:
-            return mtr.Structure.read
-        except:
-            return False
+    def _from_file(self, structure: mtr.Structure):
+        return mtr.Structure.read
 
     def save(self, filepath: str) -> None:
         """
         Pickle molecule to a given save file.
 
         Args:
-            filepath: Path to file in which the molecule will be pickled. Can be an absolute or a relative path.
+            filepath: Path to file in which the molecule will be pickled.
+            Can be an absolute or a relative path.
         """
         with open(mtr.expand(filepath), "wb") as f:
             pickle.dump(obj=self, file=f)
@@ -76,7 +76,8 @@ class Molecule:
         Load molecule from a pickle file.
 
         Args:
-            filepath: Path to pickle file from which the molecule will be loaded. Can be an absolute or a relative path.
+            filepath: Path to pickle file from which the molecule will be loaded.
+            Can be an absolute or a relative path.
 
         Returns:
             Molecule retrieved from pickle file.

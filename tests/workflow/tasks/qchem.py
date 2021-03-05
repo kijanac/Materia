@@ -58,7 +58,7 @@ def test_qchem_rttddft():
     # FIXME: make this test work on Windows using pathlib
 
     mock_open = mock.mock_open()
-    mock_expand = mock.MagicMock(side_effect=lambda s: s)
+    # mock_expand = mock.MagicMock(side_effect=lambda s: s)
     mock_os_makedirs = mock.MagicMock(side_effect=lambda s: s)
 
     with mock.patch("builtins.open", mock_open):
@@ -128,7 +128,7 @@ def test_write_qchem_tdscf():
     # FIXME: make this test work on Windows using pathlib
 
     mock_open = mock.mock_open()
-    mock_expand = mock.MagicMock(side_effect=lambda s: s)
+    # mock_expand = mock.MagicMock(side_effect=lambda s: s)
     mock_os_makedirs = mock.MagicMock(side_effect=lambda s: s)
 
     with mock.patch("builtins.open", mock_open):
