@@ -37,14 +37,12 @@ def _discover_tasks(*tasks: mtr.Task) -> List[mtr.Task]:
 
 def _build_delayed(
     task: mtr.Task,
-    delayeds: Optional[Dict[str, dask.delayed.Delayed]] = None,
+    delayeds: Optional[Dict[str, dask.delayed.Delayed]],
     restart: Optional[WorkflowResults] = None,
 ) -> Dict[str, dask.delayed.Delayed]:
-    if delayeds is None:
-        delayeds = {}
     if restart is not None and task.name in restart.results:
         delayeds[task.name] = dask.delayed(mtr.InputTask(restart[task.name]).compute)()
-    elif task.name not in delayeds:
+    elif delayeds[task.name] is None:
         args = (_build_delayed(v, delayeds) for v in task.requirements)
         kwargs = {
             k: _build_delayed(v, delayeds) for k, v in task.named_requirements.items()
@@ -56,15 +54,24 @@ def _build_delayed(
 
 class Workflow:
     def __init__(self, *tasks: mtr.Task) -> None:
+        # traverse task dependencies to find all tasks
+        # required to compute the provided tasks
         self.tasks = _discover_tasks(*tasks)
 
     def compute(
         self,
         restart: Optional[WorkflowResults] = None,
     ) -> WorkflowResults:
-        delayed_results = {
-            t.name: _build_delayed(t, restart=restart) for t in self.tasks
-        }
-        results = dask.delayed(delayed_results).compute()
+        # create a registry of dask delayed objects
+        # using this in _build_delayed prevents
+        # creation of duplicate delayeds for a given task
+        delayeds = {t.name: None for t in self.tasks}
+
+        # build each delayed object
+        for t in self.tasks:
+            delayeds[t.name] = _build_delayed(t, delayeds, restart)
+
+        # compute results
+        (results,) = dask.compute(delayeds)
 
         return WorkflowResults(results)
