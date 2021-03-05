@@ -29,10 +29,10 @@ def first(flist, default=None):
     """
     # from https://stackoverflow.com/a/13874877
 
-    for f, exception in flist:
+    for f, exceptions in flist:
         try:
             return f()
-        except exception:
+        except exceptions:
             continue
     else:
         return default
@@ -43,13 +43,16 @@ class Molecule:
         super().__setattr__("properties", {})
         if isinstance(structure, mtr.Structure):
             self.structure = structure
-        else:  # isinstance(structure, str):
+        else:
             self.structure = first(
                 [
                     # NOTE: casting to string allows for structure to be a pathlib.Path
-                    lambda: mtr.Structure.read(str(structure)),
-                    lambda: mtr.Structure.generate(smiles=structure),
-                    lambda: mtr.Structure.retrieve(name=structure),
+                    (lambda: mtr.Structure.read(str(structure)), (ValueError,)),
+                    (
+                        lambda: mtr.Structure.generate(smiles=structure),
+                        (ValueError, AttributeError),
+                    ),
+                    (lambda: mtr.Structure.retrieve(name=structure), (ValueError,)),
                 ]
             )
 
