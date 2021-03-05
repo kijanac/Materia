@@ -1,5 +1,6 @@
 import materia as mtr
 import numpy as np
+import unittest
 
 # TEST TASKS
 
@@ -56,6 +57,26 @@ class MatMul(mtr.Task):
 
 
 # TESTS
+
+
+def test_no_duplicates():
+    def _f(x, y):
+        return x + y
+
+    def _g(x, y):
+        return x * y
+
+    mock = unittest.mock.Mock(return_value=4)
+    f = mtr.FunctionTask(mock, name="f")
+    g = mtr.FunctionTask(_g, name="g")
+
+    f.requires(x=1, y=3)
+    g.requires(x=f, y=-1)
+
+    wf = mtr.Workflow(g)
+    wf.compute()
+
+    mock.assert_called_once()
 
 
 def test_workflow_matmul_linear():
