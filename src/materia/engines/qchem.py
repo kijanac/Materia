@@ -163,7 +163,6 @@ def _xc_functional_str(*functional_tuples: Tuple[str, str, str]) -> str:
 class QChemOutput:
     def __init__(self, filepath: str) -> None:
         self.filepath = mtr.expand(filepath)
-        self.cclib_out = cclib.io.ccread(self.filepath)
 
     @property
     @memoize
