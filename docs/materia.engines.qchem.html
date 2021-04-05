@@ -1,60 +1,193 @@
 
-<!DOCTYPE html>
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>materia.engines.qchem module &#8212; materia 8.0.8 documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>materia.engines.qchem module &mdash; materia 9.1.2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="materia.engines.vasp module" href="materia.engines.vasp.html" />
     <link rel="prev" title="materia.engines.packmol module" href="materia.engines.packmol.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="materia.engines.vasp.html" title="materia.engines.vasp module"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="materia.engines.packmol.html" title="materia.engines.packmol module"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="materia.html" >materia package</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="materia.engines.html" accesskey="U">materia.engines package</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">materia.engines.qchem module</a></li> 
-      </ul>
-    </div>  
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> materia
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                9.1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">materia</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="materia.html">materia package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="materia.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="materia.actions.html">materia.actions package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="materia.dataseries.html">materia.dataseries package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="materia.engines.html">materia.engines package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="materia.molecule.html">materia.molecule package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="materia.symmetry.html">materia.symmetry package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="materia.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="materia.html#module-materia">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">materia</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">materia</a> &raquo;</li>
+        
+          <li><a href="materia.html">materia package</a> &raquo;</li>
+        
+          <li><a href="materia.engines.html">materia.engines package</a> &raquo;</li>
+        
+      <li>materia.engines.qchem module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/materia.engines.qchem.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="module-materia.engines.qchem">
 <span id="materia-engines-qchem-module"></span><h1>materia.engines.qchem module<a class="headerlink" href="#module-materia.engines.qchem" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="materia.engines.qchem.QChem">
-<em class="property">class </em><code class="sig-name descname">QChem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scratch_dir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qcenv</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">executable</span><span class="o">=</span><span class="default_value">'qchem'</span></em>, <em class="sig-param"><span class="n">num_processors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_threads</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">arguments</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">save</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">savename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">QChem</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">executable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qchem'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scratch_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qcenv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_processors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="materia.engines.engine.html#materia.engines.engine.Engine" title="materia.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.engines.engine.Engine</span></code></a></p>
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.aimd">
-<code class="sig-name descname">aimd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.aimd" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">aimd</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.aimd" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemAIMD</span></code></p>
@@ -64,7 +197,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.command">
-<code class="sig-name descname">command</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inp</span></em>, <em class="sig-param"><span class="n">out</span></em>, <em class="sig-param"><span class="n">work_dir</span></em>, <em class="sig-param"><span class="n">arguments</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.command" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">command</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.command" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
@@ -74,7 +207,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.env">
-<code class="sig-name descname">env</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.env" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">env</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.env" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
@@ -84,7 +217,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.koopman_error">
-<code class="sig-name descname">koopman_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gs_io</span></em>, <em class="sig-param"><span class="n">cation_io</span></em>, <em class="sig-param"><span class="n">anion_io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.koopman_error" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">koopman_error</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gs_io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cation_io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anion_io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.koopman_error" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemKoopmanError</span></code></p>
@@ -94,7 +227,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.lrtddft">
-<code class="sig-name descname">lrtddft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.lrtddft" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">lrtddft</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.lrtddft" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemLRTDDFT</span></code></p>
@@ -103,18 +236,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="materia.engines.qchem.QChem.lrtddft_plot_ntos">
-<code class="sig-name descname">lrtddft_plot_ntos</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.lrtddft_plot_ntos" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemLRTDDFTPlotNTOs</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="materia.engines.qchem.QChem.minimize_koopman_error">
-<code class="sig-name descname">minimize_koopman_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.minimize_koopman_error" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">minimize_koopman_error</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.minimize_koopman_error" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemMinimizeKoopmanError</span></code></p>
@@ -124,7 +247,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.optimize">
-<code class="sig-name descname">optimize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.optimize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">optimize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.optimize" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemOptimize</span></code></p>
@@ -134,7 +257,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.polarizability">
-<code class="sig-name descname">polarizability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.polarizability" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">polarizability</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.polarizability" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemPolarizability</span></code></p>
@@ -144,7 +267,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.single_point">
-<code class="sig-name descname">single_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.single_point" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">single_point</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.single_point" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemSinglePoint</span></code></p>
@@ -154,7 +277,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.single_point_frontier">
-<code class="sig-name descname">single_point_frontier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.single_point_frontier" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">single_point_frontier</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.single_point_frontier" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemSinglePointFrontier</span></code></p>
@@ -164,7 +287,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChem.volume">
-<code class="sig-name descname">volume</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">io</span></em>, <em class="sig-param"><span class="n">handlers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.volume" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">volume</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChem.volume" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QChemVolume</span></code></p>
@@ -176,14 +299,14 @@
 
 <dl class="py class">
 <dt id="materia.engines.qchem.QChemInput">
-<em class="property">class </em><code class="sig-name descname">QChemInput</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">molecules</span></em>, <em class="sig-param"><span class="n">settings</span></em>, <em class="sig-param"><span class="n">charges</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">multiplicities</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">total_charge</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">total_multiplicity</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">string</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChemInput" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">QChemInput</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">molecules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplicities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_charge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_multiplicity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChemInput" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt id="materia.engines.qchem.QChemInput.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChemInput.write" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">write</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChemInput.write" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -192,11 +315,16 @@
 
 <dl class="py class">
 <dt id="materia.engines.qchem.QChemOutput">
-<em class="property">class </em><code class="sig-name descname">QChemOutput</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChemOutput" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">QChemOutput</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.engines.qchem.QChemOutput" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
+<dt id="materia.engines.qchem.QChemOutput.cclib_out">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">cclib_out</span></code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.cclib_out" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="materia.engines.qchem.QChemOutput.electronic_excitations">
-<em class="property">property </em><code class="sig-name descname">electronic_excitations</code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.electronic_excitations" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">electronic_excitations</span></code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.electronic_excitations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="materia.properties.html#materia.properties.ExcitationSpectrum" title="materia.properties.ExcitationSpectrum"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExcitationSpectrum</span></code></a></p>
@@ -206,12 +334,12 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChemOutput.footer">
-<em class="property">property </em><code class="sig-name descname">footer</code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.footer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">footer</span></code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.footer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChemOutput.frontier_energies">
-<em class="property">property </em><code class="sig-name descname">frontier_energies</code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.frontier_energies" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">frontier_energies</span></code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.frontier_energies" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<a class="reference internal" href="materia.quantity.html#materia.quantity.Quantity" title="materia.quantity.Quantity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code></a>, <a class="reference internal" href="materia.quantity.html#materia.quantity.Quantity" title="materia.quantity.Quantity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code></a>]</p>
@@ -221,7 +349,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChemOutput.polarizability">
-<em class="property">property </em><code class="sig-name descname">polarizability</code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.polarizability" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">polarizability</span></code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.polarizability" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="materia.properties.html#materia.properties.Polarizability" title="materia.properties.Polarizability"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polarizability</span></code></a></p>
@@ -231,7 +359,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChemOutput.structure">
-<em class="property">property </em><code class="sig-name descname">structure</code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.structure" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">structure</span></code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.structure" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="materia.molecule.structure.html#materia.molecule.structure.Structure" title="materia.molecule.structure.Structure"><code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code></a></p>
@@ -241,7 +369,7 @@
 
 <dl class="py method">
 <dt id="materia.engines.qchem.QChemOutput.total_energy">
-<em class="property">property </em><code class="sig-name descname">total_energy</code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.total_energy" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">total_energy</span></code><a class="headerlink" href="#materia.engines.qchem.QChemOutput.total_energy" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="materia.quantity.html#materia.quantity.Quantity" title="materia.quantity.Quantity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code></a></p>
@@ -254,64 +382,51 @@
 </div>
 
 
-            <div class="clearer"></div>
+           </div>
+           
           </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="materia.engines.vasp.html" class="btn btn-neutral float-right" title="materia.engines.vasp module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="materia.engines.packmol.html" class="btn btn-neutral float-left" title="materia.engines.packmol module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="materia.engines.packmol.html"
-                        title="previous chapter">materia.engines.packmol module</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="materia.engines.vasp.html"
-                        title="next chapter">materia.engines.vasp module</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/materia.engines.qchem.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="materia.engines.vasp.html" title="materia.engines.vasp module"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="materia.engines.packmol.html" title="materia.engines.packmol module"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="materia.html" >materia package</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="materia.engines.html" >materia.engines package</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">materia.engines.qchem module</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2020.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.1.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
 </html>

@@ -1,103 +1,221 @@
 
-<!DOCTYPE html>
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>materia.utils module &#8212; materia 8.0.8 documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>materia.utils module &mdash; materia 9.1.2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="materia.workflow module" href="materia.workflow.html" />
     <link rel="prev" title="materia.units module" href="materia.units.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="materia.workflow.html" title="materia.workflow module"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="materia.units.html" title="materia.units module"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="materia.html" accesskey="U">materia package</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">materia.utils module</a></li> 
-      </ul>
-    </div>  
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> materia
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                9.1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">materia</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="materia.html">materia package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="materia.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="materia.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="materia.handler.html">materia.handler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="materia.math.html">materia.math module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="materia.properties.html">materia.properties module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="materia.quantity.html">materia.quantity module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="materia.tasks.html">materia.tasks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="materia.units.html">materia.units module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">materia.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="materia.workflow.html">materia.workflow module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="materia.html#module-materia">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">materia</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">materia</a> &raquo;</li>
+        
+          <li><a href="materia.html">materia package</a> &raquo;</li>
+        
+      <li>materia.utils module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/materia.utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="module-materia.utils">
 <span id="materia-utils-module"></span><h1>materia.utils module<a class="headerlink" href="#module-materia.utils" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="materia.utils.IO">
-<em class="property">class </em><code class="sig-name descname">IO</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inp</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">work_dir</span><span class="o">=</span><span class="default_value">'.'</span></em>, <em class="sig-param"><span class="n">temp</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.IO" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">IO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.IO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt id="materia.utils.NestedDictionary">
-<em class="property">class </em><code class="sig-name descname">NestedDictionary</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.NestedDictionary" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">NestedDictionary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.NestedDictionary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.MutableMapping</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt id="materia.utils.Settings">
-<em class="property">class </em><code class="sig-name descname">Settings</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.Settings" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.Settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#materia.utils.NestedDictionary" title="materia.utils.NestedDictionary"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.utils.NestedDictionary</span></code></a></p>
 <dl class="py method">
 <dt id="materia.utils.Settings.update">
-<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.Settings.update" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">update</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.Settings.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
 If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
 In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.closest_trio">
-<code class="sig-name descname">closest_trio</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">points</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.closest_trio" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds the three closest points from a given list of points.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>points</strong> (<em>numpy.ndarray</em>) – 3xNp Numpy array whose columns represent points on the unit sphere, where Np is the number of points.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>3x3 Numpy array whose columns are the three closest points from the given list of points.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="materia.utils.expand">
-<code class="sig-name descname">expand</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.expand" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">expand</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.expand" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
@@ -107,174 +225,47 @@ In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
 
 <dl class="py function">
 <dt id="materia.utils.extrapolate">
-<code class="sig-name descname">extrapolate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">x_extrap_to</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.extrapolate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">extrapolate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_extrap_to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.extrapolate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="materia.utils.interpolate">
-<code class="sig-name descname">interpolate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">x_interp_to</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'cubic_spline'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.interpolate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.lcm">
-<code class="sig-name descname">lcm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">numbers</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.lcm" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.linearly_independent">
-<code class="sig-name descname">linearly_independent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vectors</span></em>, <em class="sig-param"><span class="n">indep</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.linearly_independent" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">interpolate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_interp_to</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cubic_spline'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.interpolate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="materia.utils.memoize">
-<code class="sig-name descname">memoize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.memoize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">memoize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.memoize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="materia.utils.mkdir_safe">
-<code class="sig-name descname">mkdir_safe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dir</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.mkdir_safe" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">mkdir_safe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.mkdir_safe" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.nontrivial_vector">
-<code class="sig-name descname">nontrivial_vector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">R</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.nontrivial_vector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a vector which is acted upon nontrivially (i.e. is sent to a linearly independent vector) by the given rotation matrix.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>R</strong> (<em>numpy.ndarray</em>) – 3x3 numpy array representing a rotation matrix.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>3x1 numpy array representing a vector which is acted upon nontrivially by R.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.normalize">
-<code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">v</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.normalize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.orthogonal_complement">
-<code class="sig-name descname">orthogonal_complement</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">l</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.orthogonal_complement" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.periodicity">
-<code class="sig-name descname">periodicity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matrix</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.periodicity" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.perpendicular_vector">
-<code class="sig-name descname">perpendicular_vector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.perpendicular_vector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a unit vector which is perpendicular to one or two given nonzero vector(s).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing a nonzero vector.</p></li>
-<li><p><strong>b</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing a nonzero vector.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>3x1 Numpy array representing a unit vector which is perpendicular to a (and b, if applicable).</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.rotation_matrix">
-<code class="sig-name descname">rotation_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">cos_theta</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.rotation_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a matrix which rotates a vector a given angle about a given axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing the vector whose direction is the axis of rotation.</p></li>
-<li><p><strong>cos_theta</strong> (<em>float</em>) – Cosine of angle of rotation about the axis of rotation.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>3x3 Numpy array representing the rotation matrix which rotates a vector by the given angle about the given axis.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.rotation_matrix_m_to_n">
-<code class="sig-name descname">rotation_matrix_m_to_n</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">m</span></em>, <em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.rotation_matrix_m_to_n" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a matrix which rotates one given vector to another.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>m</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing the vector to be rotated.</p></li>
-<li><p><strong>n</strong> (<em>numpy.ndarray</em>) – 3x1 Numpy array representing the vector after rotation, i.e. the target vector.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>3x3 Numpy array representing the rotation matrix which maps m to n.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.sample_spherical_triangle">
-<code class="sig-name descname">sample_spherical_triangle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">B</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">sin_alpha</span></em>, <em class="sig-param"><span class="n">sin_beta</span></em>, <em class="sig-param"><span class="n">sin_gamma</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.sample_spherical_triangle" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="materia.utils.spherical_excess">
-<code class="sig-name descname">spherical_excess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cos_alpha</span></em>, <em class="sig-param"><span class="n">cos_beta</span></em>, <em class="sig-param"><span class="n">cos_gamma</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.spherical_excess" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="materia.utils.temporary_seed">
-<code class="sig-name descname">temporary_seed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seed</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.temporary_seed" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">temporary_seed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.temporary_seed" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="materia.utils.work_dir">
-<code class="sig-name descname">work_dir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.work_dir" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">work_dir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.work_dir" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="materia.utils.xyz2mol">
-<code class="sig-name descname">xyz2mol</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">atomic_numbers</span></em>, <em class="sig-param"><span class="n">charge</span></em>, <em class="sig-param"><span class="n">atomic_positions</span></em>, <em class="sig-param"><span class="n">charged_fragments</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.xyz2mol" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">xyz2mol</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atomic_numbers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomic_positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charged_fragments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.utils.xyz2mol" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Mol</span></code></p>
@@ -285,63 +276,51 @@ In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
 </div>
 
 
-            <div class="clearer"></div>
+           </div>
+           
           </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="materia.workflow.html" class="btn btn-neutral float-right" title="materia.workflow module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="materia.units.html" class="btn btn-neutral float-left" title="materia.units module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="materia.units.html"
-                        title="previous chapter">materia.units module</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="materia.workflow.html"
-                        title="next chapter">materia.workflow module</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/materia.utils.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="materia.workflow.html" title="materia.workflow module"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="materia.units.html" title="materia.units module"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">materia 8.0.8 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >materia</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="materia.html" >materia package</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">materia.utils module</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2020.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.1.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
 </html>
