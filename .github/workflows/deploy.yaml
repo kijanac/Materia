@@ -36,4 +36,4 @@ jobs:
       run: conda run -n dev python manage/manage.py build -c -l conda-forge
 
     - name: Deploy to PyPI and Anaconda
-      run: conda run -n dev python manage/manage.py publish ${{ secrets.PYPI_TOKEN }} ${{ secrets.CONDA_TOKEN }}
+      run: conda run -n dev python manage/manage.py publish -p ${{ secrets.PYPI_TOKEN }} -c ${{ secrets.CONDA_TOKEN }}
