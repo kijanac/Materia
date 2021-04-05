@@ -6,7 +6,7 @@ import numpy as np
 import materia as mtr
 from materia.utils import memoize
 import networkx as nx
-import openbabel as ob
+from openbabel import openbabel as ob
 import pubchempy as pcp
 import rdkit
 import rdkit.Chem
