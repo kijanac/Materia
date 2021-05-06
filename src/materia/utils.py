@@ -25,7 +25,6 @@ __all__ = [
     "IO",
     "memoize",
     "mkdir_safe",
-    "NestedDictionary",
     "Settings",
     "temporary_seed",
     "work_dir",
@@ -229,11 +228,15 @@ def work_dir(dir: Optional[str] = None):
             pass
 
 
-class NestedDictionary(collections.abc.MutableMapping):
+class Settings(collections.abc.MutableMapping):
     def __init__(self, *args, **kwargs) -> None:
         self.d = dict(*args, **kwargs)
 
-    def __getitem__(self, keys) -> NestedDictionary:
+    def update(self, settings: Settings) -> None:
+        for k, v in settings.items():
+            self.__setitem__(keys=k, value=v)
+
+    def __getitem__(self, keys) -> Settings:
         if not isinstance(keys, tuple):
             keys = (keys,)
 
@@ -241,7 +244,7 @@ class NestedDictionary(collections.abc.MutableMapping):
         for k in keys:
             branch = branch[k]
 
-        return NestedDictionary(branch) if isinstance(branch, dict) else branch
+        return Settings(branch) if isinstance(branch, dict) else branch
 
     def __setitem__(self, keys, value) -> None:
         if not isinstance(keys, tuple):
@@ -291,12 +294,6 @@ class NestedDictionary(collections.abc.MutableMapping):
 
     def __repr__(self) -> str:
         return repr(self.d)
-
-
-class Settings(NestedDictionary):
-    def update(self, settings: Settings) -> None:
-        for k, v in settings.items():
-            self.__setitem__(keys=k, value=v)
 
 
 # ------------------------------------------------------ #
