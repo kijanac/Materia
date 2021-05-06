@@ -6,6 +6,7 @@ import functools
 import materia as mtr
 from materia.utils import memoize
 import re
+import shlex
 import subprocess
 
 __all__ = [
@@ -141,7 +142,7 @@ class FunctionTask(Task):
         super().__init__(name=name)
         self.f = f
 
-    def compute(self, **kwargs) -> None:
+    def compute(self, **kwargs: Any) -> Any:
         return self.f(**kwargs)
 
 
@@ -168,11 +169,25 @@ class InputTask(Task):
         super().__init__(name=name)
         self.value = value
 
-    def compute(self, *args, **kwargs) -> Any:
+    def compute(self, *args: Any, **kwargs: Any) -> Any:
         return self.value
 
 
 class ShellCommand(Task):
+    """Run shell command.
+
+    Attributes
+    ----------
+    command : str
+        Shell command
+    name : str
+        Name for use in Workflows.
+    requirements : list
+        List of Tasks required as args in compute.
+    named_requirements : dict
+        Dicionary of Tasks required as kwargs in compute.
+    """
+
     def __init__(
         self,
         command: str,
@@ -182,7 +197,7 @@ class ShellCommand(Task):
         self.command = command
 
     def compute(self) -> None:
-        subprocess.call(self.command.split())
+        subprocess.call(shlex.split(self.command))
 
 
 def task(
@@ -199,6 +214,20 @@ T = Union[int, float]
 
 
 class MaxLIPOTR(Task):
+    """Minimize objective function using MaxLIPOTR algorithm.
+
+    Attributes
+    ----------
+    objective_function
+        Objective function to be minimized.
+    name : str
+        Name for use in Workflows.
+    requirements : list
+        List of Tasks required as args in compute.
+    named_requirements : dict
+        Dicionary of Tasks required as kwargs in compute.
+    """
+
     def __init__(
         self,
         objective_function: Callable[T, T],
