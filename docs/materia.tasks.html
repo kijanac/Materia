@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>materia.tasks module &mdash; materia 9.1.2 documentation</title>
+  <title>materia.tasks module &mdash; materia 10.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                9.1.2
+                10.0.0
               </div>
             
           
@@ -402,6 +402,46 @@
 <dt id="materia.tasks.MaxLIPOTR">
 <em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">MaxLIPOTR</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objective_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.MaxLIPOTR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#materia.tasks.Task" title="materia.tasks.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.tasks.Task</span></code></a></p>
+<p>Minimize objective function using MaxLIPOTR algorithm.</p>
+<dl class="py attribute">
+<dt id="materia.tasks.MaxLIPOTR.objective_function">
+<code class="sig-name descname"><span class="pre">objective_function</span></code><a class="headerlink" href="#materia.tasks.MaxLIPOTR.objective_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Objective function to be minimized.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="materia.tasks.MaxLIPOTR.name">
+<code class="sig-name descname"><span class="pre">name</span></code><a class="headerlink" href="#materia.tasks.MaxLIPOTR.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name for use in Workflows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="materia.tasks.MaxLIPOTR.requirements">
+<code class="sig-name descname"><span class="pre">requirements</span></code><a class="headerlink" href="#materia.tasks.MaxLIPOTR.requirements" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of Tasks required as args in compute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="materia.tasks.MaxLIPOTR.named_requirements">
+<code class="sig-name descname"><span class="pre">named_requirements</span></code><a class="headerlink" href="#materia.tasks.MaxLIPOTR.named_requirements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dicionary of Tasks required as kwargs in compute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p>Initialize Task.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -431,6 +471,51 @@
 <dt id="materia.tasks.ShellCommand">
 <em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ShellCommand</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#materia.tasks.ShellCommand" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#materia.tasks.Task" title="materia.tasks.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">materia.tasks.Task</span></code></a></p>
+<p>Run shell command.</p>
+<dl class="py attribute">
+<dt id="materia.tasks.ShellCommand.command">
+<code class="sig-name descname"><span class="pre">command</span></code><a class="headerlink" href="#materia.tasks.ShellCommand.command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shell command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="materia.tasks.ShellCommand.name">
+<code class="sig-name descname"><span class="pre">name</span></code><a class="headerlink" href="#materia.tasks.ShellCommand.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name for use in Workflows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="materia.tasks.ShellCommand.requirements">
+<code class="sig-name descname"><span class="pre">requirements</span></code><a class="headerlink" href="#materia.tasks.ShellCommand.requirements" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of Tasks required as args in compute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="materia.tasks.ShellCommand.named_requirements">
+<code class="sig-name descname"><span class="pre">named_requirements</span></code><a class="headerlink" href="#materia.tasks.ShellCommand.named_requirements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dicionary of Tasks required as kwargs in compute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p>Initialize Task.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
