@@ -252,14 +252,15 @@ def periodicity(matrix: np.ndarray) -> int:
     angles = (max(min(z.real, 1), -1) for z in evals if not np.isclose(z, 1))
     # if z is close to 1, then it contributes a period of 1,
     # which doesn't impact the lcm and therefore the final period
-    periods = (int((2 * np.pi / np.arccos(angle)).round()) for angle in angles)
+    periods = [int((2 * np.pi / np.arccos(angle)).round()) for angle in angles]
 
-    try:
-        return lcm(numbers=periods)
-    except ValueError:
-        # `periods` must not have any values in it,
-        # so all evals must have been close to 1
+    if len(periods) == 0:
+        # all evals must have been close to 1
         return 1
+    elif len(periods) == 1:
+        return periods[0]
+    else:
+        return lcm(numbers=periods)
 
 
 def perpendicular_vector(a: np.ndarray, b: Optional[np.ndarray] = None) -> np.ndarray:
