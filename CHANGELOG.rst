@@ -8,9 +8,32 @@
 
 
 
-`Version 2.0.0 <https://github.com/kijanac/luz/compare/v1.0.0...v2.0.0>`__
---------------------------------------------------------------------------
+`Version 10.0.0 <https://github.com/kijanac/luz/compare/v1.0.0...v10.0.0>`__
+----------------------------------------------------------------------------
 
+* fix: Fix bug in periodicity which incorrectly returned 1 sometimes (`80696a7 <https://github.com/kijanac/luz/commit/80696a727ba882c89ee44b72cb6c0eba1416cc5a>` __)
+* feat: Remove NestedDictionary and merge functionality with Settings (`3917eb3 <https://github.com/kijanac/luz/commit/3917eb3d61fcb8dba7919e90e5c49d65a07354cf>` __)
+* fix: Partially fix bug which causes errors while using QChemOutput on the output of QChem 5.3 (`597dbae <https://github.com/kijanac/luz/commit/597dbaeadcf5ede4e44cf06fafd29a1b97289ccc>` __)
+* fix: Fix openbabel import statements to comply with new package structure. (`215489f <https://github.com/kijanac/luz/commit/215489ff945867c6dc1618a0844da93e478aa91f>` __)
+* fix: Fix bug which prevented Molecule initialization. (`939dbfb <https://github.com/kijanac/luz/commit/939dbfbdebd96428bf80bfc41c1f0aa8dedacfdd>` __)
+* fix: Fix bug in Workflow which created duplicate task evaluations. (`865bd66 <https://github.com/kijanac/luz/commit/865bd664cffc7cc373b2b500c1095bae88934fca>` __)
+* fix: Fix bug preventing units from working correctly due to signature change in Quantity. (`1b4e2bd <https://github.com/kijanac/luz/commit/1b4e2bd192f35940909bc1ace11dfb278cb1d364>` __)
+* fix: Fix bug in WorkflowResults.save which caused saving results to fail. (`22c45bd <https://github.com/kijanac/luz/commit/22c45bdf4e769b4e7866e08a7954d003dc28fd79>` __)
+* feat: Rewrite Workflow to replace hand-rolled task scheduling with dask. Rewrite WorkflowResults to match. (`7304959 <https://github.com/kijanac/luz/commit/730495909b68351e8e1e8635adbc02689fa943e9>` __)
+
+
+`Version 2.0.0 <https://github.com/kijanac/luz/compare/v10.0.0...v2.0.0>`__
+---------------------------------------------------------------------------
+
+* fix: Fix bug in periodicity which incorrectly returned 1 sometimes (`80696a7 <https://github.com/kijanac/luz/commit/80696a727ba882c89ee44b72cb6c0eba1416cc5a>` __)
+* feat: Remove NestedDictionary and merge functionality with Settings (`3917eb3 <https://github.com/kijanac/luz/commit/3917eb3d61fcb8dba7919e90e5c49d65a07354cf>` __)
+* fix: Partially fix bug which causes errors while using QChemOutput on the output of QChem 5.3 (`597dbae <https://github.com/kijanac/luz/commit/597dbaeadcf5ede4e44cf06fafd29a1b97289ccc>` __)
+* fix: Fix openbabel import statements to comply with new package structure. (`215489f <https://github.com/kijanac/luz/commit/215489ff945867c6dc1618a0844da93e478aa91f>` __)
+* fix: Fix bug which prevented Molecule initialization. (`939dbfb <https://github.com/kijanac/luz/commit/939dbfbdebd96428bf80bfc41c1f0aa8dedacfdd>` __)
+* fix: Fix bug in Workflow which created duplicate task evaluations. (`865bd66 <https://github.com/kijanac/luz/commit/865bd664cffc7cc373b2b500c1095bae88934fca>` __)
+* fix: Fix bug preventing units from working correctly due to signature change in Quantity. (`1b4e2bd <https://github.com/kijanac/luz/commit/1b4e2bd192f35940909bc1ace11dfb278cb1d364>` __)
+* fix: Fix bug in WorkflowResults.save which caused saving results to fail. (`22c45bd <https://github.com/kijanac/luz/commit/22c45bdf4e769b4e7866e08a7954d003dc28fd79>` __)
+* feat: Rewrite Workflow to replace hand-rolled task scheduling with dask. Rewrite WorkflowResults to match. (`7304959 <https://github.com/kijanac/luz/commit/730495909b68351e8e1e8635adbc02689fa943e9>` __)
 
 
 `Version 3.0.0 <https://github.com/kijanac/luz/compare/v2.0.0...v3.0.0>`__
@@ -131,16 +154,18 @@
 `Version 9.1.2 <https://github.com/kijanac/luz/compare/v9.1.1...v9.1.2>`__
 --------------------------------------------------------------------------
 
-* fix: Partially fix bug which causes errors while using QChemOutput on the output of QChem 5.3 (`597dbae <https://github.com/kijanac/luz/commit/597dbaeadcf5ede4e44cf06fafd29a1b97289ccc>`__)
-* fix: Fix openbabel import statements to comply with new package structure. (`215489f <https://github.com/kijanac/luz/commit/215489ff945867c6dc1618a0844da93e478aa91f>`__)
-* fix: Fix bug which prevented Molecule initialization. (`939dbfb <https://github.com/kijanac/luz/commit/939dbfbdebd96428bf80bfc41c1f0aa8dedacfdd>`__)
-* fix: Fix bug in Workflow which created duplicate task evaluations. (`865bd66 <https://github.com/kijanac/luz/commit/865bd664cffc7cc373b2b500c1095bae88934fca>`__)
-* fix: Fix bug preventing units from working correctly due to signature change in Quantity. (`1b4e2bd <https://github.com/kijanac/luz/commit/1b4e2bd192f35940909bc1ace11dfb278cb1d364>`__)
-* fix: Fix bug in WorkflowResults.save which caused saving results to fail. (`22c45bd <https://github.com/kijanac/luz/commit/22c45bdf4e769b4e7866e08a7954d003dc28fd79>`__)
-* feat: Rewrite Workflow to replace hand-rolled task scheduling with dask. Rewrite WorkflowResults to match. (`7304959 <https://github.com/kijanac/luz/commit/730495909b68351e8e1e8635adbc02689fa943e9>`__)
+* fix: Partially fix bug which causes errors while using QChemOutput on the output of QChem 5.3 (`597dbae <https://github.com/kijanac/luz/commit/597dbaeadcf5ede4e44cf06fafd29a1b97289ccc>` __)
+* fix: Fix openbabel import statements to comply with new package structure. (`215489f <https://github.com/kijanac/luz/commit/215489ff945867c6dc1618a0844da93e478aa91f>` __)
+* fix: Fix bug which prevented Molecule initialization. (`939dbfb <https://github.com/kijanac/luz/commit/939dbfbdebd96428bf80bfc41c1f0aa8dedacfdd>` __)
+* fix: Fix bug in Workflow which created duplicate task evaluations. (`865bd66 <https://github.com/kijanac/luz/commit/865bd664cffc7cc373b2b500c1095bae88934fca>` __)
+* fix: Fix bug preventing units from working correctly due to signature change in Quantity. (`1b4e2bd <https://github.com/kijanac/luz/commit/1b4e2bd192f35940909bc1ace11dfb278cb1d364>` __)
+* fix: Fix bug in WorkflowResults.save which caused saving results to fail. (`22c45bd <https://github.com/kijanac/luz/commit/22c45bdf4e769b4e7866e08a7954d003dc28fd79>` __)
+* feat: Rewrite Workflow to replace hand-rolled task scheduling with dask. Rewrite WorkflowResults to match. (`7304959 <https://github.com/kijanac/luz/commit/730495909b68351e8e1e8635adbc02689fa943e9>` __)
 
 
-`Version 9.1.2 <https://github.com/kijanac/luz/compare/v9.1.2...v9.1.2>`__
---------------------------------------------------------------------------
+`Version 10.0.0 <https://github.com/kijanac/luz/compare/v9.1.2...v10.0.0>`__
+----------------------------------------------------------------------------
 
+* fix: Fix bug in periodicity which incorrectly returned 1 sometimes (`80696a7 <https://github.com/kijanac/luz/commit/80696a727ba882c89ee44b72cb6c0eba1416cc5a>` __)
+* feat: Remove NestedDictionary and merge functionality with Settings (`3917eb3 <https://github.com/kijanac/luz/commit/3917eb3d61fcb8dba7919e90e5c49d65a07354cf>` __)
 
